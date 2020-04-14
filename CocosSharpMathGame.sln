@@ -1,0 +1,33 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30002.166
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CocosSharpMathGame.Droid", "CocosSharpMathGame.Droid\CocosSharpMathGame.Droid.csproj", "{CFA4E26E-468D-41B1-868E-04FFA2D2A9FD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CocosSharpMathGame", "CocosSharpMathGame\CocosSharpMathGame.csproj", "{32321C3F-BE8E-428F-BA2E-F9F1E5894252}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CFA4E26E-468D-41B1-868E-04FFA2D2A9FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CFA4E26E-468D-41B1-868E-04FFA2D2A9FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CFA4E26E-468D-41B1-868E-04FFA2D2A9FD}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{CFA4E26E-468D-41B1-868E-04FFA2D2A9FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CFA4E26E-468D-41B1-868E-04FFA2D2A9FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CFA4E26E-468D-41B1-868E-04FFA2D2A9FD}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{32321C3F-BE8E-428F-BA2E-F9F1E5894252}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32321C3F-BE8E-428F-BA2E-F9F1E5894252}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32321C3F-BE8E-428F-BA2E-F9F1E5894252}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32321C3F-BE8E-428F-BA2E-F9F1E5894252}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1089E63C-CAD3-40C9-8F5F-2C9C6FBC4CB2}
+	EndGlobalSection
+EndGlobal
