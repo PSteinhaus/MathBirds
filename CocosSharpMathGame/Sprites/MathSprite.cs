@@ -12,11 +12,20 @@ namespace CocosSharpMathGame
     /// </summary>
     class MathSprite : CCSprite
     {
-        public MathSprite(string _infix) : base(MathToTexture.CreateTexture(_infix))
+        public MathSprite(string _infix) : base()
         {
             // create and set the texture
+            MathToTexture.CreateAndAddTexture(_infix, _infix);
+            if (CCTextureCache.SharedTextureCache.Contains(_infix))
+                ReplaceTexture(CCTextureCache.SharedTextureCache[_infix], new CCRect(0,0,CCTextureCache.SharedTextureCache[_infix].ContentSizeInPixels.Width, CCTextureCache.SharedTextureCache[_infix].ContentSizeInPixels.Height));
+            //var texture = MathToTexture.CreateTexture(_infix);
+            //ReplaceTexture(texture, new CCRect(0,0,texture.ContentSizeInPixels.Width, texture.ContentSizeInPixels.Height) );
             //for now manages directly in the base constructor
-            IsAntialiased = false;
+
+            // manage size
+            ContentSize = Texture.ContentSizeInPixels;
+            Console.WriteLine(ContentSize);
+            //IsAntialiased = false;
             // set the anchor
             AnchorPoint = CCPoint.AnchorMiddle;
         }

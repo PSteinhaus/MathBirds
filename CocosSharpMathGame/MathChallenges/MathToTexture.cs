@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CocosSharp;
 using CSharpMath.SkiaSharp;
+using CSharpMath;
 using SkiaSharp;
 using System.IO;
 using MathNet.Symbolics;
@@ -34,7 +35,7 @@ namespace CocosSharpMathGame
         /// </summary>
         internal static CCTexture2D CreateTexture(string math, bool isLatex=false)
         {
-            CCTexture2D texture = null;
+            CCTexture2D texture;
             using (var png = (isLatex ? CreatePainterWithLatex(math) : CreatePainterWithInfix(math)).DrawAsStream(format: SkiaSharp.SKEncodedImageFormat.Png))
             {
                 using (var memoryStream = new MemoryStream())
