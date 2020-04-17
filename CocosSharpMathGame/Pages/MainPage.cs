@@ -55,8 +55,8 @@ namespace CocosSharpMathGame
 				//gameView.Stats.Enabled = true;
 
 				// This sets the game "world" resolution:
-				//gameView.DesignResolution = new CCSizeI(width, height);
-				//gameView.ResolutionPolicy = CCViewResolutionPolicy.ShowAll;
+				gameView.DesignResolution = new CCSizeI(Constants.COCOS_WORLD_WIDTH, Constants.COCOS_WORLD_HEIGHT);
+				gameView.ResolutionPolicy = CCViewResolutionPolicy.ShowAll;
 
 				gameView.ContentManager.SearchPaths = new List<string>()
 				{

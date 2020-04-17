@@ -126,7 +126,10 @@
     <Compile Include="Constants.cs" />
     <Compile Include="CocosSharpMathGame.cs" />
     <Compile Include="Layers\PlayLayer.cs" />
+    <Compile Include="MathChallenges\MathChallenge.cs" />
+    <Compile Include="MathChallenges\MathToTexture.cs" />
     <Compile Include="Pages\MainPage.cs" />
+    <Compile Include="Sprites\MathSprite.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Content\fonts\" />
@@ -138,7 +141,6 @@
     <Folder Include="Content\ld\images\" />
     <Folder Include="Content\sounds\" />
     <Folder Include="Nodes\" />
-    <Folder Include="Sprites\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
