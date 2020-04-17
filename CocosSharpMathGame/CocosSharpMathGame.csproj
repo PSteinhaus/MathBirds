@@ -126,6 +126,7 @@
     <Compile Include="Constants.cs" />
     <Compile Include="CocosSharpMathGame.cs" />
     <Compile Include="Layers\PlayLayer.cs" />
+    <Compile Include="MathChallenges\AddChallenge.cs" />
     <Compile Include="MathChallenges\MathChallenge.cs" />
     <Compile Include="MathChallenges\MathToTexture.cs" />
     <Compile Include="Pages\MainPage.cs" />
