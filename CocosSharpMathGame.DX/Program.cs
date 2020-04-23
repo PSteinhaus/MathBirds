@@ -15,7 +15,7 @@ namespace CocosSharpMathGame.DX
 		[STAThread]
         static void Main(string[] args)
         {
-            CCApplication application = new CCApplication(false, new CCSize(1024f, 768f));
+            CCApplication application = new CCApplication(false, new CCSize(Constants.COCOS_WORLD_WIDTH, Constants.COCOS_WORLD_HEIGHT/2));
             application.ApplicationDelegate = new AppDelegate();
 
             application.StartGame();

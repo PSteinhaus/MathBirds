@@ -7,24 +7,28 @@ namespace CocosSharpMathGame
 {
     public class PlayLayer : CCLayerColor
     {
-        private MathSprite mathSprite1 = new MathSprite("(a+b)*((x))");
-        private MathSprite mathSprite2 = new MathSprite("sqrt(a+b)/((x))");
-        private MathSprite mathSprite3 = new MathSprite("z/(x/(3*f+(1/(x^2))))");
+        //private MathSprite mathSprite1 = new MathSprite("(a+b)*((x))");
         private CCDrawNode drawNode = new CCDrawNode();
-        public PlayLayer() : base(CCColor4B.White)
+        public PlayLayer() : base(CCColor4B.Black)
         {
+            /*
             // for now place some MathSprites as a test
             AddChild(mathSprite1);
             AddChild(mathSprite2);
             AddChild(mathSprite3);
+            */
+            // a DrawNode is always useful for debugging
             AddChild(drawNode);
             drawNode.ZOrder = -400;
+            
         }
 
         protected override void AddedToScene()
         {
             base.AddedToScene();    // MAGIC
             var bounds = VisibleBoundsWorldspace;
+
+            /*
             var center = bounds.Center;
             var point1 = new CCPoint(center.X, center.Y + bounds.Size.Height / 3);
             var point2 = center;
@@ -47,6 +51,7 @@ namespace CocosSharpMathGame
             //drawNode.DrawSolidCircle(mathSprite1.Position, mathSprite1.ContentSize.Width / 2, CCColor4B.Gray);
             //drawNode.DrawSolidCircle(mathSprite2.Position, mathSprite2.ContentSize.Width / 2, CCColor4B.LightGray);
             //drawNode.DrawSolidCircle(mathSprite3.Position, mathSprite3.ContentSize.Width / 2, CCColor4B.Black);
+            */
         }
     }
 }

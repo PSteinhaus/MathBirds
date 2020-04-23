@@ -129,19 +129,23 @@
     <Compile Include="MathChallenges\AddChallenge.cs" />
     <Compile Include="MathChallenges\MathChallenge.cs" />
     <Compile Include="MathChallenges\MathToTexture.cs" />
+    <Compile Include="Nodes\GameObjectNodes\Aircrafts\Aircraft.cs" />
+    <Compile Include="Nodes\GameObjectNodes\Aircrafts\TestAircraft.cs" />
+    <Compile Include="Nodes\GameObjectNodes\GameObjectNode.cs" />
+    <Compile Include="Interfaces\ICollidable.cs" />
     <Compile Include="Pages\MainPage.cs" />
     <Compile Include="Sprites\MathSprite.cs" />
+    <Compile Include="Sprites\Parts\PartMount.cs" />
+    <Compile Include="Sprites\Parts\Part.cs" />
+    <Compile Include="Sprites\Parts\TestBody.cs" />
+    <Compile Include="Sprites\Parts\TestWings.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Content\fonts\" />
-    <Folder Include="Content\hd\animations\" />
     <Folder Include="Content\hd\fonts\" />
-    <Folder Include="Content\hd\images\" />
-    <Folder Include="Content\ld\animations\" />
+    <Folder Include="Content\hd\graphics\" />
     <Folder Include="Content\ld\fonts\" />
-    <Folder Include="Content\ld\images\" />
+    <Folder Include="Content\ld\graphics\" />
     <Folder Include="Content\sounds\" />
-    <Folder Include="Nodes\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

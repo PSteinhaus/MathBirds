@@ -60,9 +60,12 @@ namespace CocosSharpMathGame
 
 				gameView.ContentManager.SearchPaths = new List<string>()
 				{
-					"fonts",
-					"hd"
+					"hd",
+					"sounds"
 				};
+
+				// tell CCSprite to scale all textures by the factor 8, as standard behaviour
+				CCSprite.DefaultTexelToContentSizeRatio = 0.125f;
 
 				// GameScene is the root of the CocosSharp rendering hierarchy:
 				//gameScene = new GameScene(gameView);
