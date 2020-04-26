@@ -13,7 +13,8 @@ namespace CocosSharpMathGame
     internal struct PartMount
     {
         /// <summary>
-        /// where it is in relation to the part it belongs to
+        /// where it is in relation to the part it belongs to;
+        /// the position is not yet scaled!
         /// </summary>
         internal CCPoint Position { get; set; }
         internal Part.Type[] AllowedTypes { get; set; }
@@ -42,6 +43,10 @@ namespace CocosSharpMathGame
             else if (AllowedTypes.Intersect(part.Types).Any())
             {
                 MountedPart = part;
+                // make sure the part is actually at the position of the mount
+                // so also factor in the scaling
+                part.Position = Position;
+                Console.WriteLine("Mount: "+part.Position);
                 return true;
             };
             return false;

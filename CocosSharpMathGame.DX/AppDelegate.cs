@@ -2,6 +2,7 @@ using System.Reflection;
 using Microsoft.Xna.Framework;
 using CocosSharp;
 using CocosDenshion;
+using System.Collections.Generic;
 
 namespace CocosSharpMathGame.DX
 {
@@ -32,6 +33,14 @@ namespace CocosSharpMathGame.DX
                 CCSprite.DefaultTexelToContentSizeRatio = 1.0f;
             }
             */
+            application.ContentSearchPaths = new List<string>()
+            {
+                "sounds",
+                "hd/graphics"
+            };
+            //CCSprite.DefaultTexelToContentSizeRatio = 1.0f;
+            //CCSprite.DefaultTexelToContentSizeRatio = 0.125f;
+            //CCSprite.DefaultTexelToContentSizeRatio = 0.0625f;
 
             var scene = new CCScene(mainWindow);
             var playLayer = new PlayLayer();

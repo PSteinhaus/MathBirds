@@ -44,12 +44,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Content\hd\animations\" />
     <Folder Include="Content\hd\fonts\" />
-    <Folder Include="Content\hd\images\" />
-    <Folder Include="Content\ld\animations\" />
-    <Folder Include="Content\ld\fonts\" />
-    <Folder Include="Content\ld\images\" />
     <Folder Include="Content\sounds\" />
   </ItemGroup>
   <ItemGroup>
@@ -102,16 +97,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\hd\graphics\parts.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Game.ico" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="Content\hd\graphics\parts.plist">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Content\fonts\MarkerFelt-22.xnb">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CocosSharpMathGame\CocosSharpMathGame.csproj">

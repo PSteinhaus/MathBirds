@@ -9,10 +9,12 @@ namespace CocosSharpMathGame
 {
     internal class TestBody : Part
     {
-        internal TestBody() : base("testBody")
+        internal TestBody() : base("testBody.png")
         {
+            // set your types
+            Types = new Type[] { Type.BODY };
             // add a mount point for wings at your center
-            PartMounts = new PartMount[] { new PartMount(CCPoint.Zero, Type.WINGS) };
+            PartMounts = new PartMount[] { new PartMount(new CCPoint((ContentSize.Width / 2), (ContentSize.Height / 2)), Type.WINGS) };
         }
     }
 }

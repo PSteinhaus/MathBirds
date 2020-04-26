@@ -11,7 +11,7 @@ namespace CocosSharpMathGame
     /// Aircrafts are objects in the sky that are assembled from parts
     /// which react to collision
     /// </summary>
-    internal class Aircraft : GameObjectNode, ICollidable
+    internal abstract class Aircraft : GameObjectNode, ICollidable
     {
         private Part body = null;
         /// <summary>
@@ -30,9 +30,18 @@ namespace CocosSharpMathGame
                     RemoveChild(body);
                 body = value;
                 if (value != null)
+                {
                     AddChild(body);
+                    // update ContentSize
+                    ContentSize = body.ScaledContentSize;
+                }
             }
         }
+
+        internal Aircraft() : base()
+        {
+        }
+
         /// <summary>
         /// searches and returns all parts that this aircraft is made of
         /// starting at the body and then searching recursively

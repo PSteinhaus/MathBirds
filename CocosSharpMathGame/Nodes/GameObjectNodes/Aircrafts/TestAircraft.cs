@@ -7,13 +7,19 @@ using CocosSharp;
 
 namespace CocosSharpMathGame
 {
-    class TestAircraft : Aircraft
+    internal class TestAircraft : Aircraft
     {
-        TestAircraft(CCPoint position, float rotation)
+        // DEBUG
+        internal TestWings wings;
+        internal TestAircraft(CCPoint position, float rotation=0f) : base()
         {
+            Position = position;
+            Rotation = rotation;
+            Console.WriteLine("Aircraft: " + Position);
             Body = new TestBody();
             // mount the wings
-            Body.MountPart(new TestWings());
+            wings = new TestWings();
+            Body.MountPart(wings);
         }
     }
 }

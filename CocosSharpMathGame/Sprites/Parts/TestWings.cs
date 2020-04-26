@@ -9,9 +9,11 @@ namespace CocosSharpMathGame
 {
     internal class TestWings : Part
     {
-        internal TestWings() : base("testWings")
+        internal TestWings() : base("testWings.png")
         {
-
+            // set your types
+            Types = new Type[] { Type.WINGS };
+            AnchorPoint = CCPoint.AnchorMiddle;
         }
     }
 }

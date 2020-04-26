@@ -58,10 +58,11 @@ namespace CocosSharpMathGame
 				gameView.DesignResolution = new CCSizeI(Constants.COCOS_WORLD_WIDTH, Constants.COCOS_WORLD_HEIGHT);
 				gameView.ResolutionPolicy = CCViewResolutionPolicy.ShowAll;
 
+				//gameView.ContentManager.RootDirectory = "Content";
 				gameView.ContentManager.SearchPaths = new List<string>()
 				{
-					"hd",
-					"sounds"
+					"sounds",
+					"hd/graphics"
 				};
 
 				// tell CCSprite to scale all textures by the factor 8, as standard behaviour
