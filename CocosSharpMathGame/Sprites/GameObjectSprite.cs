@@ -8,9 +8,9 @@ using CocosSharp;
 namespace CocosSharpMathGame
 {
     /// <summary>
-    /// All visible objects in the sky that aren't Sprites are GameObjectNodes (maybe excluding effects like shots or shields)
+    /// All visible objects in the sky that aren't pure Nodes are GameObjectSprites (maybe excluding effects like shots or shields)
     /// </summary>
-    internal class GameObjectNode : CCNode, IGameObject
+    internal class GameObjectSprite : CCSprite, IGameObject
     {
         // 0 is considered EAST; rotation is clockwise
         private float myRotation = 0;
@@ -26,8 +26,9 @@ namespace CocosSharpMathGame
                 Rotation = myRotation;  // set the "actual" rotation to match
             }
         }
-        internal GameObjectNode()
+        internal GameObjectSprite(CCSpriteFrame spriteFrame) : base(spriteFrame)
         {
+            IsAntialiased = false;
             AnchorPoint = CCPoint.AnchorMiddle;
             Scale = Constants.STANDARD_SCALE;
         }

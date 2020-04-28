@@ -7,9 +7,10 @@ using CocosSharp;
 
 namespace CocosSharpMathGame
 {
-    abstract internal class UIElement : CCSprite
+    abstract internal class UIElement : GameObjectSprite
     {
         static protected CCSpriteSheet spriteSheet = new CCSpriteSheet("ui.plist");
+        protected bool Pressed { get; set; } = false;
         internal UIElement(string textureName) : base(spriteSheet.Frames.Find(_ => _.TextureFilename.Equals(textureName)))
         {
 
@@ -21,33 +22,41 @@ namespace CocosSharpMathGame
             Func<CCTouch, bool> touchIsOnIt = null;
             if (IsCircleButton)
             {
-                touchStartedOnIt = (CCTouch touch) =>
-                 {
-                     return touch.StartLocation.IsNear(BoundingBoxTransformedToWorld.Center, ScaledContentSize.Width / 2);
-                 };
-                touchIsOnIt = (CCTouch touch) =>
-                {
-                    return touch.Location.IsNear(BoundingBoxTransformedToWorld.Center, ScaledContentSize.Width / 2);
-                };
+                touchStartedOnIt = TouchStartedOnItCircle;
+                touchIsOnIt = TouchIsOnItCircle;
             }
             else
             {
-                touchStartedOnIt = (CCTouch touch) =>
-                {
-                    return BoundingBoxTransformedToWorld.ContainsPoint(touch.StartLocation);
-                };
-                touchIsOnIt = (CCTouch touch) =>
-                {
-                    return BoundingBoxTransformedToWorld.ContainsPoint(touch.Location);
-                };
+                touchStartedOnIt = TouchStartedOnIt;
+                touchIsOnIt = TouchIsOnIt;
             }
             // add a touch listener
             var touchListener = new CCEventListenerTouchAllAtOnce();
-            touchListener.OnTouchesBegan = (arg1, arg2) => { if (touchStartedOnIt(arg1[0])) onTouchesBegan(arg1, arg2); };
-            touchListener.OnTouchesMoved = (arg1, arg2) => { if (touchStartedOnIt(arg1[0])) onTouchesMoved(arg1, arg2); };
-            touchListener.OnTouchesEnded = (arg1, arg2) => { if (touchMustEndOnIt ? touchIsOnIt(arg1[0]):touchStartedOnIt(arg1[0])) onTouchesEnded(arg1, arg2); };
-            touchListener.OnTouchesCancelled = (arg1, arg2) => { if (touchStartedOnIt(arg1[0])) onTouchesCancelled(arg1, arg2); };
+            // DEBUG: I don't yet know whether it is necessary to check for visibility; experiments will tell
+            touchListener.OnTouchesBegan = (arg1, arg2) =>                                     { if (Visible && touchStartedOnIt(arg1[0]))                                  { Pressed = true;  onTouchesBegan(arg1, arg2); } };
+            if(onTouchesMoved!=null) touchListener.OnTouchesMoved = (arg1, arg2) =>            { if (Visible && Pressed)                                                                       onTouchesMoved(arg1, arg2); };
+            if (onTouchesEnded != null) touchListener.OnTouchesEnded = (arg1, arg2) =>         { if (Visible && touchMustEndOnIt ? touchIsOnIt(arg1[0]) : true && Pressed)  { Pressed = false; onTouchesEnded(arg1, arg2); } };
+            else                        touchListener.OnTouchesEnded = (arg1, arg2) =>                                                                                        Pressed = false;
+            if (onTouchesCancelled != null) touchListener.OnTouchesCancelled = (arg1, arg2) => { if (Visible && Pressed)                                                    { Pressed = false; onTouchesCancelled(arg1, arg2); } };
+            else                            touchListener.OnTouchesCancelled = (arg1, arg2) =>                                                                                Pressed = false;
             AddEventListener(touchListener, this);
+        }
+
+        internal bool TouchStartedOnIt(CCTouch touch)
+        {
+            return BoundingBoxTransformedToWorld.ContainsPoint(touch.StartLocation);
+        }
+        internal bool TouchIsOnIt(CCTouch touch)
+        {
+            return BoundingBoxTransformedToWorld.ContainsPoint(touch.Location);
+        }
+        internal bool TouchStartedOnItCircle(CCTouch touch)
+        {
+            return touch.StartLocation.IsNear(BoundingBoxTransformedToWorld.Center, ScaledContentSize.Width / 2);
+        }
+        internal bool TouchIsOnItCircle(CCTouch touch)
+        {
+            return touch.Location.IsNear(BoundingBoxTransformedToWorld.Center, ScaledContentSize.Width / 2);
         }
     }
 }

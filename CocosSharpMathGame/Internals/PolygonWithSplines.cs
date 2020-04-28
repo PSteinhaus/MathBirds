@@ -28,11 +28,21 @@ namespace CocosSharpMathGame
         /// These points specify the overall structure of the polygon.
         /// The final polygon is created based on these points and the spline control information.
         /// </summary>
-        private CCPoint[] ControlPoints { get; set; }
-        internal PolygonWithSplines(CCPoint[] controlPoints, int[] splineControl) : base(controlPoints)
+        internal CCPoint[] ControlPoints {
+            get
+            {
+                return ControlPolygon.Points;
+            }
+            set
+            {
+                ControlPolygon.Points = value;
+            }
+        }
+        private Polygon ControlPolygon { get; set; }
+        internal PolygonWithSplines(CCPoint[] controlPoints, int[] splineControl = null) : base(controlPoints)
         {
-            SplineControl = splineControl;
-            ControlPoints = controlPoints;
+            SplineControl = splineControl!=null ? splineControl : new int[controlPoints.Length];
+            ControlPolygon = new Polygon(controlPoints);
             ConstructPolygon();
         }
 
@@ -51,6 +61,19 @@ namespace CocosSharpMathGame
             SplineControl[stopIndex] = segments;
         }
 
+        internal override void MoveBy(float dx, float dy)
+        {
+            base.MoveBy(dx, dy);
+            // also update the Control Polygon
+            MovePointsBy(ControlPoints, dx, dy);
+        }
+
+        internal override void RotateBy(float degree)
+        {
+            base.RotateBy(degree);
+            // also update the Control Polygon
+            RotatePointsBy(ControlPoints, PivotPoint, degree);
+        }
         internal void ConstructPolygon()
         {
             List<CCPoint> newPoints = new List<CCPoint>();
@@ -87,30 +110,6 @@ namespace CocosSharpMathGame
                     // or not (in case another spline is starting there (because it will be added then)
                     if (SplineControl[i] > 0)
                         newPoints.Add(new CCPoint(splineX[splineX.Length-1], splineY[splineY.Length - 1]));
-                    /*
-                    //var spline = CubicSpline.InterpolateNatural(splineControlPointsX, splineControlPointsY);
-                    // now for each control point
-                    for (int j=0; j<splineControlPointsX.Count; j++)
-                    {
-                        // add the control point itself (but only if it isn't the last point AND a new spline is supposed to start here)
-                        if (j != splineControlPointsX.Count - 1 || SplineControl[i]>0)
-                            newPoints.Add(new CCPoint((float)splineControlPointsX[j], (float)splineControlPointsY[j]));
-                        // then (if it is not the end point)
-                        if (j != splineControlPointsX.Count-1)
-                        {
-                            // get the x-distance to the next control point
-                            double dx = splineControlPointsX[j + 1] - splineControlPointsX[j];
-                            // divide it into "segments" many parts of equal length, go there and add points (based on the spline) in between
-                            // don't add the end point (as that will be done in the next i-loop iteration)
-                            for(int k=1; k<segments; k++)
-                            {
-                                double segmentEndX = splineControlPointsX[j] + ((dx * k) / segments);
-                                double segmentEndY = spline.Interpolate(segmentEndX);
-                                newPoints.Add(new CCPoint((float)segmentEndX, (float)segmentEndY));
-                            }
-                        }
-                    }
-                    */
                     // finally clear the list of collected control points
                     splineControlPointsX.Clear();
                     splineControlPointsY.Clear();

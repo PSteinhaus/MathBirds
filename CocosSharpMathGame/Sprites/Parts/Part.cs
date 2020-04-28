@@ -11,7 +11,7 @@ namespace CocosSharpMathGame
     /// Parts are what Aircrafts are made of.
     /// They are visible.
     /// </summary>
-    abstract internal class Part : CCSprite
+    abstract internal class Part : GameObjectSprite
     {
         /// <summary>
         /// Parts can have multiples Types.
@@ -45,7 +45,7 @@ namespace CocosSharpMathGame
         }
         protected Part(string textureName) : base(spriteSheet.Frames.Find(_ => _.TextureFilename.Equals(textureName)))
         {
-            IsAntialiased = false;
+            Scale = 1; // Parts are usually scaled by the aircrafts owning them
             AnchorPoint = CCPoint.AnchorLowerLeft;
             Console.WriteLine("Part ContentSize: " + ContentSize);
         }

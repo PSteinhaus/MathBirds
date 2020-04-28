@@ -7,29 +7,29 @@
 			<key>testBody.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{0,6},{5,16}}</string>
+				<string>{{0,0},{16,5}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
 				<false/>
 				<key>sourceColorRect</key>
-				<string>{{7,0},{5,16}}</string>
+				<string>{{0,7},{16,5}}</string>
 				<key>sourceSize</key>
-				<string>{19,16}</string>
+				<string>{16,19}</string>
 			</dict>
 
 			<key>testWings.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{0,0},{19,5}}</string>
+				<string>{{0,6},{5,19}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
 				<false/>
 				<key>sourceColorRect</key>
-				<string>{{0,6},{19,5}}</string>
+				<string>{{5,0},{5,19}}</string>
 				<key>sourceSize</key>
-				<string>{19,16}</string>
+				<string>{16,19}</string>
 			</dict>
 
 		</dict>

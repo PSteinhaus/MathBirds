@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\Xamarin.Forms.4.5.0.617\build\Xamarin.Forms.props" Condition="Exists('..\packages\Xamarin.Forms.4.5.0.617\build\Xamarin.Forms.props')" />
+  <Import Project="..\packages\Xamarin.Forms.4.5.0.657\build\Xamarin.Forms.props" Condition="Exists('..\packages\Xamarin.Forms.4.5.0.657\build\Xamarin.Forms.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -43,6 +43,9 @@
     <None Include="Content\hd\graphics\parts.plist">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="Content\hd\graphics\ui.plist">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -55,32 +58,32 @@
     <Reference Include="CocosSharp.Forms, Version=1.7.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\CocosSharp.Forms.1.7.1.0\lib\portable-net45+win+wpa81+wp81\CocosSharp.Forms.dll</HintPath>
     </Reference>
-    <Reference Include="CSharpMath, Version=0.4.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CSharpMath.0.4.1\lib\netstandard2.0\CSharpMath.dll</HintPath>
+    <Reference Include="CSharpMath, Version=0.4.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\CSharpMath.0.4.2\lib\netstandard2.0\CSharpMath.dll</HintPath>
     </Reference>
-    <Reference Include="CSharpMath.Editor, Version=0.4.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CSharpMath.Editor.0.4.1\lib\netstandard2.0\CSharpMath.Editor.dll</HintPath>
+    <Reference Include="CSharpMath.Editor, Version=0.4.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\CSharpMath.Editor.0.4.2\lib\netstandard2.0\CSharpMath.Editor.dll</HintPath>
     </Reference>
-    <Reference Include="CSharpMath.Forms, Version=0.4.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CSharpMath.Forms.0.4.1\lib\netstandard2.0\CSharpMath.Forms.dll</HintPath>
+    <Reference Include="CSharpMath.Forms, Version=0.4.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\CSharpMath.Forms.0.4.2\lib\netstandard2.0\CSharpMath.Forms.dll</HintPath>
     </Reference>
-    <Reference Include="CSharpMath.Rendering, Version=0.4.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CSharpMath.Rendering.0.4.1\lib\netstandard2.0\CSharpMath.Rendering.dll</HintPath>
+    <Reference Include="CSharpMath.Rendering, Version=0.4.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\CSharpMath.Rendering.0.4.2\lib\netstandard2.0\CSharpMath.Rendering.dll</HintPath>
     </Reference>
-    <Reference Include="CSharpMath.SkiaSharp, Version=0.4.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CSharpMath.SkiaSharp.0.4.1\lib\netstandard2.0\CSharpMath.SkiaSharp.dll</HintPath>
+    <Reference Include="CSharpMath.SkiaSharp, Version=0.4.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\CSharpMath.SkiaSharp.0.4.2\lib\netstandard2.0\CSharpMath.SkiaSharp.dll</HintPath>
     </Reference>
     <Reference Include="FParsec, Version=1.0.0.0, Culture=neutral, PublicKeyToken=40ccfc0a09edbb5d, processorArchitecture=MSIL">
-      <HintPath>..\packages\FParsec.1.0.3\lib\net40-client\FParsec.dll</HintPath>
+      <HintPath>..\packages\FParsec.1.1.1\lib\net45\FParsec.dll</HintPath>
     </Reference>
     <Reference Include="FParsecCS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=40ccfc0a09edbb5d, processorArchitecture=MSIL">
-      <HintPath>..\packages\FParsec.1.0.3\lib\net40-client\FParsecCS.dll</HintPath>
+      <HintPath>..\packages\FParsec.1.1.1\lib\net45\FParsecCS.dll</HintPath>
     </Reference>
-    <Reference Include="FSharp.Core, Version=4.4.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\FSharp.Core.4.3.3\lib\net45\FSharp.Core.dll</HintPath>
+    <Reference Include="FSharp.Core, Version=4.7.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\FSharp.Core.4.7.1\lib\net45\FSharp.Core.dll</HintPath>
     </Reference>
-    <Reference Include="MathNet.Numerics, Version=4.7.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\MathNet.Numerics.4.7.0\lib\net461\MathNet.Numerics.dll</HintPath>
+    <Reference Include="MathNet.Numerics, Version=4.9.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MathNet.Numerics.4.9.1\lib\net461\MathNet.Numerics.dll</HintPath>
     </Reference>
     <Reference Include="MathNet.Numerics.FSharp, Version=4.7.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\MathNet.Numerics.FSharp.4.7.0\lib\net45\MathNet.Numerics.FSharp.dll</HintPath>
@@ -92,42 +95,49 @@
       <HintPath>..\packages\CocosSharp.1.7.1.0\lib\portable-net45+win+wpa81+wp81\MonoGame.Framework.dll</HintPath>
     </Reference>
     <Reference Include="SkiaSharp, Version=1.68.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
-      <HintPath>..\packages\SkiaSharp.1.68.0\lib\net45\SkiaSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="SkiaSharp.Views.Forms, Version=1.68.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\SkiaSharp.Views.Forms.1.68.0\lib\netstandard1.3\SkiaSharp.Views.Forms.dll</HintPath>
+      <HintPath>..\packages\SkiaSharp.1.68.1.1\lib\net45\SkiaSharp.dll</HintPath>
     </Reference>
     <Reference Include="Symbolism, Version=1.0.4.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Symbolism.1.0.4\lib\netstandard2.0\Symbolism.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Buffers.4.5.0\lib\netstandard2.0\System.Buffers.dll</HintPath>
+      <HintPath>..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Drawing.Primitives, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Drawing.Primitives.4.3.0\lib\net45\System.Drawing.Primitives.dll</HintPath>
+      <Private>True</Private>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System.Memory, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Memory.4.5.3\lib\netstandard2.0\System.Memory.dll</HintPath>
+      <HintPath>..\packages\System.Memory.4.5.4\lib\net461\System.Memory.dll</HintPath>
     </Reference>
     <Reference Include="System.Numerics" />
     <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
     </Reference>
-    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.5.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.6.0\lib\netstandard2.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.6.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.7.1\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
     </Reference>
     <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net47\System.ValueTuple.dll</HintPath>
+    </Reference>
     <Reference Include="Xamarin.Forms.Core, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Xamarin.Forms.4.5.0.617\lib\netstandard2.0\Xamarin.Forms.Core.dll</HintPath>
+      <HintPath>..\packages\Xamarin.Forms.4.5.0.657\lib\netstandard2.0\Xamarin.Forms.Core.dll</HintPath>
     </Reference>
     <Reference Include="Xamarin.Forms.Platform, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Xamarin.Forms.4.5.0.617\lib\netstandard2.0\Xamarin.Forms.Platform.dll</HintPath>
+      <HintPath>..\packages\Xamarin.Forms.4.5.0.657\lib\netstandard2.0\Xamarin.Forms.Platform.dll</HintPath>
     </Reference>
     <Reference Include="Xamarin.Forms.Xaml, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Xamarin.Forms.4.5.0.617\lib\netstandard2.0\Xamarin.Forms.Xaml.dll</HintPath>
+      <HintPath>..\packages\Xamarin.Forms.4.5.0.657\lib\netstandard2.0\Xamarin.Forms.Xaml.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Constants.cs" />
     <Compile Include="CocosSharpMathGame.cs" />
+    <Compile Include="Interfaces\IGameObject.cs" />
     <Compile Include="Internals\ArrayUtil.cs" />
     <Compile Include="Internals\CubicSpline.cs" />
     <Compile Include="Internals\Polygon.cs" />
@@ -138,10 +148,13 @@
     <Compile Include="MathChallenges\MathChallenge.cs" />
     <Compile Include="MathChallenges\MathToTexture.cs" />
     <Compile Include="Nodes\GameObjectNodes\Aircrafts\Aircraft.cs" />
+    <Compile Include="Nodes\GameObjectNodes\Aircrafts\FlightPathControlNode.cs" />
+    <Compile Include="Nodes\GameObjectNodes\Aircrafts\FlightPathNode.cs" />
     <Compile Include="Nodes\GameObjectNodes\Aircrafts\TestAircraft.cs" />
     <Compile Include="Nodes\GameObjectNodes\GameObjectNode.cs" />
     <Compile Include="Interfaces\ICollidable.cs" />
     <Compile Include="Pages\MainPage.cs" />
+    <Compile Include="Sprites\GameObjectSprite.cs" />
     <Compile Include="Sprites\MathSprite.cs" />
     <Compile Include="Sprites\Parts\PartMount.cs" />
     <Compile Include="Sprites\Parts\Part.cs" />
@@ -149,6 +162,8 @@
     <Compile Include="Sprites\Parts\TestWings.cs" />
     <Compile Include="Sprites\UI\Button.cs" />
     <Compile Include="Sprites\UI\CircleButton.cs" />
+    <Compile Include="Sprites\UI\ExecuteOrdersButton.cs" />
+    <Compile Include="Sprites\UI\FlightPathHead.cs" />
     <Compile Include="Sprites\UI\RectButton.cs" />
     <Compile Include="Sprites\UI\UIElement.cs" />
   </ItemGroup>
@@ -160,6 +175,9 @@
     <Content Include="Content\hd\graphics\parts.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Content\hd\graphics\ui.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Data\sprites\testBody.png" />
     <Content Include="Data\sprites\testWings.png" />
   </ItemGroup>
@@ -168,10 +186,12 @@
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\Xamarin.Forms.4.5.0.617\build\Xamarin.Forms.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Xamarin.Forms.4.5.0.617\build\Xamarin.Forms.props'))" />
-    <Error Condition="!Exists('..\packages\Xamarin.Forms.4.5.0.617\build\Xamarin.Forms.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Xamarin.Forms.4.5.0.617\build\Xamarin.Forms.targets'))" />
-    <Error Condition="!Exists('..\packages\SkiaSharp.1.68.0\build\net45\SkiaSharp.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\SkiaSharp.1.68.0\build\net45\SkiaSharp.targets'))" />
+    <Error Condition="!Exists('..\packages\Xamarin.Forms.4.5.0.657\build\Xamarin.Forms.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Xamarin.Forms.4.5.0.657\build\Xamarin.Forms.props'))" />
+    <Error Condition="!Exists('..\packages\Xamarin.Forms.4.5.0.657\build\Xamarin.Forms.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Xamarin.Forms.4.5.0.657\build\Xamarin.Forms.targets'))" />
+    <Error Condition="!Exists('..\packages\SkiaSharp.1.68.1.1\build\net45\SkiaSharp.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\SkiaSharp.1.68.1.1\build\net45\SkiaSharp.targets'))" />
+    <Error Condition="!Exists('..\packages\SkiaSharp.Views.Forms.1.68.1.1\build\net45\SkiaSharp.Views.Forms.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\SkiaSharp.Views.Forms.1.68.1.1\build\net45\SkiaSharp.Views.Forms.targets'))" />
   </Target>
-  <Import Project="..\packages\Xamarin.Forms.4.5.0.617\build\Xamarin.Forms.targets" Condition="Exists('..\packages\Xamarin.Forms.4.5.0.617\build\Xamarin.Forms.targets')" />
-  <Import Project="..\packages\SkiaSharp.1.68.0\build\net45\SkiaSharp.targets" Condition="Exists('..\packages\SkiaSharp.1.68.0\build\net45\SkiaSharp.targets')" />
+  <Import Project="..\packages\Xamarin.Forms.4.5.0.657\build\Xamarin.Forms.targets" Condition="Exists('..\packages\Xamarin.Forms.4.5.0.657\build\Xamarin.Forms.targets')" />
+  <Import Project="..\packages\SkiaSharp.1.68.1.1\build\net45\SkiaSharp.targets" Condition="Exists('..\packages\SkiaSharp.1.68.1.1\build\net45\SkiaSharp.targets')" />
+  <Import Project="..\packages\SkiaSharp.Views.Forms.1.68.1.1\build\net45\SkiaSharp.Views.Forms.targets" Condition="Exists('..\packages\SkiaSharp.Views.Forms.1.68.1.1\build\net45\SkiaSharp.Views.Forms.targets')" />
 </Project>

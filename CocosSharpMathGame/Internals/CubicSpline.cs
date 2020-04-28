@@ -167,10 +167,14 @@ namespace TestMySpline
 		/// <param name="debug">Turn on console output. Default is false.</param>
 		public void Fit(float[] x, float[] y, float startSlope = float.NaN, float endSlope = float.NaN, bool debug = false)
 		{
-			if (Single.IsInfinity(startSlope) || Single.IsInfinity(endSlope))
-			{
-				throw new Exception("startSlope and endSlope cannot be infinity.");
-			}
+			if (Single.IsPositiveInfinity(startSlope))
+				startSlope = float.MaxValue;
+			else if (Single.IsNegativeInfinity(startSlope))
+				startSlope = float.MinValue;
+			if (Single.IsPositiveInfinity(endSlope))
+				endSlope = float.MaxValue;
+			else if (Single.IsNegativeInfinity(endSlope))
+				endSlope = float.MinValue;
 
 			// Save x and y for eval
 			this.xOrig = x;
