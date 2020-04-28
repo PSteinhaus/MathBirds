@@ -21,8 +21,8 @@ namespace CocosSharpMathGame
             // lets create some maneuver polygon
             var d = ScaledContentSize.Width; // use some relative length as measure
             var controlPoints = new CCPoint[]
-            { new CCPoint(2*d, 4*d), new CCPoint(0, 5*d), new CCPoint(-2*d, 4*d),
-              new CCPoint(-d/2, d/4), new CCPoint(0,d/2), new CCPoint(d/2, d/4) };
+            { new CCPoint(2*d, 3*d), new CCPoint(0, 3.5f*d), new CCPoint(-2*d, 3*d),
+              new CCPoint(-d, d), new CCPoint(0,d*1.2f), new CCPoint(d, d) };
             var maneuverPolygon = new PolygonWithSplines(controlPoints);
             maneuverPolygon.SpecifySpline(0, 2, 15);
             maneuverPolygon.SpecifySpline(3, 5, 15);
@@ -31,7 +31,7 @@ namespace CocosSharpMathGame
             maneuverPolygon.RotateBy(90f);
             UpdateManeuverPolygonToThis(maneuverPolygon);
             // this is a test plane so I want to see the polygon too
-            IsManeuverPolygonDrawn = true;
+            //IsManeuverPolygonDrawn = true;
 
             // ok... since this doesn't work lets try to draw it like this:
             //var drawNode = maneuverPolygon.CreateDrawNode();

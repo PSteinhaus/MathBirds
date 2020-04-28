@@ -60,12 +60,15 @@ namespace CocosSharpMathGame
             float firstY = startPosition.Y - startSlopeDy;
             // also create another point as the third point
             // it makes sure that the plane HAS TO MOVE a little bit in a somewhat straight way first
-            float thirdX = startPosition.X + startSlopeDx;
-            float thirdY = startPosition.Y + startSlopeDy;
+            float thirdX = startPosition.X + 40*startSlopeDx;
+            float thirdY = startPosition.Y + 40*startSlopeDy;
             var xValues = new float[] { firstX, startPosition.X, thirdX, endPosition.X };
             var yValues = new float[] { firstY, startPosition.Y, thirdY, endPosition.Y };
             CubicSpline.FitParametric(xValues, yValues, POINTS_PER_PATH, out float[] pathX, out float[] pathY, startSlopeDx, startSlopeDy, endSlopeDx, endSlopeDy);
             var newPath = new CCPoint[pathX.Length];
+            // now calculate a second spline, based on the first one
+            // the difference is the end; use the two last points of the previous spline to construct a new end, leading to a more strongly curved path
+            //xValues = new float[] { firstX, startPosition.X, thirdX, endPosition.X,  }
             // for the output skip the first point (start slope point)
             // and replace it with the start point
             newPath[0] = startPosition;

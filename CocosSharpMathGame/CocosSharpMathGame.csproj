@@ -143,6 +143,7 @@
     <Compile Include="Internals\Polygon.cs" />
     <Compile Include="Internals\PolygonWithSplines.cs" />
     <Compile Include="Internals\TriDiagonalMatrix.cs" />
+    <Compile Include="Layers\GUILayer.cs" />
     <Compile Include="Layers\PlayLayer.cs" />
     <Compile Include="MathChallenges\AddChallenge.cs" />
     <Compile Include="MathChallenges\MathChallenge.cs" />
@@ -154,6 +155,7 @@
     <Compile Include="Nodes\GameObjectNodes\GameObjectNode.cs" />
     <Compile Include="Interfaces\ICollidable.cs" />
     <Compile Include="Pages\MainPage.cs" />
+    <Compile Include="Scenes\PlayScene.cs" />
     <Compile Include="Sprites\GameObjectSprite.cs" />
     <Compile Include="Sprites\MathSprite.cs" />
     <Compile Include="Sprites\Parts\PartMount.cs" />

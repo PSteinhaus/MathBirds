@@ -13,6 +13,7 @@ namespace CocosSharpMathGame.DX
         {
             application.ContentRootDirectory = "Content";
             var windowSize = mainWindow.WindowSizeInPixels;
+            mainWindow.DisplayStats = true;
 
             // This will set the world bounds to be (0,0, w, h)
             // CCSceneResolutionPolicy.ShowAll will ensure that the aspect ratio is preserved
@@ -41,12 +42,12 @@ namespace CocosSharpMathGame.DX
             //CCSprite.DefaultTexelToContentSizeRatio = 1.0f;
             //CCSprite.DefaultTexelToContentSizeRatio = 0.125f;
             //CCSprite.DefaultTexelToContentSizeRatio = 0.0625f;
-
             var scene = new CCScene(mainWindow);
             var playLayer = new PlayLayer();
 
             scene.AddChild(playLayer);
-
+            scene.AddChild(playLayer.GUILayer);
+            
             mainWindow.RunWithScene(scene);
         }
 

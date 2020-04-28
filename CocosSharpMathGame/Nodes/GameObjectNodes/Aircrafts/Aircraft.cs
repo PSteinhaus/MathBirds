@@ -105,6 +105,8 @@ namespace CocosSharpMathGame
         /// <returns>whether the aircraft is done executing it orders</returns>
         internal bool ExecuteOrders(float dt)
         {
+            // first make the controls invisible
+            FlightPathControlNode.Visible = false;
             // for now all aircrafts can do is follow their flight path
             // advance dt seconds on the path
             bool finished = FlightPathControlNode.Advanche(dt);
@@ -152,6 +154,7 @@ namespace CocosSharpMathGame
         internal void PrepareForPlanningPhase()
         {
             FlightPathControlNode.ResetHeadPosition();
+            FlightPathControlNode.Visible = true;
         }
     }
 }

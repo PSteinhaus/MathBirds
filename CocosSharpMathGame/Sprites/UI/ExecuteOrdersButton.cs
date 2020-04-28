@@ -37,7 +37,7 @@ namespace CocosSharpMathGame
                 {
                     Visible = false;
                     // execute orders
-                    (Layer as PlayLayer).ExecuteOrders();
+                    (Layer as GUILayer).ExecuteOrders();
                 }
             }
         }
