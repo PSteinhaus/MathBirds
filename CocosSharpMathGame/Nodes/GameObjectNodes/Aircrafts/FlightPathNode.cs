@@ -14,7 +14,7 @@ namespace CocosSharpMathGame
     /// </summary>
     internal class FlightPathNode : CCDrawNode
     {
-        private const int POINTS_PER_PATH = 400;
+        private const int POINTS_PER_PATH = 800;
         internal CCColor4B LineColor { get; set; } = CCColor4B.White;
         internal float LineWidth { get; set; } = 4f;
         internal CCPoint[] Path { get; private set; }
@@ -51,7 +51,7 @@ namespace CocosSharpMathGame
         {
             get { return Path[Path.Length-1]; }
         }
-        internal void CalculatePath(CCPoint startPosition, float startSlopeDx, float startSlopeDy, CCPoint endPosition, float endSlopeDx=float.NaN, float endSlopeDy=float.NaN)
+        internal void CalculatePath(CCPoint startPosition, float startSlopeDx, float startSlopeDy, CCPoint endPosition, float endSlopeDx = float.NaN, float endSlopeDy = float.NaN)
         {
             // calculate a spline
             // as the first point of the input-path add a new point
@@ -60,26 +60,96 @@ namespace CocosSharpMathGame
             float firstY = startPosition.Y - startSlopeDy;
             // also create another point as the third point
             // it makes sure that the plane HAS TO MOVE a little bit in a somewhat straight way first
-            float thirdX = startPosition.X + 40*startSlopeDx;
-            float thirdY = startPosition.Y + 40*startSlopeDy;
-            var xValues = new float[] { firstX, startPosition.X, thirdX, endPosition.X };
-            var yValues = new float[] { firstY, startPosition.Y, thirdY, endPosition.Y };
-            CubicSpline.FitParametric(xValues, yValues, POINTS_PER_PATH, out float[] pathX, out float[] pathY, startSlopeDx, startSlopeDy, endSlopeDx, endSlopeDy);
+            float secondX = startPosition.X + 1 * startSlopeDx;
+            float secondY = startPosition.Y + 1 * startSlopeDy;
+            float thirdX = startPosition.X + 10 * startSlopeDx;
+            float thirdY = startPosition.Y + 10 * startSlopeDy;
+
+            // now calculate a special midpoint; it strongly defines the curvature of the path
+            // start with the midpoint between start and end
+            CCPoint midpoint = new CCPoint((endPosition.X + startPosition.X) / 2, (endPosition.Y + startPosition.Y) / 2);
+            // now we need the perpendicular line going through that point (midpoint.Y = (-1/m)*midpoint.X + np) (mp = -1/m)
+            float m = (endPosition.Y - startPosition.Y) / (endPosition.X - startPosition.X);
+            float mp = -1 / m;
+            float np = midpoint.Y - midpoint.X * mp;
+            // now get the line extending from the starting point with the startSlope (startPosition.Y = startSlope*startPosition.X + ns)
+            float ns = startPosition.Y - (startSlopeDy / startSlopeDx) * startPosition.X;
+            // next find the intersection point that these lines form (startSlope*x + ns = mp*x + np)
+            // x*(startSlope - mp) = np - ns;
+            float x = (np - ns) / ((startSlopeDy / startSlopeDx) - mp);
+            float y = mp * x + np;
+            // finally, as the special curvature point calculate the midpoint between the start-end-midpoint and intersection point
+            //float curvaturePointX = (midpoint.X + x) / 2;
+            //float curvaturePointY = (midpoint.Y + y) / 2;
+            float curvaturePointX = midpoint.X + ((x - midpoint.X) / 3f);
+            float curvaturePointY = midpoint.Y + ((y - midpoint.Y) / 3f);
+            // ADDITIONAL PROCESS FOR REFINING THIS FURTHER:
+            // first get the curvature point as a vector relative to the midpoint
+            CCPoint curveVector = new CCPoint(curvaturePointX - midpoint.X, curvaturePointY - midpoint.Y);
+            // if it's not (0,0) (i.e. if there is any curvature at all)
+            float curveFactor = 0;
+            float halfDistance = CCPoint.Distance(startPosition, midpoint);
+            float magicDistanceFactor = halfDistance / 900f < 1 ? halfDistance / 900f : 1;
+            if (!curveVector.Equals(CCPoint.Zero))
+            {
+                // normalize it
+                curveVector = CCPoint.Normalize(curveVector);
+                // now we need to calculate the factor by which it is to be scaled
+                // for that we calculate the scalar product of the normalized direction vector of the starting slope and the normalized direction vector from start to end point
+                float scalarProduct = CCPoint.Dot(new CCPoint(startSlopeDx, startSlopeDy), CCPoint.Normalize(new CCPoint(endPosition.X - startPosition.X, endPosition.Y - startPosition.Y)));
+                // the larger this product, the less curvature
+                curveFactor = 1 - scalarProduct;
+                Console.WriteLine("CurveVector: " + curveVector);
+                Console.WriteLine("CurveFactor: " + curveFactor);
+                Console.WriteLine("Distance: " + CCPoint.Distance(startPosition, midpoint));
+                // now calculate the curvature point
+                curvaturePointX = midpoint.X + curveVector.X * curveFactor * (1.3f-0.8f* magicDistanceFactor) * halfDistance * (curveFactor > 1 ? -1 : 1);
+                curvaturePointY = midpoint.Y + curveVector.Y * curveFactor * (1.3f-0.8f* magicDistanceFactor) * halfDistance * (curveFactor > 1 ? -1 : 1);
+                Console.WriteLine("Midpoint: " + midpoint);
+                Console.WriteLine("CurvaturePoint: " + curvaturePointX + "," + curvaturePointY);
+            }
+            float[] xValues, yValues;
+            magicDistanceFactor = halfDistance / 900f;
+            if (curveFactor/magicDistanceFactor > 0.55f)
+            {
+                xValues = new float[] { startPosition.X, secondX, thirdX, curvaturePointX, endPosition.X };
+                yValues = new float[] { startPosition.Y, secondY, thirdY, curvaturePointY, endPosition.Y };
+            }
+            else
+            {
+                xValues = new float[] { startPosition.X, secondX, thirdX, endPosition.X };
+                yValues = new float[] { startPosition.Y, secondY, thirdY, endPosition.Y };
+            }
+            //var xValues = new float[] { startPosition.X, curvaturePointX, endPosition.X };
+            //var yValues = new float[] { startPosition.Y, curvaturePointY, endPosition.Y };
+            CubicSpline.FitParametric(xValues, yValues, POINTS_PER_PATH/4, out float[] pathX1, out float[] pathY1);// startSlopeDx, startSlopeDy, endSlopeDx, endSlopeDy);
+            // get the point before the endpoint to adjust the curvature
+            float xBeforeEnd = pathX1[pathX1.Length - 2];
+            float yBeforeEnd = pathY1[pathY1.Length - 2];
+            if (curveFactor/magicDistanceFactor > 0.55f)
+            {
+                xValues = new float[] { startPosition.X, secondX, thirdX, curvaturePointX, xBeforeEnd, endPosition.X };
+                yValues = new float[] { startPosition.Y, secondY, thirdY, curvaturePointY, yBeforeEnd, endPosition.Y };
+            }
+            else
+            {
+                xValues = new float[] { startPosition.X, secondX, thirdX, xBeforeEnd, endPosition.X };
+                yValues = new float[] { startPosition.Y, secondY, thirdY, yBeforeEnd, endPosition.Y };
+            }
+            CubicSpline.FitParametric(xValues, yValues, POINTS_PER_PATH, out float[] pathX, out float[] pathY);
             var newPath = new CCPoint[pathX.Length];
-            // now calculate a second spline, based on the first one
-            // the difference is the end; use the two last points of the previous spline to construct a new end, leading to a more strongly curved path
-            //xValues = new float[] { firstX, startPosition.X, thirdX, endPosition.X,  }
+
             // for the output skip the first point (start slope point)
             // and replace it with the start point
             newPath[0] = startPosition;
-            for (int i=1; i<pathX.Length; i++)
+            for (int i = 1; i < pathX.Length; i++)
             {
                 newPath[i] = new CCPoint(pathX[i], pathY[i]);
             }
             Path = newPath;
             // draw it properly
             Clear();
-            for (int i=0; i<Path.Length-1; i++)
+            for (int i = 0; i < Path.Length - 1; i++)
             {
                 DrawLine(Path[i], Path[i + 1], LineWidth, LineColor, CCLineCap.Round);
             }

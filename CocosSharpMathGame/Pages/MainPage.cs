@@ -31,6 +31,7 @@ namespace CocosSharpMathGame
 		{
 			// set the global variable
 			Instance = this;
+			Console.WriteLine("YES???");
 			gameView = new CocosSharpView()
 			{
 				// Notice it has the same properties as other XamarinForms Views
@@ -47,10 +48,10 @@ namespace CocosSharpMathGame
 		void HandleViewCreated(object sender, EventArgs e)
 		{
 			var gameView = sender as CCGameView;
-
+			Console.WriteLine("YES????");
 			if (gameView != null)
 			{
-
+				Console.WriteLine("YES");
 				// show the stats
 				gameView.Stats.Enabled = true;
 
@@ -66,7 +67,7 @@ namespace CocosSharpMathGame
 				};
 
 				// tell CCSprite to scale all textures by the factor 8, as standard behaviour
-				CCSprite.DefaultTexelToContentSizeRatio = 0.125f;
+				//CCSprite.DefaultTexelToContentSizeRatio = 0.125f;
 
 				// GameScene is the root of the CocosSharp rendering hierarchy:
 				//gameScene = new GameScene(gameView);

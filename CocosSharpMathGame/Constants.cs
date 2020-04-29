@@ -8,7 +8,7 @@ namespace CocosSharpMathGame
         public const int COCOS_WORLD_WIDTH = 1080;
         public const int COCOS_WORLD_HEIGHT = 1920;
         public const float STANDARD_SCALE = 8;
-        public const float TURN_DURATION = 2f;  // executing orders takes 3.5 seconds
+        public const float TURN_DURATION = 3f;  // executing orders takes 3.5 seconds
 
         public static float DegreesToRadians(float degrees)
         {

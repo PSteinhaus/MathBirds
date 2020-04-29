@@ -17,9 +17,9 @@ namespace CocosSharpMathGame.Droid
 		protected override void OnCreate(Bundle bundle)
 		{
 			base.OnCreate(bundle);
-
+			Console.WriteLine("YES?");
 			global::Xamarin.Forms.Forms.Init(this, bundle);
-
+			Console.WriteLine("YES??");
 			LoadApplication(new App());
 		}
 	}

@@ -187,7 +187,7 @@ namespace CocosSharpMathGame
                     break;
                 case GameState.EXECUTING_ORDERS:
                     {
-                        Console.WriteLine("EXECUTING ORDERS; dt: " + dt);
+                        // DEBUG: Console.WriteLine("EXECUTING ORDERS; dt: " + dt);
                         // go through all aircrafts and let them execute their orders
                         bool executionFinished = true;  // check if they are done
                         foreach (var aircraft in Aircrafts)
