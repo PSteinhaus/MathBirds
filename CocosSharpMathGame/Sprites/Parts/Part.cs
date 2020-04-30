@@ -35,6 +35,7 @@ namespace CocosSharpMathGame
             get
             {
                 List<Part> totalParts = new List<Part> { this };
+                if (PartMounts != null)
                 foreach (PartMount partMount in PartMounts)
                 {
                     if (partMount.MountedPart != null)

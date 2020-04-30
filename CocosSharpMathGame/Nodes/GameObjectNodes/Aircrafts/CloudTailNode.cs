@@ -84,7 +84,6 @@ namespace CocosSharpMathGame
         /// <param name="decayOnly">if true, no new clouds are added (i.e. this just advances the cloud life cycles)</param>
         internal void Advance(float dt, CCPoint currentPosition, float currentCCRotation, bool decayOnly=false)
         {
-            bool cloudAdded = false;
             // check if it is time for a new cloud
             float timePlusDt = TimeSinceLastCloud + dt;
             if (timePlusDt > CloudDelay)
@@ -96,7 +95,6 @@ namespace CocosSharpMathGame
                 {
                     var cloud = new Cloud(currentPosition, currentCCRotation, CloudColor, ReferenceSize, CloudLifeTime);
                     clouds.Add(cloud);
-                    cloudAdded = true;
                 }
             }
             else

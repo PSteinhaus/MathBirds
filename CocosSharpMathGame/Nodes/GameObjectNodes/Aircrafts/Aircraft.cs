@@ -15,6 +15,27 @@ namespace CocosSharpMathGame
     {
         protected FlightPathControlNode FlightPathControlNode { get; set; }
         protected CloudTailNode CloudTailNode { get; set; } = new CloudTailNode();
+        internal Team Team { get; set; }
+        private AI ai;
+        internal AI AI {
+            get { return ai; }
+            set
+            {
+                ai = value;
+                if (ai != null)
+                    ai.Aircraft = this;
+            }
+        }
+        private bool controlledByPlayer = false;
+        internal bool ControlledByPlayer { 
+            get { return controlledByPlayer; }
+            set
+            {
+                controlledByPlayer = value;
+                if (!controlledByPlayer)
+                    FlightPathControlNode.Visible = false;
+            }
+        }
         /// <summary>
         /// DEBUG
         /// This drawnode draws the manveuver polygon (if IsManeuverPolygonDrawn == true)
@@ -119,11 +140,23 @@ namespace CocosSharpMathGame
         internal Aircraft() : base()
         {
             FlightPathControlNode = new FlightPathControlNode(this);
+            ControlledByPlayer = false;
             // DEBUG
             AddChild(maneuverPolygonDrawNode);
             maneuverPolygonDrawNode.AnchorPoint = CCPoint.AnchorLowerLeft;
             maneuverPolygonDrawNode.Scale = 1 / Constants.STANDARD_SCALE;
             IsManeuverPolygonDrawn = false;
+        }
+
+        internal void TryToSetFlightPathHeadTo(CCPoint position)
+        {
+            FlightPathControlNode.MoveHeadToClosestPointInsideManeuverPolygon(position);
+        }
+
+        internal void ChangeColor(CCColor3B newColor)
+        {
+            foreach (var part in TotalParts)
+                part.Color = newColor;
         }
 
         protected override void AddedToScene()
@@ -160,7 +193,19 @@ namespace CocosSharpMathGame
         internal void PrepareForPlanningPhase()
         {
             FlightPathControlNode.ResetHeadPosition();
-            FlightPathControlNode.Visible = true;
+            if (AI != null)
+                AI.ActInPlanningPhase(AircraftsInLevel());
+            if (ControlledByPlayer)
+                FlightPathControlNode.Visible = true;
+        }
+
+        internal IEnumerable<Aircraft> AircraftsInLevel()
+        {
+            var playLayer = (Layer as PlayLayer);
+            if (playLayer != null)
+                return playLayer.Aircrafts;
+            else
+                return null;
         }
     }
 }

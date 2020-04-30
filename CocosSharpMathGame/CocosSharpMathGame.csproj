@@ -138,10 +138,13 @@
     <Compile Include="Constants.cs" />
     <Compile Include="CocosSharpMathGame.cs" />
     <Compile Include="Interfaces\IGameObject.cs" />
+    <Compile Include="Internals\AI\AI.cs" />
+    <Compile Include="Internals\AI\StandardAI.cs" />
     <Compile Include="Internals\ArrayUtil.cs" />
     <Compile Include="Internals\CubicSpline.cs" />
     <Compile Include="Internals\Polygon.cs" />
     <Compile Include="Internals\PolygonWithSplines.cs" />
+    <Compile Include="Internals\Team.cs" />
     <Compile Include="Internals\TriDiagonalMatrix.cs" />
     <Compile Include="Layers\GUILayer.cs" />
     <Compile Include="Layers\PlayLayer.cs" />

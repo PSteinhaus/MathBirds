@@ -15,7 +15,7 @@ namespace CocosSharpMathGame
         public GUILayer GUILayer { get; set; }
         private MathSprite mathSprite1 = new MathSprite("(a+b)*((x))");
         private CCDrawNode drawNode = new CCDrawNode();
-        private List<Aircraft> Aircrafts { get; set; } = new List<Aircraft>();
+        internal List<Aircraft> Aircrafts { get; set; } = new List<Aircraft>();
         private TestAircraft testAircraft;
         private CCPoint cameraPosition = new CCPoint(0,0);
         private CCPoint CameraPosition
@@ -69,10 +69,32 @@ namespace CocosSharpMathGame
             Schedule();
             var bounds = VisibleBoundsWorldspace;
             testAircraft = new TestAircraft();
+            var playerTeam = new Team();
+            testAircraft.Team = playerTeam;
+            testAircraft.ControlledByPlayer = true;
             AddAircraft(testAircraft);
             testAircraft.MoveBy(bounds.Size.Width / 2, bounds.Size.Height / 4);
             testAircraft.RotateBy(-90f);
-            testAircraft.PrepareForPlanningPhase();
+
+            // add two other planes from different teams
+            var secondAircraft = new TestAircraft();
+            secondAircraft.Team = new Team();
+            secondAircraft.ChangeColor(CCColor3B.Blue);
+            var ai1 = new StandardAI();
+            secondAircraft.AI = ai1;
+            AddAircraft(secondAircraft);
+            secondAircraft.MoveBy(bounds.Size.Width / 5, bounds.Size.Height * 0.9f);
+            secondAircraft.RotateBy(60f);
+
+            var thirdAircraft = new TestAircraft();
+            thirdAircraft.Team = new Team();
+            thirdAircraft.ChangeColor(CCColor3B.Red);
+            var ai2 = new StandardAI();
+            thirdAircraft.AI = ai2;
+            AddAircraft(thirdAircraft);
+            thirdAircraft.MoveBy(bounds.Size.Width * 1.2f, bounds.Size.Height * 0.1f);
+            thirdAircraft.RotateBy(-20f);
+
             StartPlanningPhase();
 
             //ExecuteOrdersButton.Position = new CCPoint(bounds.MinX+ExecuteOrdersButton.ScaledContentSize.Width, bounds.MaxY- ExecuteOrdersButton.ScaledContentSize.Height);

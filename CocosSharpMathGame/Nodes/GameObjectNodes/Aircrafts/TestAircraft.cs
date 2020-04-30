@@ -18,7 +18,7 @@ namespace CocosSharpMathGame
             wings = new TestWings();
             Body.MountPart(wings);
 
-            /*
+            
             // lets create some maneuver polygon
             var d = ScaledContentSize.Width*1.5f; // use some relative length as measure
             var controlPoints = new CCPoint[]
@@ -30,12 +30,13 @@ namespace CocosSharpMathGame
             maneuverPolygon.ConstructPolygon();
             // turn it 90 degrees because 0° means EAST now...
             maneuverPolygon.RotateBy(90f);
-            */
+            /*
             // now let's try a MASSIVE polygon, allowing the plane to move almost anywhere
             var d = ScaledContentSize.Width * 1.5f; // use some relative length as measure
             var controlPoints = new CCPoint[]
             { new CCPoint(-10*d, -10*d), new CCPoint(-10*d, 10*d), new CCPoint(10*d, 10*d), new CCPoint(10*d, -10*d) };
             var maneuverPolygon = new PolygonWithSplines(controlPoints);
+            */
             
             UpdateManeuverPolygonToThis(maneuverPolygon);
             // this is a test plane so I want to see the polygon too
