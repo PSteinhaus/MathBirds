@@ -67,6 +67,23 @@ namespace CocosSharpMathGame
         }
 
         /// <summary>
+        /// Scale the Polygon, relative to the PivotPoint.
+        /// </summary>
+        /// <param name="scale"></param>
+        internal void Scale(float scale)
+        {
+            for (int i=0; i<Points.Length; i++)
+            {
+                // get the point as vector relative to the pivot point
+                CCPoint relativePoint = new CCPoint(PivotPoint.X - Points[i].X, PivotPoint.Y - Points[i].Y);
+                // scale it
+                CCPoint newRelativePoint = new CCPoint(relativePoint.X * scale, relativePoint.Y * scale);
+                // reassign it the scaled point as the new point
+                Points[i] = new CCPoint(PivotPoint.X + newRelativePoint.X, PivotPoint.Y + newRelativePoint.Y);
+            }
+        }
+
+        /// <summary>
         /// Returns the closest point that is still inside the polygon
         /// </summary>
         internal CCPoint ClosestTo(CCPoint point)

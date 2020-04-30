@@ -60,6 +60,21 @@
     <Reference Include="CocosSharp, Version=1.6.2.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\CocosSharp.PCL.Shared.1.6.2.0\lib\net40\CocosSharp.dll</HintPath>
     </Reference>
+    <Reference Include="CSharpMath, Version=0.4.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\CSharpMath.0.4.2\lib\netstandard2.0\CSharpMath.dll</HintPath>
+    </Reference>
+    <Reference Include="CSharpMath.Editor, Version=0.4.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\CSharpMath.Editor.0.4.2\lib\netstandard2.0\CSharpMath.Editor.dll</HintPath>
+    </Reference>
+    <Reference Include="CSharpMath.Forms, Version=0.4.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\CSharpMath.Forms.0.4.2\lib\netstandard2.0\CSharpMath.Forms.dll</HintPath>
+    </Reference>
+    <Reference Include="CSharpMath.Rendering, Version=0.4.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\CSharpMath.Rendering.0.4.2\lib\netstandard2.0\CSharpMath.Rendering.dll</HintPath>
+    </Reference>
+    <Reference Include="CSharpMath.SkiaSharp, Version=0.4.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\CSharpMath.SkiaSharp.0.4.2\lib\netstandard2.0\CSharpMath.SkiaSharp.dll</HintPath>
+    </Reference>
     <Reference Include="Lidgren.Network, Version=2012.1.7.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\CocosSharp.PCL.Shared.1.6.2.0\lib\net40\Lidgren.Network.dll</HintPath>
     </Reference>
@@ -96,7 +111,23 @@
     <Reference Include="SharpDX.XInput, Version=2.6.3.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
       <HintPath>..\packages\CocosSharp.PCL.Shared.1.6.2.0\lib\net40\SharpDX.XInput.dll</HintPath>
     </Reference>
+    <Reference Include="SkiaSharp, Version=1.68.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
+      <HintPath>..\packages\SkiaSharp.1.68.2-preview.60\lib\net462\SkiaSharp.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Memory, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Memory.4.5.4\lib\net461\System.Memory.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.6.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.7.1\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="Xamarin.Forms.Core, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Xamarin.Forms.4.5.0.657\lib\netstandard2.0\Xamarin.Forms.Core.dll</HintPath>
@@ -144,8 +175,12 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\Xamarin.Forms.4.5.0.657\build\Xamarin.Forms.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Xamarin.Forms.4.5.0.657\build\Xamarin.Forms.props'))" />
     <Error Condition="!Exists('..\packages\Xamarin.Forms.4.5.0.657\build\Xamarin.Forms.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Xamarin.Forms.4.5.0.657\build\Xamarin.Forms.targets'))" />
+    <Error Condition="!Exists('..\packages\SkiaSharp.1.68.2-preview.60\build\net462\SkiaSharp.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\SkiaSharp.1.68.2-preview.60\build\net462\SkiaSharp.targets'))" />
+    <Error Condition="!Exists('..\packages\SkiaSharp.Views.Forms.1.68.2-preview.60\build\net45\SkiaSharp.Views.Forms.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\SkiaSharp.Views.Forms.1.68.2-preview.60\build\net45\SkiaSharp.Views.Forms.targets'))" />
   </Target>
   <Import Project="..\packages\Xamarin.Forms.4.5.0.657\build\Xamarin.Forms.targets" Condition="Exists('..\packages\Xamarin.Forms.4.5.0.657\build\Xamarin.Forms.targets')" />
+  <Import Project="..\packages\SkiaSharp.1.68.2-preview.60\build\net462\SkiaSharp.targets" Condition="Exists('..\packages\SkiaSharp.1.68.2-preview.60\build\net462\SkiaSharp.targets')" />
+  <Import Project="..\packages\SkiaSharp.Views.Forms.1.68.2-preview.60\build\net45\SkiaSharp.Views.Forms.targets" Condition="Exists('..\packages\SkiaSharp.Views.Forms.1.68.2-preview.60\build\net45\SkiaSharp.Views.Forms.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

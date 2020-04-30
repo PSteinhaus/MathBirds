@@ -120,6 +120,21 @@
     <PackageReference Include="CocosSharp.Forms">
       <Version>1.7.1</Version>
     </PackageReference>
+    <PackageReference Include="CSharpMath">
+      <Version>0.4.2</Version>
+    </PackageReference>
+    <PackageReference Include="CSharpMath.Editor">
+      <Version>0.4.2</Version>
+    </PackageReference>
+    <PackageReference Include="CSharpMath.Forms">
+      <Version>0.4.2</Version>
+    </PackageReference>
+    <PackageReference Include="CSharpMath.Rendering">
+      <Version>0.4.2</Version>
+    </PackageReference>
+    <PackageReference Include="CSharpMath.SkiaSharp">
+      <Version>0.4.2</Version>
+    </PackageReference>
     <PackageReference Include="MathNet.Symbolics">
       <Version>0.20.0</Version>
     </PackageReference>
@@ -128,6 +143,15 @@
     </PackageReference>
     <PackageReference Include="SkiaSharp.Views.Forms">
       <Version>1.68.2-preview.60</Version>
+    </PackageReference>
+    <PackageReference Include="System.Buffers">
+      <Version>4.5.1</Version>
+    </PackageReference>
+    <PackageReference Include="System.Memory">
+      <Version>4.5.4</Version>
+    </PackageReference>
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe">
+      <Version>4.7.1</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.Forms">
       <Version>4.5.0.657</Version>

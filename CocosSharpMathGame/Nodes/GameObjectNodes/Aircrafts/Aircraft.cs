@@ -14,6 +14,7 @@ namespace CocosSharpMathGame
     internal abstract class Aircraft : GameObjectNode, ICollidable
     {
         protected FlightPathControlNode FlightPathControlNode { get; set; }
+        protected CloudTailNode CloudTailNode { get; set; } = new CloudTailNode();
         /// <summary>
         /// DEBUG
         /// This drawnode draws the manveuver polygon (if IsManeuverPolygonDrawn == true)
@@ -107,6 +108,8 @@ namespace CocosSharpMathGame
         {
             // first make the controls invisible
             FlightPathControlNode.Visible = false;
+            // advance the cloud tail lifecycle
+            CloudTailNode.Advance(dt, Position, MyRotation);
             // for now all aircrafts can do is follow their flight path
             // advance dt seconds on the path
             bool finished = FlightPathControlNode.Advanche(dt);
@@ -128,13 +131,16 @@ namespace CocosSharpMathGame
             base.AddedToScene();
             // DrawNodes have no Size, therefore we need to position them correctly at the center of the node
             maneuverPolygonDrawNode.Position = new CCPoint(ContentSize.Width/2, ContentSize.Height / 2);
-            // add the FlightPathControlNode as a brother
-            Parent.AddChild(FlightPathControlNode);
+            // add the FlightPathControlNode as a brother below you
+            Parent.AddChild(FlightPathControlNode, ZOrder - 1);
+            // add the CloudTailNode as a brother below you
+            Parent.AddChild(CloudTailNode, ZOrder - 2);
         }
         internal void PrepareForRemoval()
         {
-            // remove your brother (FlightPathControlNode)
+            // remove your brothers (FlightPathControlNode & CloudTailNode)
             Parent.RemoveChild(FlightPathControlNode);
+            Parent.RemoveChild(CloudTailNode);
         }
 
         /// <summary>

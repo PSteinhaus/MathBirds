@@ -149,6 +149,7 @@
     <Compile Include="MathChallenges\MathChallenge.cs" />
     <Compile Include="MathChallenges\MathToTexture.cs" />
     <Compile Include="Nodes\GameObjectNodes\Aircrafts\Aircraft.cs" />
+    <Compile Include="Nodes\GameObjectNodes\Aircrafts\CloudTailNode.cs" />
     <Compile Include="Nodes\GameObjectNodes\Aircrafts\FlightPathControlNode.cs" />
     <Compile Include="Nodes\GameObjectNodes\Aircrafts\FlightPathNode.cs" />
     <Compile Include="Nodes\GameObjectNodes\Aircrafts\TestAircraft.cs" />

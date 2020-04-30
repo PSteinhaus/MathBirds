@@ -16,7 +16,7 @@ namespace CocosSharpMathGame
     {
         private const int POINTS_PER_PATH = 800;
         internal CCColor4B LineColor { get; set; } = CCColor4B.White;
-        internal float LineWidth { get; set; } = 4f;
+        internal float LineWidth { get; set; } = 3f;
         internal CCPoint[] Path { get; private set; }
         internal float PathLength { get; private set; } = 0f;
         /// <summary>
@@ -79,8 +79,6 @@ namespace CocosSharpMathGame
             float x = (np - ns) / ((startSlopeDy / startSlopeDx) - mp);
             float y = mp * x + np;
             // finally, as the special curvature point calculate the midpoint between the start-end-midpoint and intersection point
-            //float curvaturePointX = (midpoint.X + x) / 2;
-            //float curvaturePointY = (midpoint.Y + y) / 2;
             float curvaturePointX = midpoint.X + ((x - midpoint.X) / 3f);
             float curvaturePointY = midpoint.Y + ((y - midpoint.Y) / 3f);
             // ADDITIONAL PROCESS FOR REFINING THIS FURTHER:
@@ -186,6 +184,7 @@ namespace CocosSharpMathGame
             float absoluteXAdvancement = absoluteAdvancementToNextPoint * (float)Math.Cos(directionToNextPointInRadians);
             float absoluteYAdvancement = absoluteAdvancementToNextPoint * (float)Math.Sin(directionToNextPointInRadians);
             CCPoint currentPosition = new CCPoint(Path[currentIndex].X + absoluteXAdvancement, Path[currentIndex].Y + absoluteYAdvancement);
+            CCPoint startPosition = currentPosition;
             // try to advance from the current position to the next point on the Path
             float distanceToNextPoint = Constants.DistanceBetween(currentPosition, Path[currentIndex + 1]); //DistanceSquared(ref Path[currentIndex + 1]);
             while (distanceToNextPoint < distance)
@@ -218,6 +217,7 @@ namespace CocosSharpMathGame
                 destination = Path[currentIndex];
                 CCfinalDirection = DirectionAt(currentIndex);
             }
+            //
         }
 
         /// <summary>
