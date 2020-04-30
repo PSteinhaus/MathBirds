@@ -241,20 +241,46 @@ namespace CocosSharpMathGame
 
         void OnTouchesMoved(List<CCTouch> touches, CCEvent touchEvent)
         {
-            if (touches.Count > 0)
+            switch (touches.Count)
             {
-                var touch = touches[0];
-                var xDif = touch.Location.X - touch.PreviousLocation.X;
-                var yDif = touch.Location.Y - touch.PreviousLocation.Y;
-                CameraPosition = new CCPoint(CameraPosition.X - xDif, CameraPosition.Y - yDif);
-                UpdateCamera();
-                //var touch = touches[0];
-                //var startLoc = touch.StartLocation;
-                //Console.WriteLine(startLoc);
-                //if (testAircraft.BoundingBoxTransformedToWorld.ContainsPoint(startLoc))
-                //    drawNode.Visible = false;
-                //if (testAircraft.ManeuverPolygon.ContainsPoint(startLoc))
-                //   testAircraft.IsManeuverPolygonDrawn = false;
+                case 1:
+                    {
+                        var touch = touches[0];
+                        var xDif = touch.Location.X - touch.PreviousLocation.X;
+                        var yDif = touch.Location.Y - touch.PreviousLocation.Y;
+                        CameraPosition = new CCPoint(CameraPosition.X - xDif, CameraPosition.Y - yDif);
+                        UpdateCamera();
+                        //var touch = touches[0];
+                        //var startLoc = touch.StartLocation;
+                        //Console.WriteLine(startLoc);
+                        //if (testAircraft.BoundingBoxTransformedToWorld.ContainsPoint(startLoc))
+                        //    drawNode.Visible = false;
+                        //if (testAircraft.ManeuverPolygon.ContainsPoint(startLoc))
+                        //   testAircraft.IsManeuverPolygonDrawn = false;
+                    }
+                    break;
+                case 2:
+                    {
+                        // check for zoom
+                        var touch1 = touches[0];
+                        var touch2 = touches[1];
+                        float zoomFactor = MyTouchExtensions.GetZoom(touch1, touch2);
+                        if (!float.IsNaN(zoomFactor))
+                        {
+                            var oldCameraSize = new CCSize(CameraSize.Width, CameraSize.Height);
+                            CameraSize = new CCSize(oldCameraSize.Width * zoomFactor, oldCameraSize.Height * zoomFactor);
+                            float dw = CameraSize.Width - oldCameraSize.Width;
+                            float dh = CameraSize.Height - oldCameraSize.Height;
+                            CCPoint touchCenter = new CCPoint((touch1.Location.X + touch2.Location.X) / 2, (touch1.Location.Y + touch2.Location.Y) / 2);
+                            float relativeX = (touchCenter.X - CameraPosition.X) / oldCameraSize.Width;
+                            float relativeY = (touchCenter.Y - CameraPosition.Y) / oldCameraSize.Height;
+                            CameraPosition = new CCPoint(CameraPosition.X - dw * relativeX, CameraPosition.Y - dh * relativeY);
+                            UpdateCamera();
+                        }
+                    }
+                    break;
+                default:
+                    break;
             }
         }
 
