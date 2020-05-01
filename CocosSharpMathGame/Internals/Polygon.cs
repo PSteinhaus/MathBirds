@@ -108,40 +108,56 @@ namespace CocosSharpMathGame
             int j = Points.Length - 1;
             for (int i = 0; i < Points.Length; i++)
             {
-                float m = (Points[i].Y - Points[j].Y) / (Points[i].X - Points[j].X);
+                if (Points[i].Equals(Points[j])) continue;
+                float iX = Points[i].X;
+                float iY = Points[i].Y;
+                float jX = Points[j].X;
+                float jY = Points[j].Y;
+                // edge cases: make sure there are no infinities
+                if (iX == jX)
+                    iX += 0.01f;   // fudge the coordinates a little
+                else if (iY == jY)
+                    iY += 0.01f;
+                float m = (iY - jY) / (iX - jX);
                 // solve y = mx + n
-                float n = Points[i].Y - m * Points[i].X;
+                float n = iY - m * iX;
                 // solve point.Y = mp*point.X + np      (the p in mp and np stands for "perpendicular")
                 // for np
+                Console.WriteLine("m: " + m);
                 float mp = -1 / m;  // perpendicular slope
+                Console.WriteLine("mp: " + mp);
                 float np = point.Y - mp * point.X;
+                Console.WriteLine("np: " + np);
                 // solve  m*x + n = mp*x + np   for x
                 // m*x - mp*x = np - n
                 // x*(m - mp) = np - n
+                Console.WriteLine("(m - mp): " + (m - mp));
+                Console.WriteLine("(np - n): " + (np - n));
                 float x = (np - n) / (m - mp);
                 float y = m * x + n;
+                Console.WriteLine("(x,y): " + x+","+y);
                 // if this intersection point lies on the polygon boundary it is a quasi-closest-point
                 // to check this simply check whether the rectangle created by the two points of the polygon contains the intersection point
                 float smallerX, smallerY, largerX, largerY;
-                if (Points[i].X < Points[j].X)
+                if (iX < jX)
                 {
-                    smallerX = Points[i].X;
-                    largerX  = Points[j].X;
+                    smallerX = iX;
+                    largerX  = jX;
                 }
                 else
                 {
-                    smallerX = Points[j].X;
-                    largerX  = Points[i].X;
+                    smallerX = jX;
+                    largerX  = iX;
                 }
-                if (Points[i].Y < Points[j].Y)
+                if (iY < jY)
                 {
-                    smallerY = Points[i].Y;
-                    largerY  = Points[j].Y;
+                    smallerY = iY;
+                    largerY  = jY;
                 }
                 else
                 {
-                    smallerY = Points[j].Y;
-                    largerY  = Points[i].Y;
+                    smallerY = jY;
+                    largerY  = iY;
                 }
                 if (smallerX < x && x <= largerX && smallerY < y && y <= largerY)
                     quasiClosestPoints.Add(new CCPoint(x, y));

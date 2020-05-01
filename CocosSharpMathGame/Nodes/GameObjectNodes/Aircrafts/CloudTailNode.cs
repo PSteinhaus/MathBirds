@@ -60,9 +60,10 @@ namespace CocosSharpMathGame
                 Polygon.Scale(scale);
                 // adapt the color (fade over time)
                 byte value = (lifePercentage <= 0.5) ? (byte)255 : (byte)(255f * 2 * (1 - lifePercentage));
-                Color.R = value;
-                Color.G = value;
-                Color.B = value;
+                Color.A = value; 
+                //Color.R = value;
+                //Color.G = value;
+                //Color.B = value;
             }
         }
         internal float CloudDelay { get; set; } = 0.2f;
@@ -73,7 +74,7 @@ namespace CocosSharpMathGame
         private List<Cloud> clouds = new List<Cloud>();
         internal CloudTailNode() : base()
         {
-            BlendFunc = CCBlendFunc.Additive;
+            BlendFunc = CCBlendFunc.NonPremultiplied;   // necessary for alpha to be respected
         }
 
         /// <summary>

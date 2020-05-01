@@ -60,6 +60,11 @@ namespace CocosSharpMathGame
             touchListener.OnTouchesMoved = OnTouchesMoved;
             touchListener.OnTouchesEnded = OnTouchesEnded;
             AddEventListener(touchListener, this);
+
+            // add a mouse listener
+            var mouseListener = new CCEventListenerMouse();
+            mouseListener.OnMouseScroll = OnMouseScroll;
+            AddEventListener(mouseListener, this);
         }
 
         protected override void AddedToScene()
@@ -78,8 +83,9 @@ namespace CocosSharpMathGame
 
             // add two other planes from different teams
             var secondAircraft = new TestAircraft();
-            secondAircraft.Team = new Team();
-            secondAircraft.ChangeColor(CCColor3B.Blue);
+            var secondTeam = new Team();
+            secondAircraft.Team = secondTeam;
+            secondAircraft.ChangeColor(CCColor3B.Red);
             var ai1 = new StandardAI();
             secondAircraft.AI = ai1;
             AddAircraft(secondAircraft);
@@ -87,7 +93,7 @@ namespace CocosSharpMathGame
             secondAircraft.RotateBy(60f);
 
             var thirdAircraft = new TestAircraft();
-            thirdAircraft.Team = new Team();
+            thirdAircraft.Team = secondTeam;
             thirdAircraft.ChangeColor(CCColor3B.Red);
             var ai2 = new StandardAI();
             thirdAircraft.AI = ai2;
@@ -264,7 +270,7 @@ namespace CocosSharpMathGame
                         // check for zoom
                         var touch1 = touches[0];
                         var touch2 = touches[1];
-                        float zoomFactor = MyTouchExtensions.GetZoom(touch1, touch2);
+                        float zoomFactor = 1.5f * MyTouchExtensions.GetZoom(touch1, touch2);
                         if (!float.IsNaN(zoomFactor))
                         {
                             var oldCameraSize = new CCSize(CameraSize.Width, CameraSize.Height);
@@ -292,6 +298,21 @@ namespace CocosSharpMathGame
                 //testAircraft.IsManeuverPolygonDrawn = true;
                 //Console.WriteLine("Released: "+touches[0].Location.ToString());
             }
+        }
+
+        private void OnMouseScroll(CCEventMouse mouseEvent)
+        {
+            // also enable zooming with mouse
+            var oldCameraSize = new CCSize(CameraSize.Width, CameraSize.Height);
+            var zoomFactor = mouseEvent.ScrollY > 0 ? mouseEvent.ScrollY / 100 : - 1/(mouseEvent.ScrollY / 100);
+            CameraSize = new CCSize(oldCameraSize.Width * zoomFactor, oldCameraSize.Height * zoomFactor);
+            float dw = CameraSize.Width - oldCameraSize.Width;
+            float dh = CameraSize.Height - oldCameraSize.Height;
+            //CCPoint scrollCenter = mouseEvent.Cursor;
+            //float relativeX = (scrollCenter.X - CameraPosition.X) / oldCameraSize.Width;
+            //float relativeY = (scrollCenter.Y - CameraPosition.Y) / oldCameraSize.Height;
+            CameraPosition = new CCPoint(CameraPosition.X - dw * 0.5f, CameraPosition.Y - dh * 0.5f);
+            UpdateCamera();
         }
     }
 }
