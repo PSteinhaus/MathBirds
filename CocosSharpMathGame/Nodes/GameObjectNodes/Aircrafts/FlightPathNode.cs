@@ -15,6 +15,10 @@ namespace CocosSharpMathGame
     internal class FlightPathNode : CCDrawNode
     {
         private const int POINTS_PER_PATH = 800;
+        /// <summary>
+        /// Divide the POINTS_PER_PATH by this number and only draw so many lines.
+        /// </summary>
+        private const int DRAWING_QUOTIENT = 16;
         internal CCColor4B LineColor { get; set; } = CCColor4B.White;
         internal float LineWidth { get; set; } = 3f;
         internal CCPoint[] Path { get; private set; }
@@ -147,15 +151,18 @@ namespace CocosSharpMathGame
             Path = newPath;
             // draw it properly
             Clear();
-            for (int i = 0; i < Path.Length - 1; i++)
-            {
-                DrawLine(Path[i], Path[i + 1], LineWidth, LineColor, CCLineCap.Round);
-            }
+            // don't draw all the points, a portion of it is enough
+            int k = 0;
+            for (; k < Path.Length - 1 - DRAWING_QUOTIENT; k+=DRAWING_QUOTIENT)
+                DrawLine(Path[k], Path[k + DRAWING_QUOTIENT], LineWidth, LineColor, CCLineCap.Round);
+            // make sure the last point is hit
+            if (k != Path.Length - 2)
+                DrawLine(Path[k], Path[Path.Length - 1], LineWidth, LineColor, CCLineCap.Round);
             // calculate and update the PathLength
             var pathLength = 0f;
             for (int i=0; i<Path.Length-1; i++)
             {
-                pathLength += Constants.DistanceBetween(Path[i], Path[i + 1]); //Path[i].DistanceSquared(ref Path[i + 1]);
+                pathLength += Constants.DistanceBetween(Path[i], Path[i + 1]);
             }
             PathLength = pathLength;
             // reset the advancement to 0
