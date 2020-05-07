@@ -18,6 +18,20 @@
 				<string>{16,19}</string>
 			</dict>
 
+			<key>testEngine.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{0,26},{5,3}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false/>
+				<key>sourceColorRect</key>
+				<string>{{0,0},{5,3}}</string>
+				<key>sourceSize</key>
+				<string>{5,3}</string>
+			</dict>
+
 			<key>testWings.png</key>
 			<dict>
 				<key>frame</key>

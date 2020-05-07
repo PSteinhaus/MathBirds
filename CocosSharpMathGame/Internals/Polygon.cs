@@ -123,19 +123,19 @@ namespace CocosSharpMathGame
                 float n = iY - m * iX;
                 // solve point.Y = mp*point.X + np      (the p in mp and np stands for "perpendicular")
                 // for np
-                Console.WriteLine("m: " + m);
+                //Console.WriteLine("m: " + m);
                 float mp = -1 / m;  // perpendicular slope
-                Console.WriteLine("mp: " + mp);
+                //Console.WriteLine("mp: " + mp);
                 float np = point.Y - mp * point.X;
-                Console.WriteLine("np: " + np);
+                //Console.WriteLine("np: " + np);
                 // solve  m*x + n = mp*x + np   for x
                 // m*x - mp*x = np - n
                 // x*(m - mp) = np - n
-                Console.WriteLine("(m - mp): " + (m - mp));
-                Console.WriteLine("(np - n): " + (np - n));
+                //Console.WriteLine("(m - mp): " + (m - mp));
+                //Console.WriteLine("(np - n): " + (np - n));
                 float x = (np - n) / (m - mp);
                 float y = m * x + n;
-                Console.WriteLine("(x,y): " + x+","+y);
+                //Console.WriteLine("(x,y): " + x+","+y);
                 // if this intersection point lies on the polygon boundary it is a quasi-closest-point
                 // to check this simply check whether the rectangle created by the two points of the polygon contains the intersection point
                 float smallerX, smallerY, largerX, largerY;
@@ -215,7 +215,6 @@ namespace CocosSharpMathGame
         {
             var clonePoints = new CCPoint[Points.Length];
             Array.Copy(Points, clonePoints, Points.Length);
-            this.Clone();
             return new Polygon(clonePoints);
         }
         /// <summary>

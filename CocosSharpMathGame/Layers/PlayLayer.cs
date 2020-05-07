@@ -80,7 +80,7 @@ namespace CocosSharpMathGame
             AddAircraft(testAircraft);
             testAircraft.MoveBy(bounds.Size.Width / 2, bounds.Size.Height / 4);
             testAircraft.RotateBy(-90f);
-
+            /*
             // add two other planes from different teams
             var secondAircraft = new TestAircraft();
             var secondTeam = new Team();
@@ -100,6 +100,7 @@ namespace CocosSharpMathGame
             AddAircraft(thirdAircraft);
             thirdAircraft.MoveBy(bounds.Size.Width * 1.2f, bounds.Size.Height * 0.1f);
             thirdAircraft.RotateBy(-20f);
+            */
 
             StartPlanningPhase();
 
@@ -112,7 +113,7 @@ namespace CocosSharpMathGame
             //testAircraft.wings.ZOrder = -1;
             //Console.WriteLine("ZOrder Parent now: " + testAircraft.ZOrder);
             //Console.WriteLine("ZOrder now: " + testAircraft.wings.ZOrder);
-            //drawNode.DrawRect(testAircraft.BoundingBoxTransformedToWorld, CCColor4B.Green);
+            drawNode.DrawRect(testAircraft.BoundingBoxTransformedToWorld, CCColor4B.Green);
             //drawNode.DrawSolidCircle( bounds.Center, 50, CCColor4B.Red);
             //drawNode.DrawSolidCircle(testAircraft.Position, 60, CCColor4B.Blue);
             //Console.WriteLine("Bounds: "+testAircraft.BoundingBoxTransformedToWorld);

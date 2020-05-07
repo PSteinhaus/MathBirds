@@ -13,11 +13,18 @@ namespace CocosSharpMathGame
         internal TestWings wings;
         internal TestAircraft() : base()
         {
+            IsManeuverPolygonDrawn = true;
             Body = new TestBody();
             // mount the wings
             wings = new TestWings();
             Body.MountPart(wings);
-
+            // give the wings some engines
+            wings.MountPart(new TestEngine());
+            wings.MountPart(new TestEngine());
+            Body.MountPart(new TestEngineStrong());
+            /*
+            foreach (var part in TotalParts)
+                Console.WriteLine("Part bounding box: "+part.BoundingBoxTransformedToParent);
 
             // lets create some maneuver polygon
             var d = ScaledContentSize.Width * 0.5f; // use some relative length as measure
@@ -34,6 +41,7 @@ namespace CocosSharpMathGame
             var maneuverPolygon = new PolygonWithSplines(controlPoints);
             maneuverPolygon.SpecifySpline(1, 5, 25);
             maneuverPolygon.ConstructPolygon();
+            */
             /*
             var controlPoints = new CCPoint[]
             { new CCPoint(2*d, 3*d), new CCPoint(0, 3.5f*d), new CCPoint(-2*d, 3*d),
@@ -53,7 +61,7 @@ namespace CocosSharpMathGame
             var maneuverPolygon = new PolygonWithSplines(controlPoints);
             */
 
-            UpdateManeuverPolygonToThis(maneuverPolygon);
+            //UpdateManeuverPolygonToThis(maneuverPolygon);
             // this is a test plane so I want to see the polygon too
             //IsManeuverPolygonDrawn = true;
 

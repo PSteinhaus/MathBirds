@@ -163,9 +163,13 @@
     <Compile Include="Scenes\PlayScene.cs" />
     <Compile Include="Sprites\GameObjectSprite.cs" />
     <Compile Include="Sprites\MathSprite.cs" />
+    <Compile Include="Sprites\Parts\ManeuverAbility.cs" />
+    <Compile Include="Sprites\Parts\MassPoint.cs" />
     <Compile Include="Sprites\Parts\PartMount.cs" />
     <Compile Include="Sprites\Parts\Part.cs" />
     <Compile Include="Sprites\Parts\TestBody.cs" />
+    <Compile Include="Sprites\Parts\TestEngineStrong.cs" />
+    <Compile Include="Sprites\Parts\TestEngine.cs" />
     <Compile Include="Sprites\Parts\TestWings.cs" />
     <Compile Include="Sprites\UI\Button.cs" />
     <Compile Include="Sprites\UI\CircleButton.cs" />

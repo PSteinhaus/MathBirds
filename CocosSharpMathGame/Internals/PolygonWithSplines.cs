@@ -74,6 +74,20 @@ namespace CocosSharpMathGame
             // also update the Control Polygon
             RotatePointsBy(ControlPoints, PivotPoint, degree);
         }
+
+        public new object Clone()
+        {
+            var clonePoints = new CCPoint[Points.Length];
+            var cloneControlPoints = new CCPoint[ControlPoints.Length];
+            var cloneSplineControl = new int[SplineControl.Length];
+            Array.Copy(Points, clonePoints, Points.Length);
+            Array.Copy(ControlPoints, cloneControlPoints, ControlPoints.Length);
+            Array.Copy(SplineControl, cloneSplineControl, SplineControl.Length);
+            var clone = new PolygonWithSplines(cloneControlPoints, cloneSplineControl);
+            clone.Points = clonePoints;
+            return clone;
+        }
+
         internal void ConstructPolygon()
         {
             List<CCPoint> newPoints = new List<CCPoint>();

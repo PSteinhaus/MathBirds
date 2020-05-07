@@ -101,14 +101,14 @@ namespace CocosSharpMathGame
                 float scalarProduct = CCPoint.Dot(new CCPoint(startSlopeDx, startSlopeDy), CCPoint.Normalize(new CCPoint(endPosition.X - startPosition.X, endPosition.Y - startPosition.Y)));
                 // the larger this product, the less curvature
                 curveFactor = 1 - scalarProduct;
-                Console.WriteLine("CurveVector: " + curveVector);
-                Console.WriteLine("CurveFactor: " + curveFactor);
-                Console.WriteLine("Distance: " + CCPoint.Distance(startPosition, midpoint));
+                //Console.WriteLine("CurveVector: " + curveVector);
+                //Console.WriteLine("CurveFactor: " + curveFactor);
+                //Console.WriteLine("Distance: " + CCPoint.Distance(startPosition, midpoint));
                 // now calculate the curvature point
                 curvaturePointX = midpoint.X + curveVector.X * curveFactor * (1.3f-0.8f* magicDistanceFactor) * halfDistance * (curveFactor > 1 ? -1 : 1);
                 curvaturePointY = midpoint.Y + curveVector.Y * curveFactor * (1.3f-0.8f* magicDistanceFactor) * halfDistance * (curveFactor > 1 ? -1 : 1);
-                Console.WriteLine("Midpoint: " + midpoint);
-                Console.WriteLine("CurvaturePoint: " + curvaturePointX + "," + curvaturePointY);
+                //Console.WriteLine("Midpoint: " + midpoint);
+                //Console.WriteLine("CurvaturePoint: " + curvaturePointX + "," + curvaturePointY);
             }
             float[] xValues, yValues;
             magicDistanceFactor = halfDistance / 900f;
