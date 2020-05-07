@@ -173,19 +173,13 @@ namespace CocosSharpMathGame
             MomentOfInertia = Body.MomentOfInertia;
 
             // change the AnchorPoint to the center of mass
-            /*
             var oldAnchor = AnchorPoint;
             AnchorPoint = new CCPoint(CenterOfMass.X / ContentSize.Width, CenterOfMass.Y / ContentSize.Height);
             // account for the movement of the anchor
             float dx = (AnchorPoint.X * ContentSize.Width)  - (oldAnchor.X * ContentSize.Width);
             float dy = (AnchorPoint.Y * ContentSize.Height) - (oldAnchor.Y * ContentSize.Height);
-            foreach (var part in totalParts)
-            {
-                part.PositionX += dx;
-                part.PositionY += dy;
-                Console.WriteLine("PartsChanged: " + part.PosLeftLower);
-            }
-            */
+            PositionX += dx;
+            PositionY += dy;
 
             // recalculate the maneuver polygon
             CalculateManeuverPolygon();

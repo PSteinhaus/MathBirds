@@ -57,6 +57,80 @@ namespace CocosSharpMathGame
         }
         internal void CalculatePath(CCPoint startPosition, float startSlopeDx, float startSlopeDy, CCPoint endPosition, float endSlopeDx = float.NaN, float endSlopeDy = float.NaN)
         {
+            List<CCPoint> pathPoints = new List<CCPoint>();
+
+            // ALTERNATIVE METHOD:
+            // create a path that is a circular arc
+            // for this 1. find the rotational center
+            // 2. rotate the start point towards the end point around the rotational center, step by step, and add these points to the path
+
+            // SPECIAL CASE: the path is a straight line
+            CCPoint normalizedVectorStartEnd = CCPoint.Normalize(endPosition - startPosition);
+            const float DELTA = 0.01f;
+            if (CCPoint.Distance(normalizedVectorStartEnd, new CCPoint(startSlopeDx, startSlopeDy)) < DELTA)
+            {
+                var xValues = new float[] { startPosition.X, (endPosition.X + startPosition.X) / 2, endPosition.X };
+                var yValues = new float[] { startPosition.Y, (endPosition.Y + startPosition.Y) / 2, endPosition.Y };
+                CubicSpline.FitParametric(xValues, yValues, POINTS_PER_PATH, out float[] pathX, out float[] pathY);
+                for (int i=0; i<pathX.Length; i++)
+                {
+                    pathPoints.Add(new CCPoint(pathX[i], pathY[i]));
+                }
+            }
+            else
+            {
+                // 1.1 solve yStart = -1/(dy/dx) * xStart + n  for n (line through start perpendicular to the start direction)
+                // 1.2 get the midpoint between start and end
+                // 1.3 solve yMid = -1/((endY-startY)/(endX-startX)) * xMid + n2  for n2 (line through midpoint perpendicular to the line from start to end)
+                // 1.4 solve -1/(dy/dx) * x + n = -1/((endY-startY)/(endX-startX)) * x + n2  for x (intersection of the previous two lines, aka "the rotational center") 
+
+                // 1.1
+                // yStart = - dx/dy * xStart + n
+                // yStart + dx/dy * xStart = n
+                float n = startPosition.Y + (startSlopeDx / startSlopeDy) * startPosition.X;
+                // 1.2
+                CCPoint midPoint = (endPosition + startPosition) / 2;
+                // 1.3
+                // yMid + ((endX-startX)/(endY-startY)) * xMid = n2
+                float n2 = midPoint.Y + ((endPosition.X - startPosition.X) / (endPosition.Y - startPosition.Y)) * midPoint.X;
+                // 1.4
+                // - dx/dy * x + n = - ((endX-startX)/(endY-startY)) * x + n2
+                // - dx/dy * x + ((endX-startX)/(endY-startY)) * x = n2 - n
+                // x = (n2 - n) / ((dx/dy) - ((endX-startX)/(endY-startY)))
+                float xRotCenter = (n2 - n) / (((endPosition.X - startPosition.X) / (endPosition.Y - startPosition.Y)) - (startSlopeDx / startSlopeDy));
+                float yRotCenter = -(startSlopeDx / startSlopeDy) * xRotCenter + n;
+                CCPoint rotationPoint = new CCPoint(xRotCenter, yRotCenter);
+
+                // 2.1 find out whether to rotate left or right
+                // for that rotate the start-direction-vector by 90° and by -90° and check which rotated vector is closer to the rotation point 
+                CCPoint rotatedLeft = CCPoint.RotateByAngle(new CCPoint(startSlopeDx, startSlopeDy), CCPoint.Zero, (float)Math.PI / 2) + startPosition;
+                CCPoint rotatedRight = CCPoint.RotateByAngle(new CCPoint(startSlopeDx, startSlopeDy), CCPoint.Zero, -(float)Math.PI / 2) + startPosition;
+                float angleSign;
+                if (CCPoint.Distance(rotatedLeft, rotationPoint) < CCPoint.Distance(rotatedRight, rotationPoint))
+                {
+                    // the rotation point is on your left, so rotate to the left
+                    angleSign = 1;
+                }
+                else
+                {
+                    // the rotation point is on your right, so rotate to the right
+                    angleSign = -1;
+                }
+                CCPoint pathPoint = startPosition;
+                pathPoints.Add(pathPoint);
+                float radius = CCPoint.Distance(rotationPoint, startPosition);
+                float dAlpha = 4f / radius;
+                float STOP_DISTANCE = ((radius * (float)Math.PI) / ((float)Math.PI / dAlpha)) * 2;
+                while (CCPoint.Distance(pathPoint, endPosition) > STOP_DISTANCE)
+                {
+                    // rotate the path point a little towards the end position
+                    pathPoint = CCPoint.RotateByAngle(pathPoint, rotationPoint, dAlpha * angleSign);
+                    pathPoints.Add(pathPoint);
+                }
+                pathPoints.Add(endPosition);
+            }
+
+            /*
             // calculate a spline
             // as the first point of the input-path add a new point
             // this point realises the start slope
@@ -149,6 +223,9 @@ namespace CocosSharpMathGame
                 newPath[i] = new CCPoint(pathX[i], pathY[i]);
             }
             Path = newPath;
+            */
+
+            Path = pathPoints.ToArray();
             // draw it properly
             Clear();
             // don't draw all the points, a portion of it is enough
