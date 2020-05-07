@@ -79,7 +79,7 @@ namespace CocosSharpMathGame
             testAircraft.ControlledByPlayer = true;
             AddAircraft(testAircraft);
             testAircraft.MoveBy(bounds.Size.Width / 2, bounds.Size.Height / 4);
-            testAircraft.RotateBy(-90f);
+            testAircraft.RotateBy(-180f);
             /*
             // add two other planes from different teams
             var secondAircraft = new TestAircraft();

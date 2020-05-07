@@ -58,6 +58,13 @@ namespace CocosSharpMathGame
         internal void CalculatePath(CCPoint startPosition, float startSlopeDx, float startSlopeDy, CCPoint endPosition, float endSlopeDx = float.NaN, float endSlopeDy = float.NaN)
         {
             List<CCPoint> pathPoints = new List<CCPoint>();
+            // fixes for numerical problems
+            if (startSlopeDx < 0.0001 && 0 < startSlopeDx) startSlopeDx = 0.001f;
+            if (startSlopeDx > -0.0001 && 0 > startSlopeDx) startSlopeDx = -0.001f;
+            if (startSlopeDy < 0.0001 && 0 < startSlopeDy) startSlopeDy = 0.001f;
+            if (startSlopeDy > -0.0001 && 0 > startSlopeDy) startSlopeDy = -0.001f;
+            if (startSlopeDx == 0) startSlopeDx = 0.001f;
+            if (startSlopeDy == 0) startSlopeDy = 0.001f;
 
             // ALTERNATIVE METHOD:
             // create a path that is a circular arc
@@ -119,7 +126,7 @@ namespace CocosSharpMathGame
                 CCPoint pathPoint = startPosition;
                 pathPoints.Add(pathPoint);
                 float radius = CCPoint.Distance(rotationPoint, startPosition);
-                float dAlpha = 4f / radius;
+                float dAlpha = 3f / radius;
                 float STOP_DISTANCE = ((radius * (float)Math.PI) / ((float)Math.PI / dAlpha)) * 2;
                 while (CCPoint.Distance(pathPoint, endPosition) > STOP_DISTANCE)
                 {
