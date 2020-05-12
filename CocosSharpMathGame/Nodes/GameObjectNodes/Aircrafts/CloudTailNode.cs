@@ -66,7 +66,7 @@ namespace CocosSharpMathGame
                 //Color.B = value;
             }
         }
-        internal float CloudDelay { get; set; } = 0.2f;
+        internal float CloudDelay { get; set; } = 0.3f;
         internal float CloudLifeTime { get; set; } = 2.5f;
         internal CCColor4B CloudColor { get; set; } = CCColor4B.White;
         internal float ReferenceSize { get; set; } = 22f;
