@@ -141,6 +141,7 @@
     <Compile Include="Internals\AI\AI.cs" />
     <Compile Include="Internals\AI\StandardAI.cs" />
     <Compile Include="Internals\ArrayUtil.cs" />
+    <Compile Include="Internals\Collisions.cs" />
     <Compile Include="Internals\CubicSpline.cs" />
     <Compile Include="Internals\Polygon.cs" />
     <Compile Include="Internals\PolygonWithSplines.cs" />
@@ -158,7 +159,7 @@
     <Compile Include="Nodes\GameObjectNodes\Aircrafts\FlightPathNode.cs" />
     <Compile Include="Nodes\GameObjectNodes\Aircrafts\TestAircraft.cs" />
     <Compile Include="Nodes\GameObjectNodes\GameObjectNode.cs" />
-    <Compile Include="Interfaces\ICollidable.cs" />
+    <Compile Include="Interfaces\ICollidible.cs" />
     <Compile Include="Pages\MainPage.cs" />
     <Compile Include="Scenes\PlayScene.cs" />
     <Compile Include="Sprites\GameObjectSprite.cs" />
@@ -171,6 +172,8 @@
     <Compile Include="Sprites\Parts\TestEngineStrong.cs" />
     <Compile Include="Sprites\Parts\TestEngine.cs" />
     <Compile Include="Sprites\Parts\TestWings.cs" />
+    <Compile Include="Sprites\Parts\WeaponAbility.cs" />
+    <Compile Include="Sprites\Projectiles\Projectile.cs" />
     <Compile Include="Sprites\UI\Button.cs" />
     <Compile Include="Sprites\UI\CircleButton.cs" />
     <Compile Include="Sprites\UI\ExecuteOrdersButton.cs" />

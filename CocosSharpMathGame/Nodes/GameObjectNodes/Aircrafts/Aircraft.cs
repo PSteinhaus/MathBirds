@@ -11,8 +11,9 @@ namespace CocosSharpMathGame
     /// Aircrafts are objects in the sky that are assembled from parts
     /// which react to collision
     /// </summary>
-    internal abstract class Aircraft : GameObjectNode, ICollidable
+    internal abstract class Aircraft : GameObjectNode, ICollidible
     {
+        public CollisionType CollisionType { get; set; } = new CollisionTypeBoundingBox();
         /// <summary>
         /// the minimal velocity that any aircraft needs to have to not fall out of the sky
         /// </summary>

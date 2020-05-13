@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CocosSharp;
+using Microsoft.Xna.Framework;
 
 namespace CocosSharpMathGame
 {
@@ -64,6 +65,14 @@ namespace CocosSharpMathGame
         {
             MoveBy(dx, dy);
             RotateBy(degree);
+        }
+
+        internal void TransformAccordingToGameObject(IGameObject gameObject)
+        {
+            Scale(gameObject.GetScale());
+            RotateBy(gameObject.MyRotation);
+            CCPoint pos = ((CCNode)gameObject).PositionWorldspace;
+            MoveBy(pos.X, pos.Y);
         }
 
         /// <summary>

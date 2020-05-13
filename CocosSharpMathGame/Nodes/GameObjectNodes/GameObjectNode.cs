@@ -10,7 +10,7 @@ namespace CocosSharpMathGame
     /// <summary>
     /// All visible objects in the sky that aren't Sprites are GameObjectNodes (maybe excluding effects like shots or shields)
     /// </summary>
-    internal class GameObjectNode : CCNode, IGameObject
+    internal abstract class GameObjectNode : CCNode, IGameObject
     {
         // 0 is considered EAST; rotation is clockwise
         private float myRotation = 0;
@@ -25,6 +25,11 @@ namespace CocosSharpMathGame
                 myRotation = value % 360;
                 Rotation = myRotation;  // set the "actual" rotation to match
             }
+        }
+
+        public float GetScale()
+        {
+            return ScaledContentSize.Width / ContentSize.Width;
         }
         internal GameObjectNode()
         {

@@ -71,5 +71,15 @@ namespace CocosSharpMathGame
             return (float)Math.Sqrt( (point2.X - point1.X) * (point2.X - point1.X) +
                                (point2.Y - point1.Y) * (point2.Y - point1.Y) );
         }
+
+        public static CCPoint[] CCRectPoints(CCRect ccRect)
+        {
+            var points = new CCPoint[4];
+            points[0] = ccRect.LowerLeft;
+            points[1] = new CCPoint(ccRect.MinX, ccRect.MaxY);
+            points[2] = ccRect.UpperRight;
+            points[3] = new CCPoint(ccRect.MaxX, ccRect.MinY);
+            return points;
+        }
     }
 }

@@ -13,5 +13,6 @@ namespace CocosSharpMathGame
     internal interface IGameObject
     {
         float MyRotation { get; set; }
+        float GetScale();
     }
 }
