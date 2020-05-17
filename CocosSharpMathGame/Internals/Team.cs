@@ -9,5 +9,9 @@ namespace CocosSharpMathGame
 {
     internal class Team
     {
+        internal bool IsEnemy(Team team)
+        {
+            return team != this;
+        }
     }
 }

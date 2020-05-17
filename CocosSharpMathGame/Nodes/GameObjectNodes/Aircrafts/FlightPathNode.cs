@@ -265,10 +265,10 @@ namespace CocosSharpMathGame
             Clear();
             // don't draw all the points, a portion of it is enough
             int k = 0;
-            for (; k < Path.Length - 1 - DRAWING_QUOTIENT; k+=DRAWING_QUOTIENT)
+            for (; k < Path.Length - DRAWING_QUOTIENT; k += DRAWING_QUOTIENT)
                 DrawLine(Path[k], Path[k + DRAWING_QUOTIENT], LineWidth, LineColor, CCLineCap.Round);
             // make sure the last point is hit
-            if (k != Path.Length - 2)
+            if (k != Path.Length - 1 - DRAWING_QUOTIENT)
                 DrawLine(Path[k], Path[Path.Length - 1], LineWidth, LineColor, CCLineCap.Round);
             // calculate and update the PathLength
             var pathLength = 0f;

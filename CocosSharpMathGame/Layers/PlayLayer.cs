@@ -16,6 +16,7 @@ namespace CocosSharpMathGame
         private MathSprite mathSprite1 = new MathSprite("(a+b)*((x))");
         private CCDrawNode drawNode = new CCDrawNode();
         internal List<Aircraft> Aircrafts { get; set; } = new List<Aircraft>();
+        internal List<Projectile> Projectiles { get; set; } = new List<Projectile>();
         private TestAircraft testAircraft;
         private CCPoint cameraPosition = new CCPoint(0,0);
         private CCPoint CameraPosition
@@ -191,6 +192,18 @@ namespace CocosSharpMathGame
             Aircrafts.Remove(aircraft);
             aircraft.PrepareForRemoval();
             RemoveChild(aircraft);
+        }
+
+        internal void AddProjectile(Projectile projectile)
+        {
+            Projectiles.Add(projectile);
+            AddChild(projectile);
+        }
+        internal void RemoveProjectile(Projectile projectile)
+        {
+            Projectiles.Remove(projectile);
+            projectile.PrepareForRemoval();
+            RemoveChild(projectile);
         }
 
         internal void ExecuteOrders()

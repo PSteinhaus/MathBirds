@@ -13,6 +13,8 @@ namespace CocosSharpMathGame
     internal interface IGameObject
     {
         float MyRotation { get; set; }
+        float TotalRotation { get; }
+        void RotateTowards(float angle, float maxRotationAngle);
         float GetScale();
     }
 }

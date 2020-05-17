@@ -25,6 +25,11 @@ namespace CocosSharpMathGame
         }
     }
 
+    /// <summary>
+    /// WARNING: Collisions with polygons are not solved exactly. A exact solution would make it necessary to calculate m*n line intersections.
+    /// Instead we calculate for m points whether the point is inside the other polygon.
+    /// Still, polygon collisions are very costly.
+    /// </summary>
     internal class CollisionTypePolygon : CollisionType
     {
         /// <summary>
@@ -34,6 +39,16 @@ namespace CocosSharpMathGame
         internal CollisionTypePolygon(Polygon collisionPolygon)
         {
             this.collisionPolygon = collisionPolygon;
+        }
+    }
+
+    internal class CollisionTypeLine : CollisionType
+    {
+        internal CCPoint StartPoint, EndPoint;
+        internal CollisionTypeLine(CCPoint startPoint, CCPoint endPoint)
+        {
+            StartPoint = startPoint;
+            EndPoint = endPoint;
         }
     }
 
@@ -50,6 +65,8 @@ namespace CocosSharpMathGame
                 // check cType2
                 if (cType2 is CollisionTypePosition)
                     return CollidePositionPosition(collidible1, collidible2);
+                else if (cType2 is CollisionTypeLine)
+                    return CollidePositionLine(collidible1, cType2 as CollisionTypeLine);
                 else if (cType2 is CollisionTypePolygon)
                     return CollidePositionPolygon(collidible1, collidible2, cType2 as CollisionTypePolygon);
                 else if (cType2 is CollisionTypeBoundingBox)
@@ -62,6 +79,8 @@ namespace CocosSharpMathGame
                 // check cType2
                 if (cType2 is CollisionTypePosition)
                     return CollidePositionBoundingBox(collidible2, collidible1);
+                else if (cType2 is CollisionTypeLine)
+                    return CollideBoundingBoxLine(collidible1, cType2 as CollisionTypeLine);
                 else if (cType2 is CollisionTypePolygon)
                     return CollideBoundingBoxPolygon(collidible1, collidible2, cType2 as CollisionTypePolygon);
                 else if (cType2 is CollisionTypeBoundingBox)
@@ -74,6 +93,8 @@ namespace CocosSharpMathGame
                 // check cType2
                 if (cType2 is CollisionTypePosition)
                     return CollidePositionCircle(collidible2, collidible1, cType1 as CollisionTypeCircle);
+                else if (cType2 is CollisionTypeLine)
+                    return CollideCircleLine(collidible1, (CollisionTypeCircle)cType1, (CollisionTypeLine)cType2);
                 else if (cType2 is CollisionTypePolygon)
                     return CollideCirclePolygon(collidible1, cType1 as CollisionTypeCircle, collidible2, cType2 as CollisionTypePolygon);
                 else if (cType2 is CollisionTypeBoundingBox)
@@ -86,12 +107,28 @@ namespace CocosSharpMathGame
                 // check cType2
                 if (cType2 is CollisionTypePosition)
                     return CollidePositionPolygon(collidible2, collidible1, cType1 as CollisionTypePolygon);
+                else if (cType2 is CollisionTypeLine)
+                    return CollidePolygonLine(collidible1, (CollisionTypePolygon)cType1, (CollisionTypeLine)cType2);
                 else if (cType2 is CollisionTypePolygon)
                     return CollidePolygonPolygon(collidible1, cType1 as CollisionTypePolygon, collidible2, cType2 as CollisionTypePolygon);
                 else if (cType2 is CollisionTypeBoundingBox)
                     return CollideBoundingBoxPolygon(collidible2, collidible1, cType1 as CollisionTypePolygon);
                 else if (cType2 is CollisionTypeCircle)
                     return CollideCirclePolygon(collidible2, cType2 as CollisionTypeCircle, collidible1, cType1 as CollisionTypePolygon);
+            }
+            else if (cType1 is CollisionTypeLine)
+            {
+                // check cType2
+                if (cType2 is CollisionTypePosition)
+                    return CollidePositionLine(collidible2, (CollisionTypeLine)cType1);
+                else if (cType2 is CollisionTypeLine)
+                    return CollideLineLine((CollisionTypeLine)cType1, (CollisionTypeLine)cType2);
+                else if (cType2 is CollisionTypePolygon)
+                    return CollidePolygonLine(collidible2, (CollisionTypePolygon)cType2, (CollisionTypeLine)cType1);
+                else if (cType2 is CollisionTypeBoundingBox)
+                    return CollideBoundingBoxLine(collidible2, (CollisionTypeLine)cType1);
+                else if (cType2 is CollisionTypeCircle)
+                    return CollideCircleLine(collidible2, (CollisionTypeCircle)cType2, (CollisionTypeLine)cType1);
             }
             return false;
         }
@@ -124,6 +161,12 @@ namespace CocosSharpMathGame
             return false;
         }
 
+        internal static bool CollidePositionLine(ICollidible posCollidible, CollisionTypeLine cTypeLine)
+        {
+            CCPoint pos = ((CCNode)posCollidible).PositionWorldspace;
+            return pos.Equals(cTypeLine.StartPoint) || pos.Equals(cTypeLine.EndPoint);
+        }
+
         internal static bool CollideBoundingBoxBoundingBox(ICollidible boxCollidible1, ICollidible boxCollidible2)
         {
             return ((CCNode)boxCollidible1).BoundingBoxTransformedToWorld.IntersectsRect(((CCNode)boxCollidible2).BoundingBoxTransformedToWorld);
@@ -131,12 +174,23 @@ namespace CocosSharpMathGame
 
         internal static bool CollideBoundingBoxCircle(ICollidible boxCollidible, ICollidible circleCollidible, CollisionTypeCircle cTypeCircle)
         {
-            CCRect box = ((CCNode)boxCollidible).BoundingBoxTransformedToWorld;
-            float radius = cTypeCircle.radius;
-            CCPoint pos = ((CCNode)circleCollidible).PositionWorldspace;
-            CCPoint[] boxPoints = Constants.CCRectPoints(box);
-            foreach (var point in boxPoints)
-                if (point.IsNear(pos, radius))
+            return CollideBoundingBoxCircle(((CCNode)boxCollidible).BoundingBoxTransformedToWorld, ((CCNode)circleCollidible).PositionWorldspace, cTypeCircle.radius);
+        }
+
+        internal static bool CollideBoundingBoxCircle(CCRect box, CCPoint circlePos, float radius)
+        {
+            // for peformance first approximate the box with a circle and check whether these two collide
+            // if they don't then the circle can't collide with the box either
+            float boxRadius = box.Size.Width > box.Size.Height ? box.Size.Width/2 : box.Size.Height/2;
+            if (!CollideCircleCircle(circlePos, radius, box.Center, boxRadius))
+                return false;
+            // check whether the circle center is inside the bounding box
+            if (box.ContainsPoint(circlePos)) return true;
+            // check if the circle collides with the lines of the box
+            var boxPoints = Constants.CCRectPoints(box);
+            int i, j;
+            for (i = 0, j = -1; i < 3; j = i++)
+                if (CollideCircleLine(circlePos, radius, boxPoints[i], boxPoints[j]))
                     return true;
             return false;
         }
@@ -154,6 +208,20 @@ namespace CocosSharpMathGame
                     if (transformedPolygon.ContainsPoint(point))
                         return true;
             }
+            return false;
+        }
+
+        internal static bool CollideBoundingBoxLine(ICollidible boxCollidible, CollisionTypeLine cTypeLine)
+        {
+            CCRect box = ((CCNode)boxCollidible).BoundingBoxTransformedToWorld;
+            // check whether the start or end point is contained in the box
+            if (box.ContainsPoint(cTypeLine.StartPoint) || box.ContainsPoint(cTypeLine.EndPoint))
+                return true;
+            // check for intersections of the line and the box boundaries
+            CCPoint[] boxPoints = Constants.CCRectPoints(box);
+            for (int i = 0; i < 3; i++)
+                if (CCPoint.SegmentIntersect(cTypeLine.StartPoint, cTypeLine.EndPoint, boxPoints[i], boxPoints[i + 1]))
+                    return true;
             return false;
         }
 
@@ -180,6 +248,29 @@ namespace CocosSharpMathGame
             return pos1.IsNear(pos2, radius1 + radius2);
         }
 
+        internal static bool CollideCircleCircle(CCPoint circlePos1, float radius1, CCPoint circlePos2, float radius2)
+        {
+            return circlePos1.IsNear(circlePos2, radius1 + radius2);
+        }
+
+        internal static bool CollideCircleLine(ICollidible circleCollidible1, CollisionTypeCircle cTypeCircle1, CollisionTypeLine cTypeLine)
+        {
+            // calculate the length of the perpendicular line from the line to the center of the circle
+            CCPoint vectorPerpToLine = CCPoint.PerpendicularCCW((cTypeLine.EndPoint - cTypeLine.StartPoint));
+            CCPoint vectorLineStartToCircle = ((CCNode)circleCollidible1).PositionWorldspace - cTypeLine.StartPoint;
+            float perpLength = (float)Math.Abs( CCPoint.Dot(vectorPerpToLine, vectorLineStartToCircle) / vectorPerpToLine.Length );
+            return perpLength <= cTypeCircle1.radius;
+        }
+
+        internal static bool CollideCircleLine(CCPoint circlePos, float radius, CCPoint LineStart, CCPoint LineEnd)
+        {
+            // calculate the length of the perpendicular line from the line to the center of the circle
+            CCPoint vectorPerpToLine = CCPoint.PerpendicularCCW((LineEnd - LineStart));
+            CCPoint vectorLineStartToCircle = circlePos - LineStart;
+            float perpLength = (float)Math.Abs(CCPoint.Dot(vectorPerpToLine, vectorLineStartToCircle) / vectorPerpToLine.Length);
+            return perpLength <= radius;
+        }
+
         internal static bool CollidePolygonPolygon(ICollidible polyCollidible1, CollisionTypePolygon cTypePoly1, ICollidible polyCollidible2, CollisionTypePolygon cTypePoly2)
         {
             // first check the bounding boxes of the polygons (for performance)
@@ -195,6 +286,32 @@ namespace CocosSharpMathGame
                         return true;
             }
             return false;
+        }
+
+        internal static bool CollidePolygonLine(ICollidible polyCollidible, CollisionTypePolygon cTypePoly, CollisionTypeLine cTypeLine)
+        {
+            // for performance reasons first check the bounding box
+            if (CollideBoundingBoxLine(polyCollidible, cTypeLine))
+            {
+                // transform the polygon to match the positioning, rotation and scale of the node
+                Polygon transformedPolygon = ((Polygon)cTypePoly.collisionPolygon.Clone());
+                transformedPolygon.TransformAccordingToGameObject(polyCollidible);
+                // first check if the polygon contains some of the two line points
+                if (transformedPolygon.ContainsPoint(cTypeLine.StartPoint) || transformedPolygon.ContainsPoint(cTypeLine.EndPoint))
+                    return true;
+                // solve exactly: check for line intersections
+                var polyPoints = transformedPolygon.Points;
+                int i, j;
+                for (i = 0, j = polyPoints.Length - 1; i < polyPoints.Length; j = i++)
+                    if (CCPoint.SegmentIntersect(cTypeLine.StartPoint, cTypeLine.EndPoint, polyPoints[i], polyPoints[j]))
+                        return true;
+            }
+            return false;
+        }
+
+        internal static bool CollideLineLine(CollisionTypeLine cTypeLine1, CollisionTypeLine cTypeLine2)
+        {
+            return CCPoint.SegmentIntersect(cTypeLine1.StartPoint, cTypeLine1.EndPoint, cTypeLine2.StartPoint, cTypeLine2.EndPoint);
         }
     }
 }

@@ -140,6 +140,7 @@ namespace CocosSharpMathGame
         {
             // update the ContentSize and move all parts to fit into it
             var oldContentSize = ContentSize;
+            TotalParts = Body.TotalParts;
             var totalParts = TotalParts;
             // go through the bounding boxes of all parts and get the new total dimensions
             float xMin = float.PositiveInfinity; float yMin = float.PositiveInfinity;
@@ -670,6 +671,8 @@ namespace CocosSharpMathGame
             RotateBy(direction - MyRotation);
         }
 
+        internal CCPoint VelocityVector { get; private protected set; }
+
         /// <summary>
         /// Execute your orders for dt seconds
         /// </summary>
@@ -682,8 +685,11 @@ namespace CocosSharpMathGame
             // advance the cloud tail lifecycle
             CloudTailNode.Advance(dt, Position, MyRotation);
             // for now all aircrafts can do is follow their flight path
+            // calculate the velocity
+            var oldPosition = Position;
             // advance dt seconds on the path
             bool finished = FlightPathControlNode.Advanche(dt);
+            VelocityVector = new CCPoint((PositionX - oldPosition.X) / dt, (PositionY - oldPosition.Y) / dt);
             return finished;
         }
 
@@ -730,12 +736,7 @@ namespace CocosSharpMathGame
         /// searches and returns all parts that this aircraft is made of
         /// starting at the body and then searching recursively
         /// </summary>
-        protected IEnumerable<Part> TotalParts {
-            get
-            {
-                return Body.TotalParts;
-            }
-        }
+        internal IEnumerable<Part> TotalParts { get; set; }
 
         /// <summary>
         /// Set into a state so that the planning phase can act properly on this aircraft

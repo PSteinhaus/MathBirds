@@ -3,12 +3,16 @@ using System;
 
 namespace CocosSharpMathGame
 {
+    /// <summary>
+    /// A class of various (math) helper functions.
+    /// </summary>
     public static class Constants
     {
         public const int COCOS_WORLD_WIDTH = 1080;
         public const int COCOS_WORLD_HEIGHT = 1920;
         public const float STANDARD_SCALE = 8;
         public const float TURN_DURATION = 3f;  // executing orders takes 3.5 seconds
+        public const float PI = (float)Math.PI;
 
         public static float DegreesToRadians(float degrees)
         {
@@ -61,6 +65,12 @@ namespace CocosSharpMathGame
             return -degrees;
         }
 
+        /// <summary>
+        /// Returns the angle as returned from Atan2 (in interval [-Pi,Pi])
+        /// </summary>
+        /// <param name="dx"></param>
+        /// <param name="dy"></param>
+        /// <returns></returns>
         public static float DxDyToRadians(float dx, float dy)
         {
             return (float)Math.Atan2(dy, dx);
@@ -80,6 +90,37 @@ namespace CocosSharpMathGame
             points[2] = ccRect.UpperRight;
             points[3] = new CCPoint(ccRect.MaxX, ccRect.MinY);
             return points;
+        }
+
+        public static float SpecialMod(float a, float n)
+        {
+            return (a % n + n) % n;
+        }
+
+        public static float AngleFromTo(float sourceA, float targetA)
+        {
+            var a = targetA - sourceA;
+            return SpecialMod(a + PI, 2*PI) - PI;
+        }
+
+        public static float AngleFromToDeg(float sourceA, float targetA)
+        {
+            var a = targetA - sourceA;
+            return SpecialMod(a + 180f, 360f) - 180f;
+        }
+
+        public static float AbsAngleDifference(float angle1, float angle2)
+        {
+            float difference1 = Math.Abs((angle1 - angle2) % (2*PI));
+            float difference2 = 2*PI - difference1;
+            return Math.Min(difference1, difference2);
+        }
+
+        public static float AbsAngleDifferenceDeg(float angle1, float angle2)
+        {
+            float difference1 = Math.Abs((angle1 - angle2) % 360f);
+            float difference2 = 360f - difference1;
+            return Math.Min(difference1, difference2);
         }
     }
 }

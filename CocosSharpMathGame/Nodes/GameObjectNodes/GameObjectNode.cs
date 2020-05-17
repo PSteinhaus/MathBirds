@@ -27,6 +27,27 @@ namespace CocosSharpMathGame
             }
         }
 
+        public float TotalRotation
+        {
+            get
+            {
+                var totalRotation = MyRotation;
+                if (Parent != null && Parent is IGameObject)
+                    totalRotation += ((IGameObject)Parent).TotalRotation;
+                return totalRotation;
+            }
+        }
+
+        public void RotateTowards(float angle, float maxRotationAngle)
+        {
+            float currentRotation = MyRotation;
+            float difference = Constants.AngleFromToDeg(currentRotation, angle);
+            if ((float)Math.Abs(difference) <= maxRotationAngle)
+                MyRotation = angle;
+            else
+                MyRotation += maxRotationAngle * Math.Sign(difference);
+        }
+
         public float GetScale()
         {
             return ScaledContentSize.Width / ContentSize.Width;

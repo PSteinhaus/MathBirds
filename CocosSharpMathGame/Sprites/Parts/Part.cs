@@ -14,6 +14,27 @@ namespace CocosSharpMathGame
     abstract internal class Part : GameObjectSprite
     {
         /// <summary>
+        /// The rotation this part starts at
+        /// </summary>
+        internal float NullRotation { get; set; }
+        internal float RotationFromNull
+        {
+            get
+            {
+                return Constants.AngleFromToDeg(NullRotation, MyRotation);
+            }
+        }
+        /// <summary>
+        /// Returns the Aircraft that this part belongs to (if any else null)
+        /// </summary>
+        internal Aircraft Aircraft
+        {
+            get
+            {
+                return Parent as Aircraft;
+            }
+        }
+        /// <summary>
         /// returns the position of this part relative to the aircraft;
         /// to be precise it is the difference between the left lower corner of the aircraft and the left lower corner of the part;
         /// </summary>
