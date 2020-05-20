@@ -71,11 +71,14 @@ namespace CocosSharpMathGame
         /// called by the Aircraft owning the part owning this WeaponAbility each frame
         /// </summary>
         /// <param name="dt">time since the previous frame</param>
-        internal void Update(float dt)
+        internal void ExecuteOrders(float dt)
         {
             // cool down
             CooldownUntilNextShot -= dt;
             if (CooldownUntilNextShot < 0) CooldownUntilNextShot = 0;
+            // collect aircrafts that are near enough to have parts which could be targets
+            // go through the parts of all of these planes and collect those that are in the attention angle
+            PartsInRange(out List<Part> partsInRange, out List<float> anglesFromTo, out List<float> distances);
             // if you have a target check if it is still in range
             if (TargetPart != null)
             {
@@ -86,38 +89,6 @@ namespace CocosSharpMathGame
             }
             if (TargetPart == null)     // if you currently do not aim at anything search for a target
             {
-                // collect aircrafts that are near enough to have parts which could be targets
-                List<Aircraft> aircraftsInRange = new List<Aircraft>();
-                foreach (var aircraft in ((PlayLayer)MyPart.Layer).Aircrafts)
-                {
-                    // check if it is considered an enemy
-                    if (!((Aircraft)MyPart.Parent).Team.IsEnemy(aircraft.Team))
-                        continue;
-                    // check if in attention range
-                    // for that first check if the circle defined by your part position and the attention radius collides with the bounding box of the aircraft
-                    if (Collisions.CollideBoundingBoxCircle(aircraft.BoundingBoxTransformedToWorld, MyPart.PositionWorldspace, AttentionRange))
-                        aircraftsInRange.Add(aircraft);
-                }
-                // go through the parts of all of these planes and collect those that are in the attention angle
-                List<Part> partsInRange = new List<Part>();
-                List<float> anglesFromTo = new List<float>();
-                List<float> distances = new List<float>();
-                foreach (var aircraft in aircraftsInRange)
-                {
-                    foreach (var part in aircraft.TotalParts)
-                    {
-                        CCPoint vectorMyPartPart = part.PositionWorldspace - MyPart.PositionWorldspace;
-                        float distance = vectorMyPartPart.Length;
-                        var angleFromTo = Constants.AngleFromToDeg(MyPart.TotalRotation - MyPart.RotationFromNull, Constants.DxDyToCCDegrees(vectorMyPartPart.X, vectorMyPartPart.Y));
-                        if (distance <= AttentionRange
-                            && (float)Math.Abs(angleFromTo) <= AttentionAngle)
-                        {
-                            partsInRange.Add(part);
-                            anglesFromTo.Add(Constants.AngleFromToDeg(MyPart.TotalRotation, Constants.DxDyToCCDegrees(vectorMyPartPart.X, vectorMyPartPart.Y)));
-                            distances.Add(distance);
-                        }
-                    }
-                }
                 // try to choose a part that is in reach
                 // choose the part that is closest anglewise
                 // but prioritize aircraft bodies:
@@ -161,14 +132,52 @@ namespace CocosSharpMathGame
             {
                 float angleToAimFor = AngleToAimFor();
                 MyPart.RotateTowards(angleToAimFor, TurningAnglePerSecond);
-                // if you're now close enough to the perfect angle start shooting
-                if (Constants.AbsAngleDifferenceDeg(angleToAimFor, MyPart.MyRotation) <= 5f)
+                // if you're now close enough to the perfect angle (and in range) start shooting
+                if (CanShoot() && CCPoint.Distance(MyPart.PositionWorldspace, TargetPart.PositionWorldspace) <= ShootingRange
+                    && (Constants.AbsAngleDifferenceDeg(angleToAimFor, MyPart.MyRotation) <= 5f || WouldHit()))
                     TryShoot();
             }
             // and if you have no target try to get back to NullRotation
             else
             {
                 MyPart.RotateTowards(MyPart.NullRotation, TurningAnglePerSecond);
+            }
+        }
+
+        internal void PartsInRange(out List<Part> partsInRange, out List<float> anglesFromTo, out List<float> distances)
+        {
+            // collect aircrafts that are near enough to have parts which could be targets
+            List<Aircraft> aircraftsInRange = new List<Aircraft>();
+            foreach (var aircraft in ((PlayLayer)MyPart.Layer).Aircrafts)
+            {
+                // check if it is considered an enemy
+                if (!((Aircraft)MyPart.Parent).Team.IsEnemy(aircraft.Team))
+                    continue;
+                // check if in attention arc
+                if (Collisions.CollideArcBoundingBox(MyPart.PositionWorldspace, AttentionRange, MyPart.TotalNullRotation, AttentionAngle, aircraft.BoundingBoxTransformedToWorld))
+                    aircraftsInRange.Add(aircraft);
+            }
+            partsInRange = new List<Part>();
+            anglesFromTo = new List<float>();
+            distances = new List<float>();
+            foreach (var aircraft in aircraftsInRange)
+            {
+                foreach (var part in aircraft.TotalParts)
+                {
+                    // using the position as criterium is a bit dirty and could be improved on by using the bounding box instead (at the cost of performance)
+                    CCPoint vectorMyPartPart = part.PositionWorldspace - MyPart.PositionWorldspace;
+                    float distance = vectorMyPartPart.Length;
+                    if (distance <= AttentionRange)
+                    {
+                        var angleFromTo = Constants.AngleFromToDeg(MyPart.TotalRotation - MyPart.RotationFromNull, Constants.DxDyToCCDegrees(vectorMyPartPart.X, vectorMyPartPart.Y));
+                        if ((float)Math.Abs(angleFromTo) <= AttentionAngle)
+                        {
+                            partsInRange.Add(part);
+                            anglesFromTo.Add(Constants.AngleFromToDeg(MyPart.TotalRotation, Constants.DxDyToCCDegrees(vectorMyPartPart.X, vectorMyPartPart.Y)));
+                            distances.Add(distance);
+                        }
+                    }
+                }
             }
         }
 
@@ -187,21 +196,30 @@ namespace CocosSharpMathGame
             // a) the intersection of the flight path and the bullet path
             // and b) the point where the target actually is going to be by then
             // of course we want to minimize this error, for this we will iterate
-            double angle = Constants.DxDyToRadians(-TargetToMyPart.X, -TargetToMyPart.Y);
-            double step = 0.2;
-            double delta;
-            int signDelta = -1;
-            int angleSign = Math.Sign(angle);
-            for (int i=0; i<10; i++) // iterate 10 times
+
+            // ALTERNATIVE ITERATION MATHOD USING THE BISECTION METHOD
+            double epsilon = 1;
+            double angle = 0;
+            // define the interval
+            double startAngle = Constants.DxDyToRadians(-TargetToMyPart.X, -TargetToMyPart.Y);
+            double endAngle = 0;
+            double deltaStart = TargetToMyPart.X - TargetToMyPart.Y / Math.Tan(startAngle) + (TargetToMyPart.Y * TargetAircraft.VelocityVector.Length) / (Math.Sin(startAngle) * ProjectileBlueprint.Velocity);
+            for (int i = 0; i < 6; i++) // iterate 6 times at max
             {
-                delta = TargetToMyPart.X - TargetToMyPart.Y / Math.Tan(angle) + (TargetToMyPart.Y * TargetAircraft.VelocityVector.Length) / (Math.Sin(angle) * ProjectileBlueprint.Velocity);
+                angle = (startAngle + endAngle) / 2;
+                double delta = TargetToMyPart.X - TargetToMyPart.Y / Math.Tan(angle) + (TargetToMyPart.Y * TargetAircraft.VelocityVector.Length) / (Math.Sin(angle) * ProjectileBlueprint.Velocity);
+                if (Math.Abs(delta) < epsilon)  // you're close enough so break already
+                    break;
                 // delta is negative when the bullet hits behind the part -> angle needs to be closer to 0
-                if (signDelta != Math.Sign(delta)) // each time the sign changes decrease the step size
+                if (Math.Sign(deltaStart) == Math.Sign(delta))
                 {
-                    step /= 2;
-                    signDelta = Math.Sign(delta);
+                    startAngle = angle;
+                    deltaStart = delta;
                 }
-                angle -= (delta < 0 ? angleSign : -angleSign) * step;
+                else
+                {
+                    endAngle = angle;
+                }
             }
             // subtract the transformation rotation to get the total angle
             float totalAngle = Constants.RadiansToCCDegrees((float)angle - transformationRotation);
@@ -209,9 +227,14 @@ namespace CocosSharpMathGame
             return Constants.AngleFromToDeg(((IGameObject)MyPart.Parent).TotalRotation, totalAngle);
         }
 
+        internal bool CanShoot()
+        {
+            return CooldownUntilNextShot <= 0;
+        }
+
         internal void TryShoot()
         {
-            if (CooldownUntilNextShot <= 0)
+            if (CanShoot())
             {
                 CooldownUntilNextShot = ShootDelay;
                 Projectile newProjectile = (Projectile)ProjectileBlueprint.Clone();
@@ -222,6 +245,22 @@ namespace CocosSharpMathGame
             
         }
 
+        /// <summary>
+        /// Check whether a bullet shot now would hit any parts of the TargetAircraft (if the TargetAircraft wouldn't move).
+        /// </summary>
+        /// <param name="partsInRange"></param>
+        /// <returns>whether the bullet would hit</returns>
+        internal bool WouldHit()
+        {
+            Constants.CCDegreesToDxDy(MyPart.TotalRotation, out float dx, out float dy);
+            CollisionTypeLine cTypeReachLine = new CollisionTypeLine(MyPart.PositionWorldspace, MyPart.PositionWorldspace + new CCPoint(dx * Reach, dy * Reach));
+            foreach (Part part in TargetAircraft.TotalParts)
+            {
+                if (Collisions.CollidePolygonLine(part, ((CollisionTypePolygon)part.CollisionType), cTypeReachLine))
+                    return true;
+            }
+            return false;
+        }
         internal WeaponAbility(Part myPart)
         {
             MyPart = myPart;

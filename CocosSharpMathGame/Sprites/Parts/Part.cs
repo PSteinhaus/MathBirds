@@ -11,8 +11,9 @@ namespace CocosSharpMathGame
     /// Parts are what Aircrafts are made of.
     /// They are visible.
     /// </summary>
-    abstract internal class Part : GameObjectSprite
+    abstract internal class Part : GameObjectSprite, ICollidible
     {
+        public CollisionType CollisionType { get; set; }
         /// <summary>
         /// The rotation this part starts at
         /// </summary>
@@ -22,6 +23,14 @@ namespace CocosSharpMathGame
             get
             {
                 return Constants.AngleFromToDeg(NullRotation, MyRotation);
+            }
+        }
+        // returns the TotalRotation that this part would have if it was in NullRotation
+        internal float TotalNullRotation
+        {
+            get
+            {
+                return TotalRotation - RotationFromNull;
             }
         }
         /// <summary>
@@ -49,6 +58,10 @@ namespace CocosSharpMathGame
         /// whether and how this part may actively contribute to the maneuverability of the aircraft
         /// </summary>
         internal ManeuverAbility ManeuverAbility { get; private protected set; } = null;
+        /// <summary>
+        /// whether and how this part can act as a weapon
+        /// </summary>
+        internal WeaponAbility WeaponAbility { get; private protected set; }
         /// <summary>
         /// Parts are physical objects. They have mass, distributed in space. This mass (and its distribution) is modeled here.
         /// The positions given here start at (0,0) (lower left corner of the part) and end at (ContentSize.Width, ContentSize.Height).
@@ -86,7 +99,7 @@ namespace CocosSharpMathGame
         /// </summary>
         internal enum Type
         {
-            BODY, SINGLE_WING, WINGS, WEAPON, ENGINE
+            BODY, SINGLE_WING, WINGS, WEAPON, ENGINE, GUN
         }
         internal Type[] Types { get; set; }
         /// <summary>
@@ -212,12 +225,12 @@ namespace CocosSharpMathGame
         /// <param name="part"></param>
         /// <param name="dz">the difference in ZOrder between the mounted part and this part</param>
         /// <returns>whether it was successfully mounted</returns>
-        internal bool MountPart (PartMount partMount, Part part, int dz = -1)
+        internal bool MountPart (PartMount partMount, Part part)
         {
             // check whether the PartMount is actually one of yours and proceed if true
             for (int i=0; i<PartMounts.Length; i++)
                 if (PartMounts[i].Equals(partMount))
-                    return MountPart(i, part, dz);
+                    return MountPart(i, part);
             return false;
         }
         /// <summary>
@@ -228,7 +241,7 @@ namespace CocosSharpMathGame
         /// <param name="part"></param>
         /// <param name="dz"></param>
         /// <returns></returns>
-        internal bool MountPart (int mountIndex, Part part, int dz = -1)
+        internal bool MountPart (int mountIndex, Part part)
         {
             bool mounted = false;
             // check the index
@@ -238,20 +251,41 @@ namespace CocosSharpMathGame
             // and tell it that you're its mount-parent now
             if (mounted)
             {
-                Parent.AddChild(part, zOrder: this.ZOrder + dz);
+                Parent.AddChild(part, zOrder: this.ZOrder + PartMounts[mountIndex].Dz);
                 part.MountParent = this;
                 (Parent as Aircraft).PartsChanged();
             }
             return mounted;
         }
 
-        internal bool MountPart (Part part, int dz = -1)
+        internal bool MountPart (Part part)
         {
             bool mounted = false;
             // try to mount the part somewhere and stop if you succeed
             for (int i=0; i<PartMounts.Length && mounted==false; i++)
-                mounted = MountPart(i, part, dz);
+                mounted = MountPart(i, part);
             return mounted;
+        }
+
+        internal void ExecuteOrders(float dt)
+        {
+            if (WeaponAbility != null)
+                WeaponAbility.ExecuteOrders(dt);
+            if (ManeuverAbility != null)
+                ManeuverAbility.ExecuteOrders(dt, PositionWorldspace, Aircraft.MyRotation);
+        }
+
+        internal void PrepareForRemoval()
+        {
+            if (ManeuverAbility != null)
+                ManeuverAbility.PrepareForRemoval(Aircraft);
+        }
+
+        protected override void AddedToScene()
+        {
+            base.AddedToScene();
+            if (ManeuverAbility != null)
+                Aircraft.Parent.AddChild(ManeuverAbility.CloudTailNode, zOrder: -999);
         }
     }
 }

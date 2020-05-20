@@ -19,7 +19,6 @@ namespace CocosSharpMathGame
         /// </summary>
         internal const float V_MIN = 0;
         protected FlightPathControlNode FlightPathControlNode { get; set; }
-        protected CloudTailNode CloudTailNode { get; set; } = new CloudTailNode();
         internal Team Team { get; set; }
         private AI ai;
         internal AI AI {
@@ -682,14 +681,15 @@ namespace CocosSharpMathGame
         {
             // first make the controls invisible
             FlightPathControlNode.Visible = false;
-            // advance the cloud tail lifecycle
-            CloudTailNode.Advance(dt, Position, MyRotation);
             // for now all aircrafts can do is follow their flight path
             // calculate the velocity
             var oldPosition = Position;
             // advance dt seconds on the path
             bool finished = FlightPathControlNode.Advanche(dt);
             VelocityVector = new CCPoint((PositionX - oldPosition.X) / dt, (PositionY - oldPosition.Y) / dt);
+            // let your parts act
+            foreach (var part in TotalParts)
+                part.ExecuteOrders(dt);
             return finished;
         }
 
@@ -722,14 +722,13 @@ namespace CocosSharpMathGame
             maneuverPolygonDrawNode.Position = new CCPoint(ContentSize.Width/2, ContentSize.Height / 2);
             // add the FlightPathControlNode as a brother below you
             Parent.AddChild(FlightPathControlNode, ZOrder - 1);
-            // add the CloudTailNode as a brother below you
-            Parent.AddChild(CloudTailNode, ZOrder - 2);
         }
         internal void PrepareForRemoval()
         {
             // remove your brothers (FlightPathControlNode & CloudTailNode)
             Parent.RemoveChild(FlightPathControlNode);
-            Parent.RemoveChild(CloudTailNode);
+            foreach (var part in TotalParts)
+                part.PrepareForRemoval();
         }
 
         /// <summary>

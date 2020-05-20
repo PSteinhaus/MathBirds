@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CocosSharp;
+using MathNet.Symbolics;
 
 namespace CocosSharpMathGame
 {
@@ -214,6 +215,16 @@ namespace CocosSharpMathGame
         internal static bool CollideBoundingBoxLine(ICollidible boxCollidible, CollisionTypeLine cTypeLine)
         {
             CCRect box = ((CCNode)boxCollidible).BoundingBoxTransformedToWorld;
+            float sx = cTypeLine.StartPoint.X;
+            float sy = cTypeLine.StartPoint.Y;
+            float ex = cTypeLine.EndPoint.X;
+            float ey = cTypeLine.EndPoint.Y;
+            // for performance first check whether both points of the line are outside and on one side of the box
+            if (   (sx < box.MinX && ex < box.MinX)
+                || (sx > box.MaxX && ex > box.MaxX)
+                || (sy < box.MinY && ey < box.MinY)
+                || (sy > box.MaxY && ey > box.MaxY))
+                return false;
             // check whether the start or end point is contained in the box
             if (box.ContainsPoint(cTypeLine.StartPoint) || box.ContainsPoint(cTypeLine.EndPoint))
                 return true;
@@ -225,6 +236,7 @@ namespace CocosSharpMathGame
             return false;
         }
 
+        // is dirty, as it only checks whether polygon points are contained in the circle, not whether polygon lines are crossed by it
         internal static bool CollideCirclePolygon(ICollidible circleCollidible, CollisionTypeCircle cTypeCircle, ICollidible polyCollidible, CollisionTypePolygon cTypePoly)
         {
             float radius = cTypeCircle.radius;
@@ -312,6 +324,31 @@ namespace CocosSharpMathGame
         internal static bool CollideLineLine(CollisionTypeLine cTypeLine1, CollisionTypeLine cTypeLine2)
         {
             return CCPoint.SegmentIntersect(cTypeLine1.StartPoint, cTypeLine1.EndPoint, cTypeLine2.StartPoint, cTypeLine2.EndPoint);
+        }
+
+        // dirty, because only the center of the bounding box + all points of the box are used to check the angle;
+        // this function is using CCDegrees
+        internal static bool CollideArcBoundingBox(CCPoint posCircle, float radius, float angleArcCenter, float angleHalfArcWidth, CCRect box)
+        {
+            if (CollideBoundingBoxCircle(box, posCircle,radius))
+            {
+                // check whether the center of the box is inside the arc
+                CCPoint vectorCirclePoint = box.Center - posCircle;
+                float anglePoint      = Constants.DxDyToCCDegrees(vectorCirclePoint.X, vectorCirclePoint.Y);
+                float angleDifference = Constants.AbsAngleDifferenceDeg(angleArcCenter, anglePoint);
+                if (angleDifference <= angleHalfArcWidth)
+                    return true;
+                // check whether a point of the box is inside the arc
+                foreach (CCPoint point in Constants.CCRectPoints(box))
+                {
+                    vectorCirclePoint = point - posCircle;
+                    anglePoint      = Constants.DxDyToCCDegrees(vectorCirclePoint.X, vectorCirclePoint.Y);
+                    angleDifference = Constants.AbsAngleDifferenceDeg(angleArcCenter, anglePoint);
+                    if (angleDifference <= angleHalfArcWidth)
+                        return true;
+                }
+            }
+            return false;
         }
     }
 }

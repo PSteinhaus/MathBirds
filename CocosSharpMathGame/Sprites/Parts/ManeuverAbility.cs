@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,6 +13,7 @@ namespace CocosSharpMathGame
     /// </summary>
     internal class ManeuverAbility
     {
+        internal CloudTailNode CloudTailNode { get; private protected set; } = new CloudTailNode();
         /// <summary>
         /// How much propellment this part can generate (per second)
         /// </summary>
@@ -36,6 +38,18 @@ namespace CocosSharpMathGame
             PowerMin = powerMin;
             RotationBonusMax = rotationBonusMax;
             RotationBonusMin = rotationBonusMin;
+        }
+
+        internal void PrepareForRemoval(Aircraft myAircraft)
+        {
+            // remove the cloud tail node
+            myAircraft.Parent.RemoveChild(CloudTailNode);
+        }
+
+        internal void ExecuteOrders(float dt, CCPoint position, float rotation)
+        {
+            // advance the cloud tail lifecycle 
+            CloudTailNode.Advance(dt, position, rotation);
         }
     }
 }

@@ -125,6 +125,7 @@ namespace CocosSharpMathGame
             {
                 if (cloud == null) continue;
                 var cloudPoly = cloud.Polygon;
+                Console.WriteLine("DRAWING CLOUD");
                 DrawPolygon(cloudPoly.Points, cloudPoly.Points.Length, cloud.Color, 0, CCColor4B.Transparent);
             }
         }

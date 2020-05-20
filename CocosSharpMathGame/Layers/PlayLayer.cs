@@ -206,9 +206,12 @@ namespace CocosSharpMathGame
             RemoveChild(projectile);
         }
 
+        private float TimeLeftExecutingOrders { get; set; }
+
         internal void ExecuteOrders()
         {
             State = GameState.EXECUTING_ORDERS;
+            TimeLeftExecutingOrders = Constants.TURN_DURATION;
         }
         internal void StartPlanningPhase()
         {
@@ -229,16 +232,15 @@ namespace CocosSharpMathGame
                     break;
                 case GameState.EXECUTING_ORDERS:
                     {
+                        TimeLeftExecutingOrders -= dt;
                         // DEBUG: Console.WriteLine("EXECUTING ORDERS; dt: " + dt);
                         // go through all aircrafts and let them execute their orders
-                        bool executionFinished = true;  // check if they are done
                         foreach (var aircraft in Aircrafts)
-                        {
-                            bool finished = aircraft.ExecuteOrders(dt);
-                            if (!finished) executionFinished = false;
-                        }
-                        // if all aircrafts have finished executing their orders now start the planning phase
-                        if (executionFinished)
+                            aircraft.ExecuteOrders(dt);
+                        // go through all projectiles and let them advance
+                        foreach (var projectile in Projectiles)
+                            projectile.Advance(dt);
+                        if (TimeLeftExecutingOrders <= 0)
                             StartPlanningPhase();
                     }
                     break;

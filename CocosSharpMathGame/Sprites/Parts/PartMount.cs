@@ -17,7 +17,9 @@ namespace CocosSharpMathGame
         /// the position is not yet scaled!
         /// </summary>
         internal CCPoint Position { get; set; }
+        internal int Dz { get; set; }
         internal Part MyPart { get; private set; }
+        internal float NullRotation { get; set; }
         internal Part.Type[] AllowedTypes { get; set; }
         /// <summary>
         /// the part that is mounted on this PartMount (if there is one)
@@ -29,6 +31,8 @@ namespace CocosSharpMathGame
             Position = position;
             AllowedTypes = allowedTypes;
             MountedPart = null;
+            NullRotation = 0;
+            Dz = -1;
         }
 
         /// <summary>
@@ -49,10 +53,10 @@ namespace CocosSharpMathGame
             {
                 MountedPart = part;
                 // make sure the part is actually at the position of the mount
-                // so also factor in the scaling
                 part.Position = MyPart.PosLeftLower + Position;
-                Console.WriteLine("MyPart Position: " + MyPart.Position);
-                Console.WriteLine("Mount: " + part.Position);
+                part.NullRotation = NullRotation;
+                //Console.WriteLine("MyPart Position: " + MyPart.Position);
+                //Console.WriteLine("Mount: " + part.Position);
                 return true;
             };
             return false;
