@@ -17,6 +17,9 @@ namespace CocosSharpMathGame
     internal class CollisionTypeBoundingBox : CollisionType
     { }
 
+    internal class CollisionTypeDiamond : CollisionType
+    { }
+
     internal class CollisionTypeCircle : CollisionType
     {
         internal float radius;
@@ -61,75 +64,83 @@ namespace CocosSharpMathGame
             CollisionType cType1 = collidible1.CollisionType;
             CollisionType cType2 = collidible2.CollisionType;
             // then call the appropriate funtion to compute the collision
-            if (cType1 is CollisionTypePosition)
+            switch (cType1)
             {
-                // check cType2
-                if (cType2 is CollisionTypePosition)
-                    return CollidePositionPosition(collidible1, collidible2);
-                else if (cType2 is CollisionTypeLine)
-                    return CollidePositionLine(collidible1, cType2 as CollisionTypeLine);
-                else if (cType2 is CollisionTypePolygon)
-                    return CollidePositionPolygon(collidible1, collidible2, cType2 as CollisionTypePolygon);
-                else if (cType2 is CollisionTypeBoundingBox)
-                    return CollidePositionBoundingBox(collidible1, collidible2);
-                else if (cType2 is CollisionTypeCircle)
-                    return CollidePositionCircle(collidible1, collidible2, cType2 as CollisionTypeCircle);
-            }
-            else if (cType1 is CollisionTypeBoundingBox)
-            {
-                // check cType2
-                if (cType2 is CollisionTypePosition)
-                    return CollidePositionBoundingBox(collidible2, collidible1);
-                else if (cType2 is CollisionTypeLine)
-                    return CollideBoundingBoxLine(collidible1, cType2 as CollisionTypeLine);
-                else if (cType2 is CollisionTypePolygon)
-                    return CollideBoundingBoxPolygon(collidible1, collidible2, cType2 as CollisionTypePolygon);
-                else if (cType2 is CollisionTypeBoundingBox)
-                    return CollideBoundingBoxBoundingBox(collidible1, collidible2);
-                else if (cType2 is CollisionTypeCircle)
-                    return CollideBoundingBoxCircle(collidible1, collidible2, cType2 as CollisionTypeCircle);
-            }
-            else if (cType1 is CollisionTypeCircle)
-            {
-                // check cType2
-                if (cType2 is CollisionTypePosition)
-                    return CollidePositionCircle(collidible2, collidible1, cType1 as CollisionTypeCircle);
-                else if (cType2 is CollisionTypeLine)
-                    return CollideCircleLine(collidible1, (CollisionTypeCircle)cType1, (CollisionTypeLine)cType2);
-                else if (cType2 is CollisionTypePolygon)
-                    return CollideCirclePolygon(collidible1, cType1 as CollisionTypeCircle, collidible2, cType2 as CollisionTypePolygon);
-                else if (cType2 is CollisionTypeBoundingBox)
-                    return CollideBoundingBoxCircle(collidible2, collidible1, cType1 as CollisionTypeCircle);
-                else if (cType2 is CollisionTypeCircle)
-                    return CollideCircleCircle(collidible1, cType1 as CollisionTypeCircle, collidible2, cType2 as CollisionTypeCircle);
-            }
-            else if (cType1 is CollisionTypePolygon)
-            {
-                // check cType2
-                if (cType2 is CollisionTypePosition)
-                    return CollidePositionPolygon(collidible2, collidible1, cType1 as CollisionTypePolygon);
-                else if (cType2 is CollisionTypeLine)
-                    return CollidePolygonLine(collidible1, (CollisionTypePolygon)cType1, (CollisionTypeLine)cType2);
-                else if (cType2 is CollisionTypePolygon)
-                    return CollidePolygonPolygon(collidible1, cType1 as CollisionTypePolygon, collidible2, cType2 as CollisionTypePolygon);
-                else if (cType2 is CollisionTypeBoundingBox)
-                    return CollideBoundingBoxPolygon(collidible2, collidible1, cType1 as CollisionTypePolygon);
-                else if (cType2 is CollisionTypeCircle)
-                    return CollideCirclePolygon(collidible2, cType2 as CollisionTypeCircle, collidible1, cType1 as CollisionTypePolygon);
-            }
-            else if (cType1 is CollisionTypeLine)
-            {
-                // check cType2
-                if (cType2 is CollisionTypePosition)
-                    return CollidePositionLine(collidible2, (CollisionTypeLine)cType1);
-                else if (cType2 is CollisionTypeLine)
-                    return CollideLineLine((CollisionTypeLine)cType1, (CollisionTypeLine)cType2);
-                else if (cType2 is CollisionTypePolygon)
-                    return CollidePolygonLine(collidible2, (CollisionTypePolygon)cType2, (CollisionTypeLine)cType1);
-                else if (cType2 is CollisionTypeBoundingBox)
-                    return CollideBoundingBoxLine(collidible2, (CollisionTypeLine)cType1);
-                else if (cType2 is CollisionTypeCircle)
-                    return CollideCircleLine(collidible2, (CollisionTypeCircle)cType2, (CollisionTypeLine)cType1);
+                case CollisionTypePosition ctp1:
+                    switch (cType2)
+                    {
+                        case CollisionTypePosition ctp2:
+                            return CollidePositionPosition(collidible1, collidible2);
+                        case CollisionTypeLine ctl2:
+                                return CollidePositionLine(collidible1, ctl2);
+                        case CollisionTypePolygon ctpoly2:
+                                return CollidePositionPolygon(collidible1, collidible2, ctpoly2);
+                        case CollisionTypeBoundingBox ctb2:
+                                return CollidePositionBoundingBox(collidible1, collidible2);
+                        case CollisionTypeCircle ctc2:
+                                return CollidePositionCircle(collidible1, collidible2, ctc2);
+                    }
+                    break;
+                case CollisionTypeBoundingBox ctb1:
+                    switch (cType2)
+                    {
+                        case CollisionTypePosition ctp2:
+                            return CollidePositionBoundingBox(collidible2, collidible1);
+                        case CollisionTypeLine ctl2:
+                            return CollideBoundingBoxLine(collidible1, ctl2);
+                        case CollisionTypePolygon ctpoly2:
+                            return CollideBoundingBoxPolygon(collidible1, collidible2, ctpoly2);
+                        case CollisionTypeBoundingBox ctb2:
+                            return CollideBoundingBoxBoundingBox(collidible1, collidible2);
+                        case CollisionTypeCircle ctc2:
+                            return CollideBoundingBoxCircle(collidible1, collidible2, ctc2);
+                    }
+                    break;
+                case CollisionTypeCircle ctc1:
+                    switch (cType2)
+                    {
+                        case CollisionTypePosition ctp2:
+                            return CollidePositionCircle(collidible2, collidible1, ctc1);
+                        case CollisionTypeLine ctl2:
+                            return CollideCircleLine(collidible1, ctc1, ctl2);
+                        case CollisionTypePolygon ctpoly2:
+                            return CollideCirclePolygon(collidible1, ctc1, collidible2, ctpoly2);
+                        case CollisionTypeBoundingBox ctb2:
+                            return CollideBoundingBoxCircle(collidible2, collidible1, ctc1);
+                        case CollisionTypeCircle ctc2:
+                            return CollideCircleCircle(collidible1, ctc1, collidible2, ctc2);
+                    }
+                    break;
+                case CollisionTypePolygon ctpoly1:
+                    switch (cType2)
+                    {
+                        case CollisionTypePosition ctp2:
+                            return CollidePositionPolygon(collidible2, collidible1, ctpoly1);
+                        case CollisionTypeLine ctl2:
+                            return CollidePolygonLine(collidible1, ctpoly1, ctl2);
+                        case CollisionTypePolygon ctpoly2:
+                            return CollidePolygonPolygon(collidible1, ctpoly1, collidible2, ctpoly2);
+                        case CollisionTypeBoundingBox ctb2:
+                            return CollideBoundingBoxPolygon(collidible2, collidible1, ctpoly1);
+                        case CollisionTypeCircle ctc2:
+                            return CollideCirclePolygon(collidible2, ctc2, collidible1, ctpoly1);
+                    }
+                    break;
+                case CollisionTypeLine ctl1:
+                    switch (cType2)
+                    {
+                        case CollisionTypePosition ctp2:
+                            return CollidePositionLine(collidible2, ctl1);
+                        case CollisionTypeLine ctl2:
+                            return CollideLineLine(ctl1, ctl2);
+                        case CollisionTypePolygon ctpoly2:
+                            return CollidePolygonLine(collidible2, ctpoly2, ctl1);
+                        case CollisionTypeBoundingBox ctb2:
+                            return CollideBoundingBoxLine(collidible2, ctl1);
+                        case CollisionTypeCircle ctc2:
+                            return CollideCircleLine(collidible2, ctc2, ctl1);
+                    }
+                    break;
             }
             return false;
         }
@@ -190,23 +201,28 @@ namespace CocosSharpMathGame
             // check if the circle collides with the lines of the box
             var boxPoints = Constants.CCRectPoints(box);
             int i, j;
-            for (i = 0, j = -1; i < 3; j = i++)
+            for (i = 0, j = 3; i < 4; j = i++)
                 if (CollideCircleLine(circlePos, radius, boxPoints[i], boxPoints[j]))
                     return true;
             return false;
         }
 
+        // dirty as it only checks whether one contains a point of the other
         internal static bool CollideBoundingBoxPolygon(ICollidible boxCollidible, ICollidible polyCollidible, CollisionTypePolygon cTypePoly)
         {
             // first check the bounding box of the polygon (for performance)
-            if (((CCNode)boxCollidible).BoundingBoxTransformedToWorld.IntersectsRect(((CCNode)polyCollidible).BoundingBoxTransformedToWorld))
+            CCRect box = ((CCNode)boxCollidible).BoundingBoxTransformedToWorld;
+            if (box.IntersectsRect(((CCNode)polyCollidible).BoundingBoxTransformedToWorld))
             {
-                CCPoint[] boxPoints = Constants.CCRectPoints(((CCNode)boxCollidible).BoundingBoxTransformedToWorld);
+                CCPoint[] boxPoints = Constants.CCRectPoints(box);
                 // transform the polygon to match the positioning, rotation and scale of the node
                 Polygon transformedPolygon = ((Polygon)cTypePoly.collisionPolygon.Clone());
                 transformedPolygon.TransformAccordingToGameObject(polyCollidible);
                 foreach (var point in boxPoints)
                     if (transformedPolygon.ContainsPoint(point))
+                        return true;
+                foreach (var point in transformedPolygon.Points)
+                    if (box.ContainsPoint(point))
                         return true;
             }
             return false;
@@ -283,6 +299,7 @@ namespace CocosSharpMathGame
             return perpLength <= radius;
         }
 
+        // dirty
         internal static bool CollidePolygonPolygon(ICollidible polyCollidible1, CollisionTypePolygon cTypePoly1, ICollidible polyCollidible2, CollisionTypePolygon cTypePoly2)
         {
             // first check the bounding boxes of the polygons (for performance)
@@ -349,6 +366,80 @@ namespace CocosSharpMathGame
                 }
             }
             return false;
+        }
+
+        internal static bool CollideDiamondPosition(ICollidible collidibleDiamond, ICollidible collidiblePos)
+        {
+            CCRect diamondBox = ((CCNode)collidibleDiamond).BoundingBoxTransformedToWorld;
+            CCPoint center = diamondBox.Center;
+            CCPoint pos = ((CCNode)collidiblePos).PositionWorldspace;
+            return CollideDiamondPosition(diamondBox, center, pos);
+        }
+
+        internal static bool CollideDiamondPosition(CCRect diamondBox, CCPoint center, CCPoint pos)
+        {
+            float dx = Math.Abs(pos.X - center.X);
+            float dy = Math.Abs(pos.Y - center.Y);
+            float width = (diamondBox.Size.Width / 2);
+            float height = (diamondBox.Size.Height / 2);
+            if (dx > width || dy > height) return false;
+            float ratioWidth = dx / width;
+            float ratioHeight = dy / height;
+            return dx <= width - ratioHeight * width && dy <= height - ratioWidth * height;
+        }
+
+        // dirty as it only checks whether one contains a point of the other (analog to polygon case)
+        internal static bool CollideDiamondBoundingBox(ICollidible collidibleDiamond, ICollidible collidibleBox)
+        {
+            if (CollideBoundingBoxBoundingBox(collidibleDiamond, collidibleBox))
+            {
+                var diamondBox = ((CCNode)collidibleDiamond).BoundingBoxTransformedToWorld;
+                var diamond = BoxToDiamond(diamondBox);
+                var box = ((CCNode)collidibleBox).BoundingBoxTransformedToWorld;
+                var boxPoints = Constants.CCRectPoints(box);
+                foreach (var point in diamond)
+                    if (box.ContainsPoint(point))
+                        return true;
+                foreach (var point in boxPoints)
+                    if (CollideDiamondPosition(diamondBox, diamondBox.Center, point))
+                        return true;
+            }
+            return false;
+        }
+
+        // exact
+        internal static bool CollideDiamondCircle(ICollidible collidibleDiamond, ICollidible collidibleCircle, CollisionTypeCircle cTypeCircle)
+        {
+            var circlePos = ((CCNode)collidibleCircle).PositionWorldspace;
+            var radius = cTypeCircle.radius;
+            // for performance first check whether they are too far to collide anyway
+            var diamondBox = ((CCNode)collidibleDiamond).BoundingBoxTransformedToWorld;
+            float maxSizeBox = diamondBox.Size.Width > diamondBox.Size.Height ? diamondBox.Size.Width : diamondBox.Size.Height;
+            if (   Math.Abs(circlePos.X - diamondBox.Center.X) > radius + diamondBox.Size.Width  / 2
+                || Math.Abs(circlePos.Y - diamondBox.Center.Y) > radius + diamondBox.Size.Height / 2)
+                return false;
+            var diamond = BoxToDiamond(diamondBox);
+            int i, j;
+            for (i = 0, j = diamond.Length - 1; i < diamond.Length; j = i++)
+                if (CollideCircleLine(circlePos, radius, diamond[i], diamond[j]))
+                    return true;
+            return false;
+        }
+
+        /// <summary>
+        /// NOT YET IMPLEMENTED, AS I REALISED THAT I PROBABLY WONT USE DIAMONDS ANYWAY...
+        /// </summary>
+        /// <param name="collidible1"></param>
+        /// <param name="collidible2"></param>
+        /// <returns></returns>
+        internal static bool CollideDiamondDiamond(ICollidible collidible1, ICollidible collidible2)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal static CCPoint[] BoxToDiamond(CCRect box)
+        {
+            return new CCPoint[] { new CCPoint(box.MinX, box.MinY + (box.Size.Width / 2)), new CCPoint(box.MinX + (box.Size.Width / 2), box.MaxY), new CCPoint(box.MaxX, box.MinY + (box.Size.Height / 2)), new CCPoint(box.MinX + (box.Size.Width / 2), box.MinY) };
         }
     }
 }

@@ -7,12 +7,12 @@ using CocosSharp;
 
 namespace CocosSharpMathGame
 {
-    internal class TestEngineStrong : Part
+    internal class TestWeapon : Part
     {
-        internal TestEngineStrong() : base("testEngine.png")
+        internal TestWeapon() : base("testEngine.png") // for now, as there is no gun sprite yet
         {
             // set your types
-            Types = new Type[] { Type.ENGINE };
+            Types = new Type[] { Type.GUN };
             AnchorPoint = CCPoint.AnchorMiddle;
 
             // specify the mass points
@@ -21,10 +21,8 @@ namespace CocosSharpMathGame
             // specify the collision polygon
             CollisionType = new CollisionTypePolygon(new Polygon(DiamondCollisionPoints()));
 
-            // give the engine maneuver abilities
-            ManeuverAbility = new ManeuverAbility((float)Math.Pow(10, 5) * 0.5f, (float)Math.Pow(10, 5) * 1.5f);//, (float)Math.Pow(10, 5) * 0.1f, (float)Math.Pow(10, 5) * 10); ;
+            // give the gun a WeaponAbility
+            WeaponAbility = WeaponAbility.CreateTestWeapon(this);
         }
-
-
     }
 }

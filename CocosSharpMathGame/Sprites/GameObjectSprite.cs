@@ -58,5 +58,14 @@ namespace CocosSharpMathGame
             AnchorPoint = CCPoint.AnchorMiddle;
             Scale = Constants.STANDARD_SCALE;
         }
+
+        /// <summary>
+        /// Returns a simple collision polygon, that is a diamond based on the ContentSize
+        /// </summary>
+        /// <returns></returns>
+        public CCPoint[] DiamondCollisionPoints()
+        {
+            return new CCPoint[] { new CCPoint(0, (ContentSize.Height / 2)), new CCPoint((ContentSize.Width / 2), ContentSize.Height), new CCPoint(ContentSize.Width, (ContentSize.Height / 2)), new CCPoint((ContentSize.Width / 2), 0) };
+        }
     }
 }

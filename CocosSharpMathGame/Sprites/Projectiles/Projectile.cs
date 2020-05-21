@@ -9,9 +9,8 @@ namespace CocosSharpMathGame
 {
     internal abstract class Projectile : GameObjectNode, ICollidible, ICloneable
     {
-        public CollisionType CollisionType { get; set; } = new CollisionTypeLine(CCPoint.Zero, CCPoint.Zero);
-        internal CCDrawNode TailNode { get; private protected set; } = new CCDrawNode();
-        internal float Velocity { get; set; }
+        public CollisionType CollisionType { get; set; }
+        internal float Velocity { get; private protected set; }
         internal float LifeTime { get; set; }
         internal float TimeAlive { get; set; } = 0;
         internal float TailLifeTime = 1f;
@@ -29,22 +28,35 @@ namespace CocosSharpMathGame
         }
         internal Team MyTeam { get; set; }
         
-        internal Projectile(CCPoint position, float CCrotation, float velocity, Team team)
+        internal Projectile()
         {
-            Position = position;
-            Velocity = velocity;
-            MyRotation = CCrotation;
-            Constants.CCDegreesToDxDy(MyRotation, out float dx, out float dy);
-            Dx = dx * velocity; Dy = velocity * dy;
-            MyTeam = team;
-            TailNode.BlendFunc = CCBlendFunc.NonPremultiplied;
+            Init();
             SetTailColor(CCColor4B.White);
+        }
+
+        internal void SetRotation(float CCrotation, bool updateDxDy=true)
+        {
+            MyRotation = CCrotation;
+            if (updateDxDy) UpdateDxDy();
+        }
+
+        internal void SetVelocity(float velocity, bool updateDxDy=true)
+        {
+            Velocity = velocity;
+            if (updateDxDy) UpdateDxDy();
+        }
+
+        private protected void UpdateDxDy()
+        {
+            Constants.CCDegreesToDxDy(MyRotation, out float dx, out float dy);
+            Dx = dx * Velocity; Dy = Velocity * dy;
         }
 
         internal void SetTailColor(CCColor4B color)
         {
             TailColor = color;
-            TailEndColor = new CCColor4B(color.R, color.G, color.B, color.A / 2);
+            byte alpha = (byte) (color.A - color.A / 4);
+            TailEndColor = new CCColor4B(color.R, color.G, color.B, alpha);
         }
 
         internal bool IsAlive()
@@ -55,33 +67,30 @@ namespace CocosSharpMathGame
         internal void Advance(float dt)
         {
             TimeAlive += dt;
-            var oldPos = Position;
-            PositionX += Dx * dt;
-            PositionY += Dy * dt;
-            ((CollisionTypeLine)CollisionType).StartPoint = oldPos;
-            ((CollisionTypeLine)CollisionType).EndPoint = Position;
-            // draw the tail
-            DrawTail();
             if (IsAlive())
             {
+                var oldPos = Position;
+                PositionX += Dx * dt;
+                PositionY += Dy * dt;
+                ((CollisionTypeLine)CollisionType).StartPoint = oldPos;
+                ((CollisionTypeLine)CollisionType).EndPoint = Position;
                 // check for collision
                 foreach (var aircraft in ((PlayLayer)Parent).Aircrafts)
                 {
                     if (aircraft.Team != MyTeam)
                     {
-                        if (Collisions.CollideBoundingBoxLine(aircraft, (CollisionTypeLine)CollisionType))
+                        if (Collisions.Collide(aircraft, this))
                         {
                             CollideWithAircraft(aircraft);
                         }
                     }
                 }
             }
-            else
-            {
-                // remove if the tail is no longer visible
-                if (TimeAlive - LifeTime > TailLifeTime)
-                    ((PlayLayer)Parent).RemoveProjectile(this);    
-            }
+        }
+
+        internal bool CanBeRemoved()
+        {
+            return TimeAlive - LifeTime > TailLifeTime;
         }
 
         internal void Die()
@@ -89,7 +98,7 @@ namespace CocosSharpMathGame
             LifeTime = TimeAlive;
         }
 
-        internal void DrawTail()
+        internal void DrawTail(CCDrawNode drawNode)
         {
             // calculate how far back the tail needs to go
             float tMidTail = TailLifeTime / 2;
@@ -111,27 +120,24 @@ namespace CocosSharpMathGame
             }
             CCPoint midPoint = new CCPoint(PositionX - Dx * tMidTail, PositionY - Dy * tMidTail);
             CCPoint endPoint = new CCPoint(PositionX - Dx * tEndTail, PositionY - Dy * tEndTail);
-            TailNode.Clear();
             if (tMidTail != 0)
-                TailNode.DrawLine(Position, midPoint, TailWidth, TailColor);
+                drawNode.DrawLine(Position, midPoint, TailWidth, TailColor);
             if (tEndTail != 0)
-                TailNode.DrawLine(midPoint, endPoint, TailWidth, TailEndColor);
+                drawNode.DrawLine(midPoint, endPoint, TailWidth, TailEndColor);
+            //TailNode.DrawSolidCircle(Position, 10f, CCColor4B.Yellow);
         }
 
-        protected override void AddedToScene()
+        private void Init()
         {
-            base.AddedToScene();
-            // add your tail
-            Parent.AddChild(TailNode);
+            CollisionType = new CollisionTypeLine(CCPoint.Zero, CCPoint.Zero);
         }
 
-        internal virtual void PrepareForRemoval()
+        public object Clone()   // make virtual in the future if necessary
         {
-            // remove your tail
-            Parent.RemoveChild(TailNode);
+            object clone = MemberwiseClone();
+            ((Projectile)clone).Init();
+            return clone;
         }
-
-        public abstract object Clone();
 
         internal abstract void CollideWithAircraft(Aircraft aircraft);
     }

@@ -272,20 +272,12 @@ namespace CocosSharpMathGame
             if (WeaponAbility != null)
                 WeaponAbility.ExecuteOrders(dt);
             if (ManeuverAbility != null)
-                ManeuverAbility.ExecuteOrders(dt, PositionWorldspace, Aircraft.MyRotation);
+                ManeuverAbility.ExecuteOrders(dt, PositionWorldspace, Aircraft.MyRotation, ((PlayLayer)Layer).MultiPurposeDrawNode);
         }
 
         internal void PrepareForRemoval()
         {
-            if (ManeuverAbility != null)
-                ManeuverAbility.PrepareForRemoval(Aircraft);
-        }
-
-        protected override void AddedToScene()
-        {
-            base.AddedToScene();
-            if (ManeuverAbility != null)
-                Aircraft.Parent.AddChild(ManeuverAbility.CloudTailNode, zOrder: -999);
+            
         }
     }
 }

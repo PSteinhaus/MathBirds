@@ -42,14 +42,19 @@ namespace CocosSharpMathGame
                 cameraSize = value;
             }
         }
+        internal CCDrawNode MultiPurposeDrawNode { get; set; }
         public PlayLayer() : base(CCColor4B.Black)
         {
             GUILayer = new GUILayer(this);
+
+            MultiPurposeDrawNode = new CCDrawNode();
+            MultiPurposeDrawNode.BlendFunc = CCBlendFunc.NonPremultiplied;
+            AddChild(MultiPurposeDrawNode);
             // for now place some MathSprites as a test
             //AddChild(mathSprite1);
             //AddChild(mathSprite2);
             //AddChild(mathSprite3);
-            
+
             // a DrawNode is always useful for debugging
             AddChild(drawNode);
             drawNode.ZOrder = 0;
@@ -80,19 +85,20 @@ namespace CocosSharpMathGame
             testAircraft.ControlledByPlayer = true;
             AddAircraft(testAircraft);
             testAircraft.MoveBy(bounds.Size.Width / 2, bounds.Size.Height / 4);
-            testAircraft.RotateBy(-180f);
-            /*
+            testAircraft.RotateBy(-90f);
+            
             // add two other planes from different teams
-            var secondAircraft = new TestAircraft();
+            var secondAircraft = new TestAircraft(withWeapon: true);
             var secondTeam = new Team();
             secondAircraft.Team = secondTeam;
             secondAircraft.ChangeColor(CCColor3B.Red);
             var ai1 = new StandardAI();
             secondAircraft.AI = ai1;
             AddAircraft(secondAircraft);
-            secondAircraft.MoveBy(bounds.Size.Width / 5, bounds.Size.Height * 0.9f);
-            secondAircraft.RotateBy(60f);
+            secondAircraft.MoveBy(bounds.Size.Width / 2, bounds.Size.Height * 1.3f);
+            secondAircraft.RotateBy(90f);
 
+            /*
             var thirdAircraft = new TestAircraft();
             thirdAircraft.Team = secondTeam;
             thirdAircraft.ChangeColor(CCColor3B.Red);
@@ -202,7 +208,6 @@ namespace CocosSharpMathGame
         internal void RemoveProjectile(Projectile projectile)
         {
             Projectiles.Remove(projectile);
-            projectile.PrepareForRemoval();
             RemoveChild(projectile);
         }
 
@@ -238,13 +243,37 @@ namespace CocosSharpMathGame
                         foreach (var aircraft in Aircrafts)
                             aircraft.ExecuteOrders(dt);
                         // go through all projectiles and let them advance
+                        // check whether a projectile needs to be removed
+                        List<Projectile> toBeRemoved = new List<Projectile>();
                         foreach (var projectile in Projectiles)
-                            projectile.Advance(dt);
+                        {
+                           projectile.Advance(dt);
+                            if (projectile.CanBeRemoved()) toBeRemoved.Add(projectile);
+                        }
+                        foreach (var projectile in toBeRemoved)
+                        {
+                            Console.WriteLine("removed at TimeAlive: " + projectile.TimeAlive + ", LifeTime: " + projectile.LifeTime);
+                            RemoveProjectile(projectile);
+                        }
+                        UpdateMPDrawNode();
                         if (TimeLeftExecutingOrders <= 0)
                             StartPlanningPhase();
                     }
                     break;
             }
+        }
+        /// <summary>
+        /// Draw everything that is supposed to be drawn by the DrawNode
+        /// </summary>
+        private void UpdateMPDrawNode()
+        {
+            MultiPurposeDrawNode.Clear();
+            // draw the projectiles
+            foreach (Projectile projectile in Projectiles)
+                projectile.DrawTail(MultiPurposeDrawNode);
+            // draw everything directly related to the aircrafts
+            foreach (var aircraft in Aircrafts)
+                aircraft.UseDrawNode(MultiPurposeDrawNode);
         }
 
         void OnTouchesBegan(List<CCTouch> touches, CCEvent touchEvent)

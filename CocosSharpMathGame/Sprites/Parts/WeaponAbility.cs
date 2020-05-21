@@ -16,11 +16,17 @@ namespace CocosSharpMathGame
     internal class WeaponAbility
     {
         internal Part MyPart { get; private protected set; }
+        /// <summary>
+        /// In CCDegrees
+        /// </summary>
         internal float AttentionAngle { get; set; }
         internal float AttentionRange { get; set; }
-        internal float ShootingAngle { get; set; }
+        /// <summary>
+        /// In CCDegrees
+        /// </summary>
+        internal float MaxTurningAngle { get; set; }
         internal float ShootingRange { get; set; }
-        internal float SpreadAngle { get; set; }
+        internal float SpreadAngle { get; set; } // doesn't do anything yet
         internal bool FireAtWill { get; set; } = true;
         /// <summary>
         /// Measured in shots per second
@@ -131,16 +137,26 @@ namespace CocosSharpMathGame
             if (TargetPart != null)
             {
                 float angleToAimFor = AngleToAimFor();
-                MyPart.RotateTowards(angleToAimFor, TurningAnglePerSecond);
+                float angleToTurnTo = angleToAimFor;
+                float angleTurn = Constants.AngleFromToDeg(MyPart.NullRotation, angleToTurnTo);
+                if (angleTurn > MaxTurningAngle)
+                    angleToTurnTo = MyPart.NullRotation + MaxTurningAngle;
+                else if (angleTurn < -MaxTurningAngle)
+                    angleToTurnTo = MyPart.NullRotation - MaxTurningAngle;
+                MyPart.RotateTowards(angleToTurnTo, TurningAnglePerSecond * dt);
                 // if you're now close enough to the perfect angle (and in range) start shooting
-                if (CanShoot() && CCPoint.Distance(MyPart.PositionWorldspace, TargetPart.PositionWorldspace) <= ShootingRange
+                if (CanShoot()
+                    && CCPoint.Distance(MyPart.PositionWorldspace, TargetPart.PositionWorldspace) <= ShootingRange
                     && (Constants.AbsAngleDifferenceDeg(angleToAimFor, MyPart.MyRotation) <= 5f || WouldHit()))
+                {
                     TryShoot();
+                }
+                    
             }
             // and if you have no target try to get back to NullRotation
             else
             {
-                MyPart.RotateTowards(MyPart.NullRotation, TurningAnglePerSecond);
+                MyPart.RotateTowards(MyPart.NullRotation, TurningAnglePerSecond * dt);
             }
         }
 
@@ -190,8 +206,8 @@ namespace CocosSharpMathGame
             // as there is no exact solution the solution is here approched by iteration
             CCPoint TargetToMyPart = MyPart.PositionWorldspace - TargetPart.PositionWorldspace;
             // rotate the vector, so that the movement direction of the target is identical to the x axis
-            float transformationRotation = -Constants.DxDyToRadians(TargetPart.Aircraft.VelocityVector.X, TargetPart.Aircraft.VelocityVector.X);
-            CCPoint.RotateByAngle(TargetToMyPart, CCPoint.Zero, transformationRotation);
+            float transformationRotation = -Constants.DxDyToRadians(TargetAircraft.VelocityVector.X, TargetAircraft.VelocityVector.Y);
+            TargetToMyPart = CCPoint.RotateByAngle(TargetToMyPart, CCPoint.Zero, transformationRotation);
             // now the cordinate system is simpler and we can compute the difference between
             // a) the intersection of the flight path and the bullet path
             // and b) the point where the target actually is going to be by then
@@ -204,7 +220,8 @@ namespace CocosSharpMathGame
             double startAngle = Constants.DxDyToRadians(-TargetToMyPart.X, -TargetToMyPart.Y);
             double endAngle = 0;
             double deltaStart = TargetToMyPart.X - TargetToMyPart.Y / Math.Tan(startAngle) + (TargetToMyPart.Y * TargetAircraft.VelocityVector.Length) / (Math.Sin(startAngle) * ProjectileBlueprint.Velocity);
-            for (int i = 0; i < 6; i++) // iterate 6 times at max
+            int i;
+            for (i = 0; i < 6; i++) // iterate 6 times at max
             {
                 angle = (startAngle + endAngle) / 2;
                 double delta = TargetToMyPart.X - TargetToMyPart.Y / Math.Tan(angle) + (TargetToMyPart.Y * TargetAircraft.VelocityVector.Length) / (Math.Sin(angle) * ProjectileBlueprint.Velocity);
@@ -221,6 +238,7 @@ namespace CocosSharpMathGame
                     endAngle = angle;
                 }
             }
+            Console.WriteLine("i: " + i);
             // subtract the transformation rotation to get the total angle
             float totalAngle = Constants.RadiansToCCDegrees((float)angle - transformationRotation);
             // for the final angle transform the total angle to a relative angle
@@ -238,8 +256,10 @@ namespace CocosSharpMathGame
             {
                 CooldownUntilNextShot = ShootDelay;
                 Projectile newProjectile = (Projectile)ProjectileBlueprint.Clone();
+                Console.WriteLine("TotalRot: " + MyPart.TotalRotation);
+                newProjectile.SetRotation(MyPart.TotalRotation);
                 newProjectile.Position = MyPart.PositionWorldspace;
-                newProjectile.MyRotation = MyPart.TotalRotation;
+                newProjectile.MyTeam = MyPart.Aircraft.Team;
                 ((PlayLayer)MyPart.Layer).AddProjectile(newProjectile);
             }
             
@@ -264,6 +284,41 @@ namespace CocosSharpMathGame
         internal WeaponAbility(Part myPart)
         {
             MyPart = myPart;
+        }
+
+        /// <summary>
+        /// Create a test weapon ability. This could be solved by subclassing too, but there is no need to create a new class for now.
+        /// </summary>
+        /// <param name="myPart"></param>
+        /// <returns></returns>
+        internal static WeaponAbility CreateTestWeapon(Part myPart)
+        {
+            var testWeapon = new WeaponAbility(myPart);
+            testWeapon.ProjectileBlueprint = new TestProjectile();
+            testWeapon.CalcBaseValuesFromProjectile();
+            testWeapon.ShootDelay = 0.25f;
+            testWeapon.MaxTurningAngle = 45f;
+            testWeapon.TurningAnglePerSecond = testWeapon.MaxTurningAngle;
+            testWeapon.CalcAttentionAngle();
+            return testWeapon;
+        }
+
+        /// <summary>
+        /// Often it's simpler to just create your base values based on the projectile you want to shoot. 
+        /// </summary>
+        private protected void CalcBaseValuesFromProjectile()
+        {
+            ShootingRange = ProjectileBlueprint.Reach;
+            AttentionRange = ShootingRange * 1.5f;
+        }
+
+        /// <summary>
+        /// calculate the AttentionAngle based on the MaxTurningAngle and the turning rate
+        /// </summary>
+        internal void CalcAttentionAngle()
+        {
+            AttentionAngle = MaxTurningAngle + MaxTurningAngle * MaxTurningAngle / (TurningAnglePerSecond / 4);
+            if (AttentionAngle > 180f) AttentionAngle = 180f;
         }
     }
 }

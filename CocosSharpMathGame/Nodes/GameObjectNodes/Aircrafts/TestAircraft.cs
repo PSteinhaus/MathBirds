@@ -11,7 +11,7 @@ namespace CocosSharpMathGame
     {
         // DEBUG
         internal TestWings wings;
-        internal TestAircraft() : base()
+        internal TestAircraft(bool withWeapon=true) : base()
         {
             IsManeuverPolygonDrawn = true;
             Body = new TestBody();
@@ -22,6 +22,11 @@ namespace CocosSharpMathGame
             wings.MountPart(new TestEngine());
             wings.MountPart(new TestEngine());
             Body.MountPart(new TestEngineStrong());
+            if (withWeapon)
+            {
+                // give the wings a gun
+                wings.MountPart(new TestWeapon());
+            }
             /*
             foreach (var part in TotalParts)
                 Console.WriteLine("Part bounding box: "+part.BoundingBoxTransformedToParent);

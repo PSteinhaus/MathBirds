@@ -16,5 +16,11 @@ namespace CocosSharpMathGame
         float TotalRotation { get; }
         void RotateTowards(float angle, float maxRotationAngle);
         float GetScale();
+
+        /// <summary>
+        /// Returns a simple collision polygon, that is a diamond based on the ContentSize
+        /// </summary>
+        /// <returns></returns>
+        CCPoint[] DiamondCollisionPoints();
     }
 }

@@ -611,6 +611,13 @@ namespace CocosSharpMathGame
             // now pray it works...
         }
 
+        internal void UseDrawNode(CCDrawNode multiPurposeDrawNode)
+        {
+            foreach (var part in TotalParts)
+                if (part.ManeuverAbility != null)
+                    part.ManeuverAbility.CloudTailNode.DrawClouds(multiPurposeDrawNode);
+        }
+
         /// <summary>
         /// Calculates where the aircraft is going to end up in one turn, based on the energetic data given
         /// </summary>

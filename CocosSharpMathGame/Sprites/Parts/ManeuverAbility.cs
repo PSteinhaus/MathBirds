@@ -40,16 +40,10 @@ namespace CocosSharpMathGame
             RotationBonusMin = rotationBonusMin;
         }
 
-        internal void PrepareForRemoval(Aircraft myAircraft)
-        {
-            // remove the cloud tail node
-            myAircraft.Parent.RemoveChild(CloudTailNode);
-        }
-
-        internal void ExecuteOrders(float dt, CCPoint position, float rotation)
+        internal void ExecuteOrders(float dt, CCPoint position, float rotation, CCDrawNode drawNode)
         {
             // advance the cloud tail lifecycle 
-            CloudTailNode.Advance(dt, position, rotation);
+            CloudTailNode.Advance(dt, position, rotation, drawNode);
         }
     }
 }

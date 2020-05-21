@@ -10,7 +10,7 @@ namespace CocosSharpMathGame
     /// <summary>
     /// Draws some nice clouds behind you
     /// </summary>
-    internal class CloudTailNode : CCDrawNode
+    internal class CloudTailNode
     {
         /// <summary>
         /// A cloud has a lifetime, a total lifetime, a reference size, a position (pivot point of the polygon) and a rotation, a polygon and a color.
@@ -69,13 +69,9 @@ namespace CocosSharpMathGame
         internal float CloudDelay { get; set; } = 0.3f;
         internal float CloudLifeTime { get; set; } = 2.5f;
         internal CCColor4B CloudColor { get; set; } = CCColor4B.White;
-        internal float ReferenceSize { get; set; } = 22f;
+        internal float ReferenceSize { get; set; } = 18f;
         private float TimeSinceLastCloud { get; set; } = 0;
         private List<Cloud> clouds = new List<Cloud>();
-        internal CloudTailNode() : base()
-        {
-            BlendFunc = CCBlendFunc.NonPremultiplied;   // necessary for alpha to be respected
-        }
 
         /// <summary>
         /// Advance the life cycles of all clouds and possibly add a new cloud
@@ -83,7 +79,7 @@ namespace CocosSharpMathGame
         /// <param name="dt">how far to advance the lifecycle</param>
         /// <param name="currentPosition">the position at which to add a possible new cloud</param>
         /// <param name="decayOnly">if true, no new clouds are added (i.e. this just advances the cloud life cycles)</param>
-        internal void Advance(float dt, CCPoint currentPosition, float currentCCRotation, bool decayOnly=false)
+        internal void Advance(float dt, CCPoint currentPosition, float currentCCRotation, CCDrawNode drawNode, bool decayOnly=false)
         {
             // check if it is time for a new cloud
             float timePlusDt = TimeSinceLastCloud + dt;
@@ -116,17 +112,15 @@ namespace CocosSharpMathGame
                     clouds.RemoveAt(i--);
             }
             // draw the clouds
-            DrawClouds();
+            DrawClouds(drawNode);
         }
-        internal void DrawClouds()
+        internal void DrawClouds(CCDrawNode drawNode)
         {
-            Clear();
             foreach (var cloud in clouds)
             {
                 if (cloud == null) continue;
                 var cloudPoly = cloud.Polygon;
-                Console.WriteLine("DRAWING CLOUD");
-                DrawPolygon(cloudPoly.Points, cloudPoly.Points.Length, cloud.Color, 0, CCColor4B.Transparent);
+                drawNode.DrawPolygon(cloudPoly.Points, cloudPoly.Points.Length, cloud.Color, 0, CCColor4B.Transparent);
             }
         }
     }
