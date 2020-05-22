@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,11 +14,16 @@ namespace CocosSharpMathGame
     /// </summary>
     internal abstract class Aircraft : GameObjectNode, ICollidible
     {
+        internal enum State
+        {
+            ACTIVE, SHOT_DOWN
+        }
+        internal State MyState = State.ACTIVE;
         public CollisionType CollisionType { get; set; } = new CollisionTypeBoundingBox();
         /// <summary>
         /// the minimal velocity that any aircraft needs to have to not fall out of the sky
         /// </summary>
-        internal const float V_MIN = 0;
+        internal const float V_MIN = 150f;
         protected FlightPathControlNode FlightPathControlNode { get; set; }
         internal Team Team { get; set; }
         private AI ai;
@@ -94,7 +100,7 @@ namespace CocosSharpMathGame
             rightSide = new List<Part>();
             var centerOfMass = CenterOfMass;
             foreach (Part part in TotalParts)
-                if (part.ManeuverAbility != null)
+                if (part.MyState != Part.State.DESTROYED && part.ManeuverAbility != null)
                 {
                     CCPoint LeftLowerCornerOfPart = part.PosLeftLower;
                     // check whether left or right side
@@ -135,7 +141,7 @@ namespace CocosSharpMathGame
         /// <summary>
         /// You lost/gained a part, some parts moved, or something else happened that entails the need to recalculate part-emergent-data.
         /// </summary>
-        internal void PartsChanged()
+        internal void PartsChanged(bool deathPossible = false)
         {
             // update the ContentSize and move all parts to fit into it
             var oldContentSize = ContentSize;
@@ -177,13 +183,13 @@ namespace CocosSharpMathGame
             var oldAnchor = AnchorPoint;
             AnchorPoint = new CCPoint(CenterOfMass.X / ContentSize.Width, CenterOfMass.Y / ContentSize.Height);
             // account for the movement of the anchor
-            float dx = (AnchorPoint.X * ContentSize.Width)  - (oldAnchor.X * ContentSize.Width);
-            float dy = (AnchorPoint.Y * ContentSize.Height) - (oldAnchor.Y * ContentSize.Height);
+            float dx = (AnchorPoint.X - oldAnchor.X) * ContentSize.Width;
+            float dy = (AnchorPoint.Y - oldAnchor.Y) * ContentSize.Height;
             PositionX += dx;
             PositionY += dy;
 
             // recalculate the maneuver polygon
-            CalculateManeuverPolygon();
+            CalculateManeuverPolygon(deathPossible);
         }
 
         protected Part body = null;
@@ -235,25 +241,25 @@ namespace CocosSharpMathGame
             ManeuverPolygonUntransformed = untransformedPolygon;
             UpdateManeuverPolygon();
             // draw it (DEBUG)
-            maneuverPolygonDrawNode.Clear();
-            maneuverPolygonDrawNode.DrawPolygon(untransformedPolygon.Points, untransformedPolygon.Points.Length, CCColor4B.Transparent ,2f, CCColor4B.White);
+            //maneuverPolygonDrawNode.Clear();
+            //maneuverPolygonDrawNode.DrawPolygon(untransformedPolygon.Points, untransformedPolygon.Points.Length, CCColor4B.Transparent ,2f, CCColor4B.White);
         }
 
         /// <summary>
         /// Calculate a maneuver polygon based on the part-emergent data (power, mass, etc.)
         /// and then set your ManeuverPolygon to this new polygon.
         /// </summary>
-        internal void CalculateManeuverPolygon()
+        internal void CalculateManeuverPolygon(bool deathPossible)
         {
             Console.WriteLine("Calculation of maneuver polygon started.");
-            const float PARTITIONS = 20; // defines how detailed each part is powered up (higher is more detailed)
+            const float PARTITIONS = 10; // defines how detailed each part is powered up (higher is more detailed)
             // first get all the relevant parts
             GetManeuverParts(out IEnumerable<Part> leftSideParts, out IEnumerable<Part> rightSideParts);
             // calculate how much kinetic energy is necessary to keep the aircraft in the sky
-            float mass = Mass;
-            Console.WriteLine("Mass: " + mass);
-            float EkinNeeded = 0.5f * mass * V_MIN * V_MIN;
-            Console.WriteLine("EkinNeeded: " + EkinNeeded);
+            //float mass = Mass;
+            //Console.WriteLine("Mass: " + mass);
+            //float EkinNeeded = 0.5f * mass * V_MIN * V_MIN;
+            //Console.WriteLine("EkinNeeded: " + EkinNeeded);
             // first calculate the values for Erot and Ekin when all parts are turned down as much as possible
             float EkinTurnedDownRight = 0;
             float EkinTurnedDownLeft = 0;
@@ -298,10 +304,6 @@ namespace CocosSharpMathGame
                     var part = rightSideParts.ElementAt(j);
                     float coefficient = rightSideCoefficients[j];
                     GetEkinAndErotOfPart(part, out float EkinMin, out float EkinMax, out float ErotMin, out float ErotMax, out float ErotBonusMin, out float ErotBonusMax);
-                    //Console.WriteLine("Part position: " + part.Position);
-                    //Console.WriteLine("Center of mass: " + CenterOfMass);
-                    //Console.WriteLine("EkinMax right: " + EkinMax);
-                    //Console.WriteLine("ErotMax right: " + ErotMax);
                     EkinRight += (EkinMax - EkinMin) * coefficient;
                     ErotRight += (ErotMax - ErotMin) * coefficient;
                 }
@@ -311,9 +313,6 @@ namespace CocosSharpMathGame
                     var part = leftSideParts.ElementAt(j);
                     float coefficient = leftSideCoefficients[j];
                     GetEkinAndErotOfPart(part, out float EkinMin, out float EkinMax, out float ErotMin, out float ErotMax, out float ErotBonusMin, out float ErotBonusMax);
-                    //Console.WriteLine("Part position: " + part.Position);
-                    //Console.WriteLine("EkinMax left: " + EkinMax);
-                    //Console.WriteLine("ErotMax left: " + ErotMax);
                     EkinLeft += (EkinMax - EkinMin) * coefficient;
                     ErotLeft += (ErotMax - ErotMin) * coefficient;
                 }
@@ -334,13 +333,8 @@ namespace CocosSharpMathGame
             }
             float CalcEkin()
             {
-                //Console.WriteLine("EkinRight :" + EkinRight);
-                //Console.WriteLine("EkinLeft  :" + EkinLeft);
-                //Console.WriteLine("ErotRight :" + ErotRight);
-                //Console.WriteLine("ErotLeft  :" + ErotLeft);
                 float Ekin = EkinRight + EkinLeft + (ErotRight + ErotLeft - (float)Math.Abs(ErotRight - ErotLeft)) +
                     ((ErotRight - ErotLeft > 0) ? Clamp(ErotBonusLeft - ErotBonusRight, 0, (float)Math.Abs(ErotRight - ErotLeft)) : Clamp(ErotBonusRight - ErotBonusLeft, 0, (float)Math.Abs(ErotRight - ErotLeft)));
-                //Console.WriteLine("Ekin :" + Ekin);
                 return Ekin;
             }
             float CalcErot()
@@ -416,19 +410,18 @@ namespace CocosSharpMathGame
             {
                 CalcBaseValues();
                 float Ekin = CalcEkin();
-                if (Ekin >= EkinNeeded)
-                {
-                    float Erot = CalcErot();
-                    var newPoint = EnergyToDestination(Ekin, Erot);
-                    if (!controlPoints.Any() || !newPoint.Equals(controlPoints.Last()))
-                        controlPoints.Add(newPoint);
-                    return true;
-                }
-                else
-                    return false;
+                //if (Ekin >= EkinNeeded)
+                float Erot = CalcErot();
+                var newPoint = EnergyToDestination(Ekin, Erot);
+                if (!controlPoints.Any() || !newPoint.Equals(controlPoints.Last()))
+                    controlPoints.Add(newPoint);
+                return true;
             }
             bool IncreaseUntilEkinIsMet()
             {
+                // DEBUG: for now there is no EkinNeeded, so just return true
+                return true;
+                /*
                 float Ekin = CalcEkin();
                 while (Ekin < EkinNeeded && !(LeftSideIsTurnedUp() && RightSideIsTurnedUp()))
                 {
@@ -466,6 +459,7 @@ namespace CocosSharpMathGame
                 end:;
                 }
                 return false;
+                */
             }
             // 1. to find the first point turn up the right side 
             // turn the right bonus on max
@@ -597,6 +591,7 @@ namespace CocosSharpMathGame
             //Console.WriteLine(controlPoints);
             // special case: not enough points found
             // in this case set the maneuverPolygon to a small predefined square in front of the aircraft
+            // and this also means that the aircraft lost its ability to fly, so kill it
             if (controlPoints.Count() < 3)
             {
                 controlPoints.Clear();
@@ -604,6 +599,8 @@ namespace CocosSharpMathGame
                 controlPoints.Add(new CCPoint(V_MIN+1, 1));
                 controlPoints.Add(new CCPoint(V_MIN+1, -1));
                 controlPoints.Add(new CCPoint(V_MIN, -1));
+                if (deathPossible)
+                    Die();
             }
             // now create the polygon and update
             var newManeuverPolygon = new PolygonWithSplines(controlPoints.ToArray());
@@ -611,11 +608,22 @@ namespace CocosSharpMathGame
             // now pray it works...
         }
 
+        internal void Die()
+        {
+            MyState = State.SHOT_DOWN;
+        }
+
         internal void UseDrawNode(CCDrawNode multiPurposeDrawNode)
         {
             foreach (var part in TotalParts)
+            {
                 if (part.ManeuverAbility != null)
                     part.ManeuverAbility.CloudTailNode.DrawClouds(multiPurposeDrawNode);
+                // DEBUG: draw the collision polygon of each part
+                //var poly = (Polygon)((CollisionTypePolygon)part.CollisionType).collisionPolygon.Clone();
+                //poly.TransformAccordingToGameObject(part);
+                //multiPurposeDrawNode.DrawPolygon(poly.Points, poly.Points.Length, CCColor4B.Transparent, 2f, CCColor4B.Aquamarine);
+            }
         }
 
         /// <summary>
@@ -751,7 +759,7 @@ namespace CocosSharpMathGame
         {
             UpdateManeuverPolygon();
             FlightPathControlNode.ResetHeadPosition();
-            if (AI != null)
+            if (AI != null && MyState != State.SHOT_DOWN)
                 AI.ActInPlanningPhase(AircraftsInLevel());
             if (ControlledByPlayer)
                 FlightPathControlNode.Visible = true;

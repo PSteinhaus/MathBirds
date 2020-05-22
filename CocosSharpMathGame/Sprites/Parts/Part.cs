@@ -13,6 +13,12 @@ namespace CocosSharpMathGame
     /// </summary>
     abstract internal class Part : GameObjectSprite, ICollidible
     {
+        internal float Health { get; private protected set; } = 5f; //float.PositiveInfinity; // standard behaviour is indestructability
+        internal enum State
+        {
+            ACTIVE, DESTROYED
+        }
+        internal State MyState { get; private protected set; } = State.ACTIVE;
         public CollisionType CollisionType { get; set; }
         /// <summary>
         /// The rotation this part starts at
@@ -108,6 +114,29 @@ namespace CocosSharpMathGame
         static protected CCSpriteSheet spriteSheet = new CCSpriteSheet("parts.plist");
         internal Part MountParent { get; set; } = null;
         protected PartMount[] PartMounts { get; set; }
+
+        internal void TakeDamage(float damage)
+        {
+            Health -= damage;
+            if (Health <= 0)
+                Die();
+        }
+        internal void Die(bool callPartsChanged=true)
+        {
+            Health = 0;
+            MyState = State.DESTROYED;
+            Color = CCColor3B.DarkGray; // TODO: switch to a "destroyed" version of the sprite instead of just darkening it
+            // reduce your mass (half it for now)
+            for (int i=0; i<MassPoints.Length; i++)
+                MassPoints[i].Mass /= 2;
+            // also kill all parts that are mounted to you
+            foreach (var part in MountedParts)
+            {
+                part.Die(false);
+            }
+            if (callPartsChanged)
+                Aircraft.PartsChanged(deathPossible: true);
+        }
         /// <summary>
         /// searches recursively and returns all parts that are mounted on this part including itself
         /// </summary>
@@ -125,6 +154,9 @@ namespace CocosSharpMathGame
                 return totalParts;
             }
         }
+        /// <summary>
+        /// Returns only the directly mounted parts (no recursion)
+        /// </summary>
         internal IEnumerable<Part> MountedParts
         {
             get
@@ -269,10 +301,19 @@ namespace CocosSharpMathGame
 
         internal void ExecuteOrders(float dt)
         {
-            if (WeaponAbility != null)
-                WeaponAbility.ExecuteOrders(dt);
-            if (ManeuverAbility != null)
-                ManeuverAbility.ExecuteOrders(dt, PositionWorldspace, Aircraft.MyRotation, ((PlayLayer)Layer).MultiPurposeDrawNode);
+            switch (MyState)
+            {
+                case State.ACTIVE:
+                    if (WeaponAbility != null && Aircraft.MyState != Aircraft.State.SHOT_DOWN)
+                        WeaponAbility.ExecuteOrders(dt);
+                    if (ManeuverAbility != null)
+                        ManeuverAbility.ExecuteOrders(dt, PositionWorldspace, Aircraft.MyRotation);
+                    break;
+                case State.DESTROYED:
+                    if (ManeuverAbility != null)
+                        ManeuverAbility.ExecuteOrders(dt, PositionWorldspace, Aircraft.MyRotation, decayOnly: true);
+                    break;
+            }
         }
 
         internal void PrepareForRemoval()

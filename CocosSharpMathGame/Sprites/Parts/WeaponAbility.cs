@@ -82,19 +82,20 @@ namespace CocosSharpMathGame
             // cool down
             CooldownUntilNextShot -= dt;
             if (CooldownUntilNextShot < 0) CooldownUntilNextShot = 0;
-            // collect aircrafts that are near enough to have parts which could be targets
-            // go through the parts of all of these planes and collect those that are in the attention angle
-            PartsInRange(out List<Part> partsInRange, out List<float> anglesFromTo, out List<float> distances);
             // if you have a target check if it is still in range
             if (TargetPart != null)
             {
                 CCPoint vectorMyPartTarget = TargetPart.PositionWorldspace - MyPart.PositionWorldspace;
-                if (CCPoint.Distance(MyPart.PositionWorldspace, TargetPart.PositionWorldspace) > AttentionRange
+                if (   TargetPart.MyState == Part.State.DESTROYED || TargetAircraft.MyState == Aircraft.State.SHOT_DOWN
+                    || CCPoint.Distance(MyPart.PositionWorldspace, TargetPart.PositionWorldspace) > AttentionRange
                     || Constants.AbsAngleDifferenceDeg(MyPart.TotalRotation - MyPart.RotationFromNull, Constants.DxDyToCCDegrees(vectorMyPartTarget.X, vectorMyPartTarget.Y)) > AttentionAngle)
                     TargetPart = null;
             }
             if (TargetPart == null)     // if you currently do not aim at anything search for a target
             {
+                // collect aircrafts that are near enough to have parts which could be targets
+                // go through the parts of all of these planes and collect those that are in the attention angle
+                PartsInRange(out List<Part> partsInRange, out List<float> anglesFromTo, out List<float> distances);
                 // try to choose a part that is in reach
                 // choose the part that is closest anglewise
                 // but prioritize aircraft bodies:
@@ -167,7 +168,7 @@ namespace CocosSharpMathGame
             foreach (var aircraft in ((PlayLayer)MyPart.Layer).Aircrafts)
             {
                 // check if it is considered an enemy
-                if (!((Aircraft)MyPart.Parent).Team.IsEnemy(aircraft.Team))
+                if (!((Aircraft)MyPart.Parent).Team.IsEnemy(aircraft.Team) || aircraft.MyState.Equals(Aircraft.State.SHOT_DOWN))
                     continue;
                 // check if in attention arc
                 if (Collisions.CollideArcBoundingBox(MyPart.PositionWorldspace, AttentionRange, MyPart.TotalNullRotation, AttentionAngle, aircraft.BoundingBoxTransformedToWorld))
@@ -180,6 +181,7 @@ namespace CocosSharpMathGame
             {
                 foreach (var part in aircraft.TotalParts)
                 {
+                    if (part.MyState == Part.State.DESTROYED) continue;
                     // using the position as criterium is a bit dirty and could be improved on by using the bounding box instead (at the cost of performance)
                     CCPoint vectorMyPartPart = part.PositionWorldspace - MyPart.PositionWorldspace;
                     float distance = vectorMyPartPart.Length;
@@ -220,8 +222,7 @@ namespace CocosSharpMathGame
             double startAngle = Constants.DxDyToRadians(-TargetToMyPart.X, -TargetToMyPart.Y);
             double endAngle = 0;
             double deltaStart = TargetToMyPart.X - TargetToMyPart.Y / Math.Tan(startAngle) + (TargetToMyPart.Y * TargetAircraft.VelocityVector.Length) / (Math.Sin(startAngle) * ProjectileBlueprint.Velocity);
-            int i;
-            for (i = 0; i < 6; i++) // iterate 6 times at max
+            for (int i = 0; i < 6; i++) // iterate 6 times at max
             {
                 angle = (startAngle + endAngle) / 2;
                 double delta = TargetToMyPart.X - TargetToMyPart.Y / Math.Tan(angle) + (TargetToMyPart.Y * TargetAircraft.VelocityVector.Length) / (Math.Sin(angle) * ProjectileBlueprint.Velocity);
@@ -238,7 +239,6 @@ namespace CocosSharpMathGame
                     endAngle = angle;
                 }
             }
-            Console.WriteLine("i: " + i);
             // subtract the transformation rotation to get the total angle
             float totalAngle = Constants.RadiansToCCDegrees((float)angle - transformationRotation);
             // for the final angle transform the total angle to a relative angle

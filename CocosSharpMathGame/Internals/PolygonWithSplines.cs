@@ -85,6 +85,7 @@ namespace CocosSharpMathGame
             Array.Copy(SplineControl, cloneSplineControl, SplineControl.Length);
             var clone = new PolygonWithSplines(cloneControlPoints, cloneSplineControl);
             clone.Points = clonePoints;
+            clone.PivotPoint = PivotPoint;
             return clone;
         }
 

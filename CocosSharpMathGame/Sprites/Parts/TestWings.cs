@@ -28,7 +28,7 @@ namespace CocosSharpMathGame
             PartMounts = new PartMount[] { engineMount1, engineMount2, gunMount1, gunMount2 };
 
             // specify the collision polygon
-            CollisionType = new CollisionTypePolygon(new Polygon(DiamondCollisionPoints()));
+            CollisionType = Collisions.CreateDiamondCollisionPolygon(this);
 
             // specify the mass points
             MassPoints = new MassPoint[] { new MassPoint((ContentSize.Width / 2)-1, ContentSize.Height, 30), new MassPoint((ContentSize.Width / 2), (ContentSize.Height/2)+(ContentSize.Height/6), 50), new MassPoint((ContentSize.Width / 2), (ContentSize.Height / 2) - (ContentSize.Height / 6), 50), new MassPoint((ContentSize.Width / 2) - 1, 0, 30) };

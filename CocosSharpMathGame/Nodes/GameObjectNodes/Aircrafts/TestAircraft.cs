@@ -21,7 +21,7 @@ namespace CocosSharpMathGame
             // give the wings some engines
             wings.MountPart(new TestEngine());
             wings.MountPart(new TestEngine());
-            Body.MountPart(new TestEngineStrong());
+            //Body.MountPart(new TestEngineStrong());
             if (withWeapon)
             {
                 // give the wings a gun

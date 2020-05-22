@@ -50,7 +50,10 @@ namespace CocosSharpMathGame
 
         public float GetScale()
         {
-            return ScaledContentSize.Width / ContentSize.Width;
+            float scale = ScaledContentSize.Width / ContentSize.Width;
+            if (Parent != null && (Parent is IGameObject g))
+                scale += g.GetScale();
+            return scale;
         }
         internal GameObjectSprite(CCSpriteFrame spriteFrame) : base(spriteFrame)
         {

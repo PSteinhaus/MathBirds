@@ -19,7 +19,7 @@ namespace CocosSharpMathGame
             MassPoints = new MassPoint[] { new MassPoint(ContentSize.Width / 2, ContentSize.Height / 2, 30) };
 
             // specify the collision polygon
-            CollisionType = new CollisionTypePolygon(new Polygon(DiamondCollisionPoints()));
+            CollisionType = Collisions.CreateDiamondCollisionPolygon(this);
 
             // give the gun a WeaponAbility
             WeaponAbility = WeaponAbility.CreateTestWeapon(this);

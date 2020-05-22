@@ -441,5 +441,12 @@ namespace CocosSharpMathGame
         {
             return new CCPoint[] { new CCPoint(box.MinX, box.MinY + (box.Size.Width / 2)), new CCPoint(box.MinX + (box.Size.Width / 2), box.MaxY), new CCPoint(box.MaxX, box.MinY + (box.Size.Height / 2)), new CCPoint(box.MinX + (box.Size.Width / 2), box.MinY) };
         }
+
+        internal static CollisionTypePolygon CreateDiamondCollisionPolygon(IGameObject gameObject)
+        {
+            var collisionPoly = new Polygon(gameObject.DiamondCollisionPoints());
+            collisionPoly.PivotPoint = ((CCNode)gameObject).AnchorPointInPoints;// new CCPoint(ContentSize.Width / 2, ContentSize.Height / 2);
+            return new CollisionTypePolygon(collisionPoly);
+        }
     }
 }

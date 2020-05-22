@@ -17,6 +17,7 @@ namespace CocosSharpMathGame
         internal float TailWidth { get; set; } = 3f;
         internal CCColor4B TailColor { get; set; }
         internal CCColor4B TailEndColor { get; set; }
+        internal float Damage { get; set; }
         internal float Dx { get; private protected set; }
         internal float Dy { get; private protected set; }
         internal float Reach

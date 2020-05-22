@@ -40,10 +40,10 @@ namespace CocosSharpMathGame
             RotationBonusMin = rotationBonusMin;
         }
 
-        internal void ExecuteOrders(float dt, CCPoint position, float rotation, CCDrawNode drawNode)
+        internal void ExecuteOrders(float dt, CCPoint position, float rotation, bool decayOnly=false)
         {
             // advance the cloud tail lifecycle 
-            CloudTailNode.Advance(dt, position, rotation, drawNode);
+            CloudTailNode.Advance(dt, position, rotation, decayOnly);
         }
     }
 }

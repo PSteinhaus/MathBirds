@@ -69,8 +69,10 @@ namespace CocosSharpMathGame
 
         internal void TransformAccordingToGameObject(IGameObject gameObject)
         {
+            CCPoint anchor = ((CCNode)gameObject).AnchorPointInPoints;
+            MoveBy(-anchor.X, -anchor.Y);
             Scale(gameObject.GetScale());
-            RotateBy(gameObject.MyRotation);
+            RotateBy(gameObject.TotalRotation);
             CCPoint pos = ((CCNode)gameObject).PositionWorldspace;
             MoveBy(pos.X, pos.Y);
         }
@@ -224,7 +226,9 @@ namespace CocosSharpMathGame
         {
             var clonePoints = new CCPoint[Points.Length];
             Array.Copy(Points, clonePoints, Points.Length);
-            return new Polygon(clonePoints);
+            Polygon clone = new Polygon(clonePoints);
+            clone.PivotPoint = PivotPoint;
+            return clone;
         }
         /// <summary>
         /// Returns a CCDrawNode that draws the polygon

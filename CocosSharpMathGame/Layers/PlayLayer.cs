@@ -49,7 +49,7 @@ namespace CocosSharpMathGame
 
             MultiPurposeDrawNode = new CCDrawNode();
             MultiPurposeDrawNode.BlendFunc = CCBlendFunc.NonPremultiplied;
-            AddChild(MultiPurposeDrawNode);
+            AddChild(MultiPurposeDrawNode, zOrder: 1000); // DEBUG: for now draw on top
             // for now place some MathSprites as a test
             //AddChild(mathSprite1);
             //AddChild(mathSprite2);
@@ -95,8 +95,8 @@ namespace CocosSharpMathGame
             var ai1 = new StandardAI();
             secondAircraft.AI = ai1;
             AddAircraft(secondAircraft);
-            secondAircraft.MoveBy(bounds.Size.Width / 2, bounds.Size.Height * 1.3f);
-            secondAircraft.RotateBy(90f);
+            secondAircraft.MoveBy(bounds.Size.Width / 5, bounds.Size.Height * 1.3f);
+            secondAircraft.RotateBy(60f);
 
             /*
             var thirdAircraft = new TestAircraft();

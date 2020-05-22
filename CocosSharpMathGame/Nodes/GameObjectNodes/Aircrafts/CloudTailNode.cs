@@ -79,7 +79,7 @@ namespace CocosSharpMathGame
         /// <param name="dt">how far to advance the lifecycle</param>
         /// <param name="currentPosition">the position at which to add a possible new cloud</param>
         /// <param name="decayOnly">if true, no new clouds are added (i.e. this just advances the cloud life cycles)</param>
-        internal void Advance(float dt, CCPoint currentPosition, float currentCCRotation, CCDrawNode drawNode, bool decayOnly=false)
+        internal void Advance(float dt, CCPoint currentPosition, float currentCCRotation, bool decayOnly=false)
         {
             // check if it is time for a new cloud
             float timePlusDt = TimeSinceLastCloud + dt;
@@ -111,8 +111,6 @@ namespace CocosSharpMathGame
                 if (clouds[i].LifeTime > clouds[i].TotalLifeTime)
                     clouds.RemoveAt(i--);
             }
-            // draw the clouds
-            DrawClouds(drawNode);
         }
         internal void DrawClouds(CCDrawNode drawNode)
         {
