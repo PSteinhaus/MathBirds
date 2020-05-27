@@ -80,7 +80,7 @@ namespace CocosSharpMathGame
                 {
                     if (aircraft.Team != MyTeam)
                     {
-                        if (Collisions.Collide(aircraft, this))
+                        if (Collisions.CollideBoundingBoxLine(aircraft, (CollisionTypeLine)CollisionType))
                         {
                             CollideWithAircraft(aircraft);
                         }

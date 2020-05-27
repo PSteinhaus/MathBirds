@@ -33,12 +33,12 @@ namespace CocosSharpMathGame
             // add a touch listener
             var touchListener = new CCEventListenerTouchAllAtOnce();
             // DEBUG: I don't yet know whether it is necessary to check for visibility; experiments will tell
-            touchListener.OnTouchesBegan = (arg1, arg2) =>                                     { if (Visible && touchStartedOnIt(arg1[0]))                                  { Pressed = true;  onTouchesBegan(arg1, arg2); } };
-            if(onTouchesMoved!=null) touchListener.OnTouchesMoved = (arg1, arg2) =>            { if (Visible && Pressed)                                                                       onTouchesMoved(arg1, arg2); };
-            if (onTouchesEnded != null) touchListener.OnTouchesEnded = (arg1, arg2) =>         { if (Visible && touchMustEndOnIt ? touchIsOnIt(arg1[0]) : true && Pressed)  { Pressed = false; onTouchesEnded(arg1, arg2); } };
-            else                        touchListener.OnTouchesEnded = (arg1, arg2) =>                                                                                        Pressed = false;
-            if (onTouchesCancelled != null) touchListener.OnTouchesCancelled = (arg1, arg2) => { if (Visible && Pressed)                                                    { Pressed = false; onTouchesCancelled(arg1, arg2); } };
-            else                            touchListener.OnTouchesCancelled = (arg1, arg2) =>                                                                                Pressed = false;
+            touchListener.OnTouchesBegan = (arg1, arg2) =>                                     { if (MyVisible && touchStartedOnIt(arg1[0]))                                  { Pressed = true;  onTouchesBegan(arg1, arg2); } };
+            if(onTouchesMoved!=null) touchListener.OnTouchesMoved = (arg1, arg2) =>            { if (MyVisible && Pressed)                                                                       onTouchesMoved(arg1, arg2); };
+            if (onTouchesEnded != null) touchListener.OnTouchesEnded = (arg1, arg2) =>         { if (MyVisible && touchMustEndOnIt ? touchIsOnIt(arg1[0]) : true && Pressed)  { Pressed = false; onTouchesEnded(arg1, arg2); } };
+            else                        touchListener.OnTouchesEnded = (arg1, arg2) =>                                                                                          Pressed = false;
+            if (onTouchesCancelled != null) touchListener.OnTouchesCancelled = (arg1, arg2) => { if (MyVisible && Pressed)                                                    { Pressed = false; onTouchesCancelled(arg1, arg2); } };
+            else                            touchListener.OnTouchesCancelled = (arg1, arg2) =>                                                                                  Pressed = false;
             AddEventListener(touchListener, this);
         }
 

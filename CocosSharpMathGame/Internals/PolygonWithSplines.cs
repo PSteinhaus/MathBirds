@@ -140,5 +140,11 @@ namespace CocosSharpMathGame
             // finally give the polygon its new form
             Points = newPoints.ToArray();
         }
+
+        new internal void MirrorOnXAxis()
+        {
+            base.MirrorOnXAxis();
+            ControlPolygon.MirrorOnXAxis();
+        }
     }
 }

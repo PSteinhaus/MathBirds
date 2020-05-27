@@ -13,6 +13,7 @@ namespace CocosSharpMathGame
     /// </summary>
     abstract internal class Part : GameObjectSprite, ICollidible
     {
+        internal bool Flipped { get; private protected set; } = false;
         internal float Health { get; private protected set; } = 10f; //float.PositiveInfinity; // standard behaviour is indestructability
         internal float MaxHealth { get; private protected set; } = 10f;
         internal enum State
@@ -59,7 +60,7 @@ namespace CocosSharpMathGame
         {
             get
             {
-                return new CCPoint(BoundingBoxTransformedToParent.MinX, BoundingBoxTransformedToParent.MinY);
+                return new CCPoint(BoundingBoxTransformedToParent.MinX, Flipped ? BoundingBoxTransformedToParent.MaxY : BoundingBoxTransformedToParent.MinY);
             }
         }
         /// <summary>
@@ -115,7 +116,8 @@ namespace CocosSharpMathGame
         /// </summary>
         static protected CCSpriteSheet spriteSheet = new CCSpriteSheet("parts.plist");
         internal Part MountParent { get; set; } = null;
-        protected PartMount[] PartMounts { get; set; }
+        // DEBUG: switch back to protected
+        internal PartMount[] PartMounts { get; set; } = new PartMount[0];
 
         internal void TakeDamage(float damage)
         {
@@ -157,9 +159,10 @@ namespace CocosSharpMathGame
             if (maxDistanceFromCollision > MAX_DISTANCE_FROM_COLLISION) maxDistanceFromCollision = MAX_DISTANCE_FROM_COLLISION;
             // generate a random point near the collisionPos
             // and show an effect there
+            Random rng = new Random();
             while(true)
             {
-                CCPoint randomPoint = Constants.RandomPointNear(collisionPos, maxDistanceFromCollision);
+                CCPoint randomPoint = Constants.RandomPointNear(collisionPos, maxDistanceFromCollision, rng);
                 //CCPoint randomPoint = collisionPos;
                 if (Collisions.CollidePositionPolygon(randomPoint, this))   // check whether the random point is inside the collision polygon
                 {
@@ -171,7 +174,6 @@ namespace CocosSharpMathGame
                         damageTail.AutoAddClouds = false;
                     if (Health / MaxHealth < 0.5f)
                     {
-                        var rng = new Random();
                         byte value = (byte)rng.Next(135, 255);
                         damageTail.CloudColor = new CCColor4B((byte)rng.Next(value, 255), value, 0);
                     }
@@ -268,7 +270,6 @@ namespace CocosSharpMathGame
                     foreach (var part in MountedParts)
                     {
                         CCPoint centerOfMass = part.CenterOfMass;
-                        CCPoint leftLowerCornerOfPart = part.PosLeftLower;
                         // remember to factor in the relative position of the part
                         x += (part.TotalMass / totalMass) * (centerOfMass.X);
                         y += (part.TotalMass / totalMass) * (centerOfMass.Y);
@@ -290,7 +291,6 @@ namespace CocosSharpMathGame
                 // calculate the moment of inertia as the sum over all mass points multiplied with the square of their distance to the center of mass
                 CCPoint centerOfMass = CenterOfMass;
                 float momentOfInertia = 0;
-                //IEnumerable<Part> totalParts = TotalParts;
                 foreach (var part in TotalParts)
                 {
                     CCPoint leftLowerCornerOfPart = part.PosLeftLower;
@@ -309,6 +309,31 @@ namespace CocosSharpMathGame
             Scale = 1; // Parts are usually scaled by the aircrafts owning them
             AnchorPoint = CCPoint.AnchorLowerLeft;
             //Console.WriteLine("Part ContentSize: " + ContentSize);
+        }
+
+        /// <summary>
+        /// Mirror the part on its x axis
+        /// </summary>
+        internal void Flip()
+        {
+            Flipped = !Flipped;
+            RotationX = Flipped ? 180f : 0; 
+            for (int i = 0; i < MassPoints.Length; i++)
+                MassPoints[i].Y *= -1;
+            // flip the collision polygon
+            ((CollisionTypePolygon)CollisionType).collisionPolygon.MirrorOnXAxis();
+            for (int i = 0; i < PartMounts.Length; i++)
+            {
+                var pm = PartMounts[i];
+                pm.Position = new CCPoint(pm.Position.X, -pm.Position.Y);
+                pm.NullRotation = -pm.NullRotation;
+                // don't forget to update the mounted part and flip it as well
+                if (pm.MountedPart != null)
+                {
+                    pm.UpdateMountedPartPosition();
+                    pm.MountedPart.Flip();
+                }
+            }
         }
 
         /// <summary>
@@ -344,6 +369,9 @@ namespace CocosSharpMathGame
             // and tell it that you're its mount-parent now
             if (mounted)
             {
+                // if the mount point is lower than the anchor of the body you have to flip the part (mirror on x axis)
+                if (PosLeftLower.Y + PartMounts[mountIndex].Position.Y < Aircraft.Body.PositionY)
+                    part.Flip();
                 Parent.AddChild(part, zOrder: this.ZOrder + PartMounts[mountIndex].Dz);
                 part.MountParent = this;
                 (Parent as Aircraft).PartsChanged();

@@ -262,7 +262,6 @@ namespace CocosSharpMathGame
             {
                 CooldownUntilNextShot = ShootDelay;
                 Projectile newProjectile = (Projectile)ProjectileBlueprint.Clone();
-                Console.WriteLine("TotalRot: " + MyPart.TotalRotation);
                 newProjectile.SetRotation(MyPart.TotalRotation, updateDxDy:false);
                 newProjectile.SetVelocity(newProjectile.Velocity + AircraftVelocityBoost());
                 newProjectile.Position = MyPart.PositionWorldspace;

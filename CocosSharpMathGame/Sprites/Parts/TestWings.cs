@@ -24,7 +24,7 @@ namespace CocosSharpMathGame
             gunMount1.NullRotation = -20f;
             gunMount1.Dz = 1;
             gunMount2.NullRotation =  20f;
-            gunMount1.Dz = 1;
+            gunMount2.Dz = 1;
             PartMounts = new PartMount[] { engineMount1, engineMount2, gunMount1, gunMount2 };
 
             // specify the collision polygon

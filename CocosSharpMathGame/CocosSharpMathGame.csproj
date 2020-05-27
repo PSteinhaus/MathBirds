@@ -175,6 +175,7 @@
     <Compile Include="Sprites\Parts\TestEngineStrong.cs" />
     <Compile Include="Sprites\Parts\TestEngine.cs" />
     <Compile Include="Sprites\Parts\TestWeapon.cs" />
+    <Compile Include="Sprites\Parts\TestWing.cs" />
     <Compile Include="Sprites\Parts\TestWings.cs" />
     <Compile Include="Sprites\Parts\WeaponAbility.cs" />
     <Compile Include="Sprites\Projectiles\Projectile.cs" />
@@ -198,6 +199,8 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Data\sprites\testBody.png" />
+    <Content Include="Data\sprites\testEngine.png" />
+    <Content Include="Data\sprites\testWing.png" />
     <Content Include="Data\sprites\testWings.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

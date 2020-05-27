@@ -12,6 +12,23 @@ namespace CocosSharpMathGame
     /// </summary>
     internal abstract class GameObjectSprite : CCSprite, IGameObject
     {
+        public bool MyVisible
+        {
+            get
+            {
+                if (Visible == false)
+                    return false;
+                else if (Parent != null)
+                {
+                    if (Parent is IGameObject g)
+                        return g.MyVisible;
+                    else
+                        return Parent.Visible;
+                }
+                else
+                    return true;
+            }
+        }
         // 0 is considered EAST; rotation is clockwise
         private float myRotation = 0;
         public float MyRotation

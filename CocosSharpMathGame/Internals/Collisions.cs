@@ -132,7 +132,7 @@ namespace CocosSharpMathGame
                         case CollisionTypePosition ctp2:
                             return CollidePositionLine(collidible2, ctl1);
                         case CollisionTypeLine ctl2:
-                            return CollideLineLine(ctl1, ctl2);
+                            return CollideLineLine(ctl1.StartPoint, ctl1.EndPoint, ctl2.StartPoint, ctl2.EndPoint);
                         case CollisionTypePolygon ctpoly2:
                             return CollidePolygonLine(collidible2, ctpoly2, ctl1);
                         case CollisionTypeBoundingBox ctb2:
@@ -340,15 +340,26 @@ namespace CocosSharpMathGame
                 var polyPoints = transformedPolygon.Points;
                 int i, j;
                 for (i = 0, j = polyPoints.Length - 1; i < polyPoints.Length; j = i++)
+                {
                     if (CCPoint.SegmentIntersect(cTypeLine.StartPoint, cTypeLine.EndPoint, polyPoints[i], polyPoints[j]))
                         return true;
+                }
             }
             return false;
         }
 
-        internal static bool CollideLineLine(CollisionTypeLine cTypeLine1, CollisionTypeLine cTypeLine2)
+        internal static bool CollideLineLine(CCPoint start1, CCPoint end1, CCPoint start2, CCPoint end2)
         {
-            return CCPoint.SegmentIntersect(cTypeLine1.StartPoint, cTypeLine1.EndPoint, cTypeLine2.StartPoint, cTypeLine2.EndPoint);
+            return CCPoint.SegmentIntersect(start1, end1, start2, end2);
+        }
+
+        internal static bool CollideLineLineAt(CCPoint start1, CCPoint end1, CCPoint start2, CCPoint end2, out float cX, out float cY)
+        {
+            var point = CCPoint.IntersectPoint(start1, end1, start2, end2);
+            cX = point.X; cY = point.Y;
+            if (CCPoint.SegmentIntersect(start1, end1, start2, end2))
+                return true;
+            return false;
         }
 
         // dirty, because only the center of the bounding box + all points of the box are used to check the angle;
@@ -465,7 +476,7 @@ namespace CocosSharpMathGame
         /// <returns></returns>
         internal static CCPoint CollisionPosLinePoly(CollisionTypeLine cTypeLine, ICollidible polyCollidible)
         {
-            // for performance reasons first check the bounding box
+            // for performance reasons first check the bounding box (skip for now because we assume a collision is present
             if (CollideBoundingBoxLine(polyCollidible, cTypeLine))
             {
                 // transform the polygon to match the positioning, rotation and scale of the node

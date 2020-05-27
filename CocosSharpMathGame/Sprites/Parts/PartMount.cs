@@ -10,10 +10,10 @@ namespace CocosSharpMathGame
     /// <summary>
     /// PartMounts are positions where parts can be added (screwed onto) the part owning the PartMount.
     /// </summary>
-    internal struct PartMount
+    internal class PartMount
     {
         /// <summary>
-        /// where it is in relation to the part it belongs to;
+        /// where it is in relation to the PosLeftLower of the part it belongs to;
         /// the position is not yet scaled!
         /// </summary>
         internal CCPoint Position { get; set; }
@@ -35,6 +35,12 @@ namespace CocosSharpMathGame
             Dz = -1;
         }
 
+        internal void UpdateMountedPartPosition()
+        {
+            MountedPart.Position = MyPart.PosLeftLower + Position;
+            MountedPart.NullRotation = NullRotation;
+        }
+
         /// <summary>
         /// tries to mount a given part
         /// </summary>
@@ -53,8 +59,7 @@ namespace CocosSharpMathGame
             {
                 MountedPart = part;
                 // make sure the part is actually at the position of the mount
-                part.Position = MyPart.PosLeftLower + Position;
-                part.NullRotation = NullRotation;
+                UpdateMountedPartPosition();
                 //Console.WriteLine("MyPart Position: " + MyPart.Position);
                 //Console.WriteLine("Mount: " + part.Position);
                 return true;

@@ -245,5 +245,14 @@ namespace CocosSharpMathGame
         {
             return CreateDrawNode(CCColor4B.Transparent, 2f, CCColor4B.White, closePolygon);
         }
+
+        internal void MirrorOnXAxis()
+        {
+            PivotPoint = new CCPoint(PivotPoint.X, -PivotPoint.Y);
+            for (int i = 0; i < Points.Length; i++)
+            {
+                Points[i].Y *= -1;
+            }
+        }
     }
 }

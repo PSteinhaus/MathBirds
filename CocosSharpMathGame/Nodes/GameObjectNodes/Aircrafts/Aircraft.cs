@@ -14,6 +14,13 @@ namespace CocosSharpMathGame
     /// </summary>
     internal abstract class Aircraft : GameObjectNode, ICollidible, IDrawNodeUser
     {
+        internal float Velocity
+        {
+            get
+            {
+                return VelocityVector.Length;
+            }
+        }
         internal enum State
         {
             ACTIVE, SHOT_DOWN
@@ -595,10 +602,11 @@ namespace CocosSharpMathGame
             if (controlPoints.Count() < 3)
             {
                 controlPoints.Clear();
-                controlPoints.Add(new CCPoint(V_MIN, 1));
-                controlPoints.Add(new CCPoint(V_MIN+1, 1));
-                controlPoints.Add(new CCPoint(V_MIN+1, -1));
-                controlPoints.Add(new CCPoint(V_MIN, -1));
+                float range = Velocity * Constants.TURN_DURATION * 0.5f;
+                controlPoints.Add(new CCPoint(range, 1));
+                controlPoints.Add(new CCPoint(range + 1, 1));
+                controlPoints.Add(new CCPoint(range + 1, -1));
+                controlPoints.Add(new CCPoint(range, -1));
                 if (deathPossible)
                     Die();
             }
@@ -624,7 +632,7 @@ namespace CocosSharpMathGame
                 // DEBUG: draw the collision polygon of each part
                 //var poly = (Polygon)((CollisionTypePolygon)part.CollisionType).collisionPolygon.Clone();
                 //poly.TransformAccordingToGameObject(part);
-                //multiPurposeDrawNode.DrawPolygon(poly.Points, poly.Points.Length, CCColor4B.Transparent, 2f, CCColor4B.Aquamarine);
+                //highNode.DrawPolygon(poly.Points, poly.Points.Length, CCColor4B.Transparent, 2f, CCColor4B.Aquamarine);
             }
         }
 

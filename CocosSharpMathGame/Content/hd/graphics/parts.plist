@@ -32,6 +32,20 @@
 				<string>{5,3}</string>
 			</dict>
 
+			<key>testWing.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{6,6},{4,10}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false/>
+				<key>sourceColorRect</key>
+				<string>{{0,0},{4,10}}</string>
+				<key>sourceSize</key>
+				<string>{4,10}</string>
+			</dict>
+
 			<key>testWings.png</key>
 			<dict>
 				<key>frame</key>

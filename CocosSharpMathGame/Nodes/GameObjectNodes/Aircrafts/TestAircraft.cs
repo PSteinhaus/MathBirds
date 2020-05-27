@@ -9,23 +9,26 @@ namespace CocosSharpMathGame
 {
     internal class TestAircraft : Aircraft
     {
-        // DEBUG
-        internal TestWings wings;
         internal TestAircraft(bool withWeapon=true) : base()
         {
             IsManeuverPolygonDrawn = true;
             Body = new TestBody();
             // mount the wings
-            wings = new TestWings();
-            Body.MountPart(wings);
+            //wings = new TestWings(); // OLD
+            var wing1 = new TestWing();
+            var wing2 = new TestWing();
+            Body.MountPart(wing1);
+            Body.MountPart(wing2);
             // give the wings some engines
-            wings.MountPart(new TestEngine());
-            wings.MountPart(new TestEngine());
+            wing1.MountPart(new TestEngine());
+            var engine2 = new TestEngine();
+            wing2.MountPart(engine2);
             //Body.MountPart(new TestEngineStrong());
             if (withWeapon)
             {
-                // give the wings a gun
-                wings.MountPart(new TestWeapon());
+                // give both wings guns
+                wing1.MountPart(new TestWeapon());
+                wing2.MountPart(new TestWeapon());
             }
             /*
             foreach (var part in TotalParts)

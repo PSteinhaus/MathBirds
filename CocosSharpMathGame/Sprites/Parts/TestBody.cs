@@ -16,11 +16,15 @@ namespace CocosSharpMathGame
             // set your types
             Types = new Type[] { Type.BODY };
 
-            // add a mount point for wings at your center
-            var wingsMount = new PartMount(this, new CCPoint((ContentSize.Width / 2), (ContentSize.Height / 2)), Type.WINGS);
+            // OLD: add a mount point for wings at your center
+            //var wingsMount = new PartMount(this, new CCPoint((ContentSize.Width / 2), (ContentSize.Height / 2)), Type.WINGS);
+            // NEW: add mount points for two single wings
+            var wingMount1 = new PartMount(this, new CCPoint((ContentSize.Width / 2), (ContentSize.Height / 2) + 1), Type.SINGLE_WING);
+            var wingMount2 = new PartMount(this, new CCPoint((ContentSize.Width / 2), (ContentSize.Height / 2) - 1), Type.SINGLE_WING);
+
             // add a mount point for an engine at the end point
             var engineMount = new PartMount(this, new CCPoint(0, ContentSize.Height / 2), Type.ENGINE);
-            PartMounts = new PartMount[] { wingsMount, engineMount };
+            PartMounts = new PartMount[] { wingMount1, wingMount2, engineMount };
 
             // specify the collision polygon
             CollisionType = Collisions.CreateDiamondCollisionPolygon(this);
