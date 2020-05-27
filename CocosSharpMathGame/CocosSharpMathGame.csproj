@@ -137,6 +137,8 @@
   <ItemGroup>
     <Compile Include="Constants.cs" />
     <Compile Include="CocosSharpMathGame.cs" />
+    <Compile Include="Interfaces\IAdvancable.cs" />
+    <Compile Include="Interfaces\IDrawNodeUser.cs" />
     <Compile Include="Interfaces\IGameObject.cs" />
     <Compile Include="Internals\AI\AI.cs" />
     <Compile Include="Internals\AI\StandardAI.cs" />
@@ -155,6 +157,7 @@
     <Compile Include="MathChallenges\MathToTexture.cs" />
     <Compile Include="Nodes\GameObjectNodes\Aircrafts\Aircraft.cs" />
     <Compile Include="Nodes\GameObjectNodes\Aircrafts\CloudTailNode.cs" />
+    <Compile Include="Nodes\GameObjectNodes\Aircrafts\DamageCloudTailNode.cs" />
     <Compile Include="Nodes\GameObjectNodes\Aircrafts\FlightPathControlNode.cs" />
     <Compile Include="Nodes\GameObjectNodes\Aircrafts\FlightPathNode.cs" />
     <Compile Include="Nodes\GameObjectNodes\Aircrafts\TestAircraft.cs" />

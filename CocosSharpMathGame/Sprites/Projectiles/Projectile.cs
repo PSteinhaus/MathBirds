@@ -7,7 +7,7 @@ using CocosSharp;
 
 namespace CocosSharpMathGame
 {
-    internal abstract class Projectile : GameObjectNode, ICollidible, ICloneable
+    internal abstract class Projectile : GameObjectNode, ICollidible, ICloneable, IAdvancable, IDrawNodeUser
     {
         public CollisionType CollisionType { get; set; }
         internal float Velocity { get; private protected set; }
@@ -65,7 +65,7 @@ namespace CocosSharpMathGame
             return TimeAlive < LifeTime;
         }
 
-        internal void Advance(float dt)
+        public bool Advance(float dt)
         {
             TimeAlive += dt;
             if (IsAlive())
@@ -87,6 +87,7 @@ namespace CocosSharpMathGame
                     }
                 }
             }
+            return CanBeRemoved();
         }
 
         internal bool CanBeRemoved()
@@ -99,7 +100,7 @@ namespace CocosSharpMathGame
             LifeTime = TimeAlive;
         }
 
-        internal void DrawTail(CCDrawNode drawNode)
+        public void UseDrawNodes(CCDrawNode highNode, CCDrawNode lowNode)
         {
             // calculate how far back the tail needs to go
             float tMidTail = TailLifeTime / 2;
@@ -122,9 +123,9 @@ namespace CocosSharpMathGame
             CCPoint midPoint = new CCPoint(PositionX - Dx * tMidTail, PositionY - Dy * tMidTail);
             CCPoint endPoint = new CCPoint(PositionX - Dx * tEndTail, PositionY - Dy * tEndTail);
             if (tMidTail != 0)
-                drawNode.DrawLine(Position, midPoint, TailWidth, TailColor);
+                lowNode.DrawLine(Position, midPoint, TailWidth, TailColor);
             if (tEndTail != 0)
-                drawNode.DrawLine(midPoint, endPoint, TailWidth, TailEndColor);
+                lowNode.DrawLine(midPoint, endPoint, TailWidth, TailEndColor);
             //TailNode.DrawSolidCircle(Position, 10f, CCColor4B.Yellow);
         }
 
@@ -138,6 +139,16 @@ namespace CocosSharpMathGame
             object clone = MemberwiseClone();
             ((Projectile)clone).Init();
             return clone;
+        }
+
+        private protected void StandardCollisionBehaviour(Part part, CCPoint collisionPos)
+        {
+            // damage the part
+            part.TakeDamage(Damage);
+            // let the part react visually
+            part.ReactToHit(Damage, collisionPos);
+            // end your life
+            Die();
         }
 
         internal abstract void CollideWithAircraft(Aircraft aircraft);

@@ -13,13 +13,15 @@ namespace CocosSharpMathGame
     /// </summary>
     abstract internal class Part : GameObjectSprite, ICollidible
     {
-        internal float Health { get; private protected set; } = 5f; //float.PositiveInfinity; // standard behaviour is indestructability
+        internal float Health { get; private protected set; } = 10f; //float.PositiveInfinity; // standard behaviour is indestructability
+        internal float MaxHealth { get; private protected set; } = 10f;
         internal enum State
         {
             ACTIVE, DESTROYED
         }
         internal State MyState { get; private protected set; } = State.ACTIVE;
         public CollisionType CollisionType { get; set; }
+        internal List<DamageCloudTailNode> DamageCloudTailNodes { get; } = new List<DamageCloudTailNode>();
         /// <summary>
         /// The rotation this part starts at
         /// </summary>
@@ -129,6 +131,16 @@ namespace CocosSharpMathGame
             // reduce your mass (half it for now)
             for (int i=0; i<MassPoints.Length; i++)
                 MassPoints[i].Mass /= 2;
+            // add a special destruction circle cloud that will follow you
+            if (!DamageCloudTailNodes.Any())
+            {
+                var dctNode = new DamageCloudTailNode(0, CCPoint.Zero);
+                dctNode.AutoAddClouds = false;
+                DamageCloudTailNodes.Add(dctNode);
+            }
+            var destructionCircleCloud = new CircleCloud(PositionWorldspace, 0, CCColor4B.White, true, (ContentSize.Width + ContentSize.Height) * GetScale() + 100f, 5f);
+            destructionCircleCloud.FollowTarget = this;
+            DamageCloudTailNodes.First().AddCloud(destructionCircleCloud);
             // also kill all parts that are mounted to you
             foreach (var part in MountedParts)
             {
@@ -137,6 +149,55 @@ namespace CocosSharpMathGame
             if (callPartsChanged)
                 Aircraft.PartsChanged(deathPossible: true);
         }
+
+        internal void ReactToHit(float damage, CCPoint collisionPos)
+        {
+            const float MAX_DISTANCE_FROM_COLLISION = 200f;
+            float maxDistanceFromCollision = ((ContentSize.Width + ContentSize.Height) / 4) * GetScale();
+            if (maxDistanceFromCollision > MAX_DISTANCE_FROM_COLLISION) maxDistanceFromCollision = MAX_DISTANCE_FROM_COLLISION;
+            // generate a random point near the collisionPos
+            // and show an effect there
+            while(true)
+            {
+                CCPoint randomPoint = Constants.RandomPointNear(collisionPos, maxDistanceFromCollision);
+                //CCPoint randomPoint = collisionPos;
+                if (Collisions.CollidePositionPolygon(randomPoint, this))   // check whether the random point is inside the collision polygon
+                {
+                    CCPoint relativePosition = randomPoint - PositionWorldspace;
+                    relativePosition = CCPoint.RotateByAngle(relativePosition, CCPoint.Zero, -Constants.CCDegreesToMathRadians(TotalRotation));
+                    // react differently depending upon how damaged you now are
+                    var damageTail = new DamageCloudTailNode(DamageToReferenceSize(damage), relativePosition);
+                    if (Health / MaxHealth > 0.7f)
+                        damageTail.AutoAddClouds = false;
+                    if (Health / MaxHealth < 0.5f)
+                    {
+                        var rng = new Random();
+                        byte value = (byte)rng.Next(135, 255);
+                        damageTail.CloudColor = new CCColor4B((byte)rng.Next(value, 255), value, 0);
+                    }
+                    DamageCloudTailNodes.Add(damageTail);
+                    break;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Returns how many mount connections can be found from here to the body
+        /// </summary>
+        /// <returns></returns>
+        internal int NumOfMountParents()
+        {
+            if (this == Aircraft.Body)
+                return 0;
+            else
+                return MountParent.NumOfMountParents() + 1;
+        }
+
+        private float DamageToReferenceSize(float damage)
+        {
+            return damage * 7f;
+        }
+
         /// <summary>
         /// searches recursively and returns all parts that are mounted on this part including itself
         /// </summary>
@@ -307,13 +368,15 @@ namespace CocosSharpMathGame
                     if (WeaponAbility != null && Aircraft.MyState != Aircraft.State.SHOT_DOWN)
                         WeaponAbility.ExecuteOrders(dt);
                     if (ManeuverAbility != null)
-                        ManeuverAbility.ExecuteOrders(dt, PositionWorldspace, Aircraft.MyRotation);
+                        ManeuverAbility.ExecuteOrders(dt, PositionWorldspace, TotalRotation);
                     break;
                 case State.DESTROYED:
                     if (ManeuverAbility != null)
-                        ManeuverAbility.ExecuteOrders(dt, PositionWorldspace, Aircraft.MyRotation, decayOnly: true);
+                        ManeuverAbility.ExecuteOrders(dt, PositionWorldspace, TotalRotation, decayOnly: true);
                     break;
             }
+            foreach (var damageTail in DamageCloudTailNodes)
+                damageTail.Advance(dt, PositionWorldspace, TotalRotation);
         }
 
         internal void PrepareForRemoval()

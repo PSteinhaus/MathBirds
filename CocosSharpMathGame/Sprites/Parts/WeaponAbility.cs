@@ -72,6 +72,8 @@ namespace CocosSharpMathGame
                 return TargetPart.Parent as Aircraft;
             }
         }
+        internal float UpdateTargetDelay { get; set; } = 0.5f;
+        internal float CooldownUntilNextTargetUpdate { get; set; }
 
         /// <summary>
         /// called by the Aircraft owning the part owning this WeaponAbility each frame
@@ -81,18 +83,21 @@ namespace CocosSharpMathGame
         {
             // cool down
             CooldownUntilNextShot -= dt;
+            CooldownUntilNextTargetUpdate -= dt;
             if (CooldownUntilNextShot < 0) CooldownUntilNextShot = 0;
             // if you have a target check if it is still in range
             if (TargetPart != null)
             {
-                CCPoint vectorMyPartTarget = TargetPart.PositionWorldspace - MyPart.PositionWorldspace;
-                if (   TargetPart.MyState == Part.State.DESTROYED || TargetAircraft.MyState == Aircraft.State.SHOT_DOWN
-                    || CCPoint.Distance(MyPart.PositionWorldspace, TargetPart.PositionWorldspace) > AttentionRange
-                    || Constants.AbsAngleDifferenceDeg(MyPart.TotalRotation - MyPart.RotationFromNull, Constants.DxDyToCCDegrees(vectorMyPartTarget.X, vectorMyPartTarget.Y)) > AttentionAngle)
-                    TargetPart = null;
+                    CCPoint vectorMyPartTarget = TargetPart.PositionWorldspace - MyPart.PositionWorldspace;
+                    if (TargetPart.MyState == Part.State.DESTROYED || TargetAircraft.MyState == Aircraft.State.SHOT_DOWN
+                        || CooldownUntilNextTargetUpdate <= 0
+                        || CCPoint.Distance(MyPart.PositionWorldspace, TargetPart.PositionWorldspace) > AttentionRange
+                        || Constants.AbsAngleDifferenceDeg(MyPart.TotalRotation - MyPart.RotationFromNull, Constants.DxDyToCCDegrees(vectorMyPartTarget.X, vectorMyPartTarget.Y)) > AttentionAngle)
+                        TargetPart = null;
             }
-            if (TargetPart == null)     // if you currently do not aim at anything search for a target
+            if (TargetPart == null && CooldownUntilNextTargetUpdate <= 0)     // if you currently do not aim at anything search for a target
             {
+                CooldownUntilNextTargetUpdate = UpdateTargetDelay;
                 // collect aircrafts that are near enough to have parts which could be targets
                 // go through the parts of all of these planes and collect those that are in the attention angle
                 PartsInRange(out List<Part> partsInRange, out List<float> anglesFromTo, out List<float> distances);
@@ -221,11 +226,12 @@ namespace CocosSharpMathGame
             // define the interval
             double startAngle = Constants.DxDyToRadians(-TargetToMyPart.X, -TargetToMyPart.Y);
             double endAngle = 0;
-            double deltaStart = TargetToMyPart.X - TargetToMyPart.Y / Math.Tan(startAngle) + (TargetToMyPart.Y * TargetAircraft.VelocityVector.Length) / (Math.Sin(startAngle) * ProjectileBlueprint.Velocity);
+            float totalBulletVelocity = ProjectileBlueprint.Velocity + AircraftVelocityBoost();
+            double deltaStart = TargetToMyPart.X - TargetToMyPart.Y / Math.Tan(startAngle) + (TargetToMyPart.Y * TargetAircraft.VelocityVector.Length) / (Math.Sin(startAngle) * totalBulletVelocity);
             for (int i = 0; i < 6; i++) // iterate 6 times at max
             {
                 angle = (startAngle + endAngle) / 2;
-                double delta = TargetToMyPart.X - TargetToMyPart.Y / Math.Tan(angle) + (TargetToMyPart.Y * TargetAircraft.VelocityVector.Length) / (Math.Sin(angle) * ProjectileBlueprint.Velocity);
+                double delta = TargetToMyPart.X - TargetToMyPart.Y / Math.Tan(angle) + (TargetToMyPart.Y * TargetAircraft.VelocityVector.Length) / (Math.Sin(angle) * totalBulletVelocity);
                 if (Math.Abs(delta) < epsilon)  // you're close enough so break already
                     break;
                 // delta is negative when the bullet hits behind the part -> angle needs to be closer to 0
@@ -257,12 +263,18 @@ namespace CocosSharpMathGame
                 CooldownUntilNextShot = ShootDelay;
                 Projectile newProjectile = (Projectile)ProjectileBlueprint.Clone();
                 Console.WriteLine("TotalRot: " + MyPart.TotalRotation);
-                newProjectile.SetRotation(MyPart.TotalRotation);
+                newProjectile.SetRotation(MyPart.TotalRotation, updateDxDy:false);
+                newProjectile.SetVelocity(newProjectile.Velocity + AircraftVelocityBoost());
                 newProjectile.Position = MyPart.PositionWorldspace;
                 newProjectile.MyTeam = MyPart.Aircraft.Team;
                 ((PlayLayer)MyPart.Layer).AddProjectile(newProjectile);
             }
             
+        }
+
+        private float AircraftVelocityBoost()
+        {
+            return MyPart.Aircraft.VelocityVector.Length * (float)Math.Cos(Constants.CCDegreesToMathRadians(Constants.AngleFromToDeg(MyPart.TotalRotation, MyPart.Aircraft.TotalRotation)));
         }
 
         /// <summary>

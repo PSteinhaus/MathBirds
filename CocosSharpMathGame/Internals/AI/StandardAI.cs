@@ -25,7 +25,7 @@ namespace CocosSharpMathGame
             Aircraft closestAircraft = null;
             foreach (var aircraft in aircrafts)
             {
-                if (aircraft != Aircraft && aircraft.Team != myTeam)
+                if (aircraft != Aircraft && aircraft.Team != myTeam && aircraft.MyState != Aircraft.State.SHOT_DOWN)
                 {
                     // check the distance (closer is better)
                     if (closestAircraft == null ||
@@ -34,7 +34,8 @@ namespace CocosSharpMathGame
                 }
             }
             // set path towards him
-            Aircraft.TryToSetFlightPathHeadTo(closestAircraft.Position);
+            if (closestAircraft != null)
+                Aircraft.TryToSetFlightPathHeadTo(closestAircraft.Position);
         }
     }
 }

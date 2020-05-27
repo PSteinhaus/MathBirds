@@ -16,7 +16,8 @@ namespace CocosSharpMathGame
         private MathSprite mathSprite1 = new MathSprite("(a+b)*((x))");
         private CCDrawNode drawNode = new CCDrawNode();
         internal List<Aircraft> Aircrafts { get; set; } = new List<Aircraft>();
-        internal List<Projectile> Projectiles { get; set; } = new List<Projectile>();
+        internal List<Projectile> Projectiles { get; } = new List<Projectile>();
+        internal List<IDrawNodeUser> DrawNodeUsers { get; } = new List<IDrawNodeUser>();
         private TestAircraft testAircraft;
         private CCPoint cameraPosition = new CCPoint(0,0);
         private CCPoint CameraPosition
@@ -42,14 +43,18 @@ namespace CocosSharpMathGame
                 cameraSize = value;
             }
         }
-        internal CCDrawNode MultiPurposeDrawNode { get; set; }
+        internal CCDrawNode HighDrawNode { get; set; }
+        internal CCDrawNode LowDrawNode { get; set; }
         public PlayLayer() : base(CCColor4B.Black)
         {
             GUILayer = new GUILayer(this);
 
-            MultiPurposeDrawNode = new CCDrawNode();
-            MultiPurposeDrawNode.BlendFunc = CCBlendFunc.NonPremultiplied;
-            AddChild(MultiPurposeDrawNode, zOrder: 1000); // DEBUG: for now draw on top
+            HighDrawNode = new CCDrawNode();
+            HighDrawNode.BlendFunc = CCBlendFunc.NonPremultiplied;
+            AddChild(HighDrawNode, zOrder: 1000);
+            LowDrawNode = new CCDrawNode();
+            LowDrawNode.BlendFunc = CCBlendFunc.NonPremultiplied;
+            AddChild(LowDrawNode, zOrder: -1000);
             // for now place some MathSprites as a test
             //AddChild(mathSprite1);
             //AddChild(mathSprite2);
@@ -203,11 +208,13 @@ namespace CocosSharpMathGame
         internal void AddProjectile(Projectile projectile)
         {
             Projectiles.Add(projectile);
+            DrawNodeUsers.Add(projectile);
             AddChild(projectile);
         }
         internal void RemoveProjectile(Projectile projectile)
         {
             Projectiles.Remove(projectile);
+            DrawNodeUsers.Remove(projectile);
             RemoveChild(projectile);
         }
 
@@ -252,10 +259,9 @@ namespace CocosSharpMathGame
                         }
                         foreach (var projectile in toBeRemoved)
                         {
-                            Console.WriteLine("removed at TimeAlive: " + projectile.TimeAlive + ", LifeTime: " + projectile.LifeTime);
                             RemoveProjectile(projectile);
                         }
-                        UpdateMPDrawNode();
+                        UpdateDrawNodes();
                         if (TimeLeftExecutingOrders <= 0)
                             StartPlanningPhase();
                     }
@@ -265,15 +271,16 @@ namespace CocosSharpMathGame
         /// <summary>
         /// Draw everything that is supposed to be drawn by the DrawNode
         /// </summary>
-        private void UpdateMPDrawNode()
+        private void UpdateDrawNodes()
         {
-            MultiPurposeDrawNode.Clear();
+            HighDrawNode.Clear();
+            LowDrawNode.Clear();
             // draw the projectiles
-            foreach (Projectile projectile in Projectiles)
-                projectile.DrawTail(MultiPurposeDrawNode);
+            foreach (var drawNodeUser in DrawNodeUsers)
+                drawNodeUser.UseDrawNodes(HighDrawNode, LowDrawNode);
             // draw everything directly related to the aircrafts
             foreach (var aircraft in Aircrafts)
-                aircraft.UseDrawNode(MultiPurposeDrawNode);
+                aircraft.UseDrawNodes(HighDrawNode, LowDrawNode);
         }
 
         void OnTouchesBegan(List<CCTouch> touches, CCEvent touchEvent)

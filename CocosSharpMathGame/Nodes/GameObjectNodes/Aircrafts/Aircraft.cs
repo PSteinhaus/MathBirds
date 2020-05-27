@@ -12,7 +12,7 @@ namespace CocosSharpMathGame
     /// Aircrafts are objects in the sky that are assembled from parts
     /// which react to collision
     /// </summary>
-    internal abstract class Aircraft : GameObjectNode, ICollidible
+    internal abstract class Aircraft : GameObjectNode, ICollidible, IDrawNodeUser
     {
         internal enum State
         {
@@ -613,12 +613,14 @@ namespace CocosSharpMathGame
             MyState = State.SHOT_DOWN;
         }
 
-        internal void UseDrawNode(CCDrawNode multiPurposeDrawNode)
+        public void UseDrawNodes(CCDrawNode highNode, CCDrawNode lowNode)
         {
             foreach (var part in TotalParts)
             {
                 if (part.ManeuverAbility != null)
-                    part.ManeuverAbility.CloudTailNode.DrawClouds(multiPurposeDrawNode);
+                    part.ManeuverAbility.CloudTailNode.UseDrawNodes(highNode, lowNode);
+                foreach (var damageTail in part.DamageCloudTailNodes)
+                    damageTail.UseDrawNodes(highNode, lowNode);
                 // DEBUG: draw the collision polygon of each part
                 //var poly = (Polygon)((CollisionTypePolygon)part.CollisionType).collisionPolygon.Clone();
                 //poly.TransformAccordingToGameObject(part);
@@ -761,7 +763,7 @@ namespace CocosSharpMathGame
             FlightPathControlNode.ResetHeadPosition();
             if (AI != null && MyState != State.SHOT_DOWN)
                 AI.ActInPlanningPhase(AircraftsInLevel());
-            if (ControlledByPlayer)
+            if (ControlledByPlayer && MyState != State.SHOT_DOWN)
                 FlightPathControlNode.Visible = true;
         }
 

@@ -145,6 +145,14 @@ namespace CocosSharpMathGame
             return false;
         }
 
+        internal static bool CollidePositionPolygon(CCPoint position, ICollidible polyCollidible)
+        {
+            // transform the polygon to match the positioning, rotation and scale of the node
+            Polygon transformedPolygon = ((Polygon)((CollisionTypePolygon)polyCollidible.CollisionType).collisionPolygon.Clone());
+            transformedPolygon.TransformAccordingToGameObject(polyCollidible);
+            return transformedPolygon.ContainsPoint(position);
+        }
+
         internal static bool CollidePositionPosition(ICollidible collidible1, ICollidible collidible2)
         {
             return ((CCNode)collidible1).PositionWorldspace.Equals(((CCNode)collidible2).PositionWorldspace);
@@ -447,6 +455,35 @@ namespace CocosSharpMathGame
             var collisionPoly = new Polygon(gameObject.DiamondCollisionPoints());
             collisionPoly.PivotPoint = ((CCNode)gameObject).AnchorPointInPoints;// new CCPoint(ContentSize.Width / 2, ContentSize.Height / 2);
             return new CollisionTypePolygon(collisionPoly);
+        }
+
+        /// <summary>
+        /// Return a position that is both on the line and in the polygon.
+        /// </summary>
+        /// <param name="testProjectile"></param>
+        /// <param name="part"></param>
+        /// <returns></returns>
+        internal static CCPoint CollisionPosLinePoly(CollisionTypeLine cTypeLine, ICollidible polyCollidible)
+        {
+            // for performance reasons first check the bounding box
+            if (CollideBoundingBoxLine(polyCollidible, cTypeLine))
+            {
+                // transform the polygon to match the positioning, rotation and scale of the node
+                Polygon transformedPolygon = ((Polygon)((CollisionTypePolygon)polyCollidible.CollisionType).collisionPolygon.Clone());
+                transformedPolygon.TransformAccordingToGameObject(polyCollidible);
+                // first check if the polygon contains some of the two line points
+                if (transformedPolygon.ContainsPoint(cTypeLine.StartPoint))
+                    return cTypeLine.StartPoint;
+                else if (transformedPolygon.ContainsPoint(cTypeLine.EndPoint))
+                    return cTypeLine.EndPoint;
+                // solve exactly: check for line intersections
+                var polyPoints = transformedPolygon.Points;
+                int i, j;
+                for (i = 0, j = polyPoints.Length - 1; i < polyPoints.Length; j = i++)
+                    if (CCPoint.SegmentIntersect(cTypeLine.StartPoint, cTypeLine.EndPoint, polyPoints[i], polyPoints[j]))
+                        return CCPoint.IntersectPoint(cTypeLine.StartPoint, cTypeLine.EndPoint, polyPoints[i], polyPoints[j]);
+            }
+            return CCPoint.Zero;
         }
     }
 }

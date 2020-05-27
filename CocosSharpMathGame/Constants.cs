@@ -127,5 +127,18 @@ namespace CocosSharpMathGame
             float difference2 = 360f - difference1;
             return Math.Min(difference1, difference2);
         }
+        
+        public static CCPoint RandomPointNear(CCPoint point, float range)
+        {
+            var rng = new Random();
+            CCPoint randomPoint = new CCPoint((float)rng.NextDouble() * range, 0);
+            return point + CCPoint.RotateByAngle(randomPoint, CCPoint.Zero, (float)rng.NextDouble() * PI * 2);
+        }
+
+        public static CCPoint RandomPointBoxnear(CCPoint point, float range)
+        {
+            var rng = new Random();
+            return point + new CCPoint((float)rng.NextDouble() * range, (float)rng.NextDouble() * range);
+        }
     }
 }

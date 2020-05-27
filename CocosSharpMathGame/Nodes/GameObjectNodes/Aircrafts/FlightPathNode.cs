@@ -139,10 +139,10 @@ namespace CocosSharpMathGame
                 if (angleEnd < 0) angleEnd = (float)(2.0 * Math.PI) + angleEnd;
                 // normalize the angles
                 float angleShift = (float)(2.0 * Math.PI) - angleStart;
-                angleStart = 0;
                 angleEnd = (angleEnd + angleShift) % (float)(2.0 * Math.PI);
                 float angleDestination = angleSign == 1 ? angleEnd : (float)(2.0*Math.PI) - angleEnd;
                 int steps = (int)(radius * angleDestination);
+                if (steps < 200) steps = 200;
                 for (int i=0; i < steps; i++)
                 {
                     CCPoint pathPoint = CCPoint.RotateByAngle(startPosition, rotationPoint, angleSign * angleDestination * ((float)i / (float)steps));
@@ -162,7 +162,6 @@ namespace CocosSharpMathGame
                 }
                 */
                 pathPoints.Add(endPosition);
-                Console.WriteLine("Path length:" + pathPoints.Count());
             }
 
             /*
