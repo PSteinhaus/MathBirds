@@ -181,6 +181,50 @@ namespace CocosSharpMathGame
                     break;
                 }
             }
+            // shake!
+            if (Aircraft.ControlledByPlayer)
+            {
+                // the shake amount depends on the damage, but mostly on how the damage relates to the max health
+                float baseRefSize = DamageToReferenceSize(damage, 10f);
+                float specialBonus = 0f;
+                float healthFactor = damage / MaxHealth;
+                if (healthFactor > 1) healthFactor = 1;
+                if (Health <= 0)
+                {
+                    baseRefSize *= (1 + TotalParts.Count()) * 0.8f;
+                    specialBonus += TotalMaxHealth;
+                }
+                float shakeAmount = baseRefSize * 20 * healthFactor + specialBonus;
+                ((PlayLayer)Layer).AddScreenShake(shakeAmount, shakeAmount);
+            }
+        }
+
+        /// <summary>
+        /// Also includes the health of mounted parts (all mounted parts, i.e. all found by recursion)
+        /// </summary>
+        internal float TotalHealth
+        {
+            get
+            {
+                float health = 0;
+                foreach (var part in TotalParts)
+                    health += part.Health;
+                return health;
+            }
+        }
+
+        /// <summary>
+        /// Also includes the max health of mounted parts (all mounted parts, i.e. all found by recursion)
+        /// </summary>
+        internal float TotalMaxHealth
+        {
+            get
+            {
+                float maxHealth = 0;
+                foreach (var part in TotalParts)
+                    maxHealth += part.MaxHealth;
+                return maxHealth;
+            }
         }
 
         /// <summary>
@@ -195,9 +239,10 @@ namespace CocosSharpMathGame
                 return MountParent.NumOfMountParents() + 1;
         }
 
-        private float DamageToReferenceSize(float damage)
+        private float DamageToReferenceSize(float damage, float maxRefSize = 50f)
         {
-            return damage * 7f;
+            float refSize = damage * 6;
+            return refSize <= maxRefSize ? refSize : maxRefSize;
         }
 
         /// <summary>

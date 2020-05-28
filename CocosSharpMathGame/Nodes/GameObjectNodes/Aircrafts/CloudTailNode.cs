@@ -90,7 +90,7 @@ namespace CocosSharpMathGame
     internal class CloudTailNode : IDrawNodeUser
     {
         internal bool DrawLow { get; set; } = true;
-        internal float CloudDelay { get; set; } = 0.3f;
+        internal float CloudDelay { get; set; } = 0.1f;
         internal float CloudLifeTime { get; set; } = 2.5f;
         internal CCColor4B CloudColor { get; set; } = CCColor4B.White;
         internal float ReferenceSize { get; set; } = 18f;

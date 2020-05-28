@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using CocosSharp;
 using Microsoft.Xna.Framework;
 
@@ -21,6 +22,7 @@ namespace CocosSharpMathGame
         internal List<IDrawNodeUser> DrawNodeUsers { get; } = new List<IDrawNodeUser>();
         private TestAircraft testAircraft;
         private CCPoint cameraPosition = new CCPoint(0,0);
+        private CCPoint currentCameraPosition = new CCPoint(0, 0);
         private CCPoint CameraPosition
         {
             get
@@ -42,8 +44,12 @@ namespace CocosSharpMathGame
             set
             {
                 cameraSize = value;
+                if (cameraSize.Width > MaxCameraWidth)
+                    cameraSize = new CCSize(MaxCameraWidth, MaxCameraHeight);
             }
         }
+        private CCPoint ShakeAmount { get; set; }
+        private CCPoint ScreenShakeVec { get; set; }
         internal CCDrawNode HighDrawNode { get; set; }
         internal CCDrawNode LowDrawNode { get; set; }
         public PlayLayer() : base(CCColor4B.Black)
@@ -145,67 +151,12 @@ namespace CocosSharpMathGame
             //Console.WriteLine("Bounds: "+testAircraft.BoundingBoxTransformedToWorld);
             //Console.WriteLine("Aircraft Position: " + testAircraft.Position);
 
-            //var maneuverDrawNode = testAircraft.ManeuverPolygon.CreateDrawNode();
-            //AddChild(maneuverDrawNode);
-
-            /*
-            // CREATE AND DRAW A POLYGON (AS A TEST)
-            var polygonPoints = new CCPoint[]
-            { new CCPoint(200, 40), new CCPoint(130, 180), new CCPoint(160, 200), new CCPoint(200, 210), new CCPoint(240, 200), new CCPoint(270, 180) };
-            var polygon = new Polygon(polygonPoints);
-            var polyDrawNode = polygon.CreateDrawNode(CCColor4B.Transparent, 2f, CCColor4B.White);
-            AddChild(polyDrawNode);
-            // NOW A MORE POINTY ONE
-            polygonPoints = new CCPoint[]
-            { new CCPoint(200, 40), new CCPoint(100, 180), new CCPoint(200, 300), new CCPoint(300, 180) };
-            polygon = new Polygon(polygonPoints);
-            polygon.MoveBy(300, 0);
-            polyDrawNode = polygon.CreateDrawNode(CCColor4B.Transparent, 2f, CCColor4B.White);
-            AddChild(polyDrawNode);
-            // AND NOW ONE WITH SPLINES
-            int[] splineControl = new int[] { -1, -1, 20, 0 };
-            var splinePolygon = new PolygonWithSplines(polygonPoints, splineControl);
-            splinePolygon.MoveBy(300, 0);
-            polyDrawNode = splinePolygon.CreateDrawNode(CCColor4B.Transparent, 2f, CCColor4B.White);
-            AddChild(polyDrawNode);
-            splinePolygon.Transform(0, 400, 200f);
-            polyDrawNode = splinePolygon.CreateDrawNode(CCColor4B.Transparent, 2f, CCColor4B.White);
-            AddChild(polyDrawNode);
-            */
-
-            //var headSprite = new FlightPathHead();
-            //headSprite.Position = bounds.Center;
-            //headSprite.PositionY += 200;
-            //AddChild(headSprite);
-
-            //var center = bounds.Center;
-            //var point1 = new CCPoint(center.X, center.Y + bounds.Size.Height / 3);
-            //var point2 = center;
-            //var point3 = new CCPoint(center.X, center.Y - bounds.Size.Height / 3);
-
-            //mathSprite1.Position = point1;
-            //mathSprite2.Position = point2;
-            //mathSprite3.Position = point3;
-
-            //float desiredWidth = 800;
-            //mathSprite1.FitToWidth(desiredWidth);
-            //mathSprite2.FitToWidth(desiredWidth);
-            //mathSprite3.FitToWidth(desiredWidth);
-
-            // create a DrawNode to check the boundaries
-            //drawNode.DrawRect(mathSprite1.BoundingBoxTransformedToParent, CCColor4B.AliceBlue);
-            //drawNode.DrawRect(mathSprite2.BoundingBoxTransformedToParent, CCColor4B.Green);
-            //drawNode.DrawRect(mathSprite3.BoundingBoxTransformedToParent, CCColor4B.Red);
-
-            //drawNode.DrawSolidCircle(mathSprite1.Position, mathSprite1.ContentSize.Width / 2, CCColor4B.Gray);
-            //drawNode.DrawSolidCircle(mathSprite2.Position, mathSprite2.ContentSize.Width / 2, CCColor4B.LightGray);
-            //drawNode.DrawSolidCircle(mathSprite3.Position, mathSprite3.ContentSize.Width / 2, CCColor4B.Black);
             UpdateCamera();
         }
 
         internal void UpdateCamera()
         {
-            Camera = new CCCamera(new CCRect(cameraPosition.X, cameraPosition.Y, CameraSize.Width, CameraSize.Height));
+            Camera = new CCCamera(new CCRect(cameraPosition.X+ScreenShakeVec.X, cameraPosition.Y+ScreenShakeVec.Y, CameraSize.Width, CameraSize.Height));
             Camera.NearAndFarPerspectiveClipping = new CCNearAndFarClipping(1f, 1000000f);
         }
         internal void AddAircraft(Aircraft aircraft)
@@ -231,6 +182,57 @@ namespace CocosSharpMathGame
             Projectiles.Remove(projectile);
             DrawNodeUsers.Remove(projectile);
             RemoveChild(projectile);
+        }
+
+        internal void AddScreenShake(float shakeX, float shakeY)
+        {
+            ShakeAmount += new CCPoint(shakeX, shakeY);
+        }
+        private float timeSinceLastShake = 30f;
+        private CCPoint currentShakePoint = CCPoint.Zero;
+        private CCPoint nextShakePoint;
+        private void ShakeScreen(float dt)
+        {
+            const float shakeDelay = 0.032625f;
+            const float reductionFactor = 0.8f;
+            const float reductionFactorCutoff = 80f;
+            const float cutoffLength = 50f;
+            timeSinceLastShake += dt;
+            if (ShakeAmount != CCPoint.Zero)
+            {
+                // check if it's time for a new shake point
+                if (timeSinceLastShake >= shakeDelay)
+                {
+                    var rng = new Random();
+                    currentShakePoint = ScreenShakeVec;
+                    int sign1 = rng.Next(0, 2) == 1 ? 1 : -1;
+                    int sign2 = rng.Next(0, 2) == 1 ? 1 : -1;
+                    nextShakePoint = new CCPoint(sign1 * (float)rng.NextDouble() * ShakeAmount.X, sign2 * (float)rng.NextDouble() * ShakeAmount.Y);
+                    timeSinceLastShake = timeSinceLastShake % shakeDelay;
+                }
+                // calculate the current shake
+                // the actual shake point is somewhere between the current and the next shake point
+                ScreenShakeVec = currentShakePoint + (nextShakePoint - currentShakePoint) * timeSinceLastShake / shakeDelay;
+                // reduce the shake
+                float reduction;
+                var length = ShakeAmount.Length;
+                if (length < cutoffLength)
+                    reduction = dt * reductionFactorCutoff;
+                else
+                    reduction = dt * length * reductionFactor;
+                if (ShakeAmount.X > ShakeAmount.Y)
+                    ShakeAmount -= new CCPoint(reduction, ShakeAmount.Y / ShakeAmount.X * reduction);
+                else
+                    ShakeAmount -= new CCPoint(ShakeAmount.X / ShakeAmount.Y * reduction, reduction);
+                if (ShakeAmount.X < 0) ShakeAmount = new CCPoint(0, ShakeAmount.Y);
+                if (ShakeAmount.Y < 0) ShakeAmount = new CCPoint(ShakeAmount.X, 0);
+                UpdateCamera();
+            }
+            else if (ScreenShakeVec != CCPoint.Zero)
+            {
+                ScreenShakeVec = CCPoint.Zero;
+                UpdateCamera();
+            }
         }
 
         private float TimeLeftExecutingOrders { get; set; }
@@ -288,6 +290,8 @@ namespace CocosSharpMathGame
                     }
                     break;
             }
+            // shake the screen
+            ShakeScreen(dt);
         }
         /// <summary>
         /// Draw everything that is supposed to be drawn by the DrawNode
@@ -372,6 +376,9 @@ namespace CocosSharpMathGame
                 //Console.WriteLine("Released: "+touches[0].Location.ToString());
             }
         }
+
+        private float MaxCameraWidth = Constants.COCOS_WORLD_WIDTH * 8;
+        private float MaxCameraHeight = Constants.COCOS_WORLD_HEIGHT * 8;
 
         private void OnMouseScroll(CCEventMouse mouseEvent)
         {

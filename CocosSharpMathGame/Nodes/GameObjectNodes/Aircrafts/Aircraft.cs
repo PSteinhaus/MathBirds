@@ -14,6 +14,26 @@ namespace CocosSharpMathGame
     /// </summary>
     internal abstract class Aircraft : GameObjectNode, ICollidible, IDrawNodeUser
     {
+        internal float Health
+        {
+            get
+            {
+                float health = 0;
+                foreach (var part in TotalParts)
+                    health += part.Health;
+                return health;
+            }
+        }
+        internal float MaxHealth
+        {
+            get
+            {
+                float maxHealth = 0;
+                foreach (var part in TotalParts)
+                    maxHealth += part.MaxHealth;
+                return maxHealth;
+            }
+        }
         /// <summary>
         /// when the aircraft dies it starts changing its vertexZ continously;
         /// because of that it cannot use the global draw nodes and has to utilise new private draw nodes;

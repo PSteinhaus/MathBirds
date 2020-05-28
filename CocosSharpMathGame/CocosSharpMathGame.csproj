@@ -164,7 +164,6 @@
     <Compile Include="Nodes\GameObjectNodes\GameObjectNode.cs" />
     <Compile Include="Interfaces\ICollidible.cs" />
     <Compile Include="Pages\MainPage.cs" />
-    <Compile Include="Scenes\PlayScene.cs" />
     <Compile Include="Sprites\GameObjectSprite.cs" />
     <Compile Include="Sprites\MathSprite.cs" />
     <Compile Include="Sprites\Parts\ManeuverAbility.cs" />
