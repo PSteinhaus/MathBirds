@@ -7,6 +7,7 @@ namespace CocosSharpMathGame
 {
     public class PlayLayer : CCLayerColor
     {
+        internal CCNode BGNode { get; private protected set; }
         internal enum GameState
         {
             PLANNING, EXECUTING_ORDERS
@@ -48,6 +49,19 @@ namespace CocosSharpMathGame
         public PlayLayer() : base(CCColor4B.Black)
         {
             GUILayer = new GUILayer(this);
+            BGNode = new CCNode();
+            AddChild(BGNode);
+            BGNode.VertexZ = Constants.VERTEX_Z_GROUND;
+            BGNode.AddChild(drawNode);
+            const float bgsize = 30000f;
+            var bgColor = new CCColor4B(55, 55, 55);
+            for (int i=-40; i<40; i++)
+            {
+                drawNode.DrawLine(new CCPoint(i * bgsize/40, -bgsize), new CCPoint(i * bgsize/40, bgsize), 20f, bgColor);
+                drawNode.DrawLine(new CCPoint(-bgsize, i * bgsize/40), new CCPoint(bgsize, i * bgsize/40), 20f, bgColor);
+            }
+            BGNode.ZOrder = (int)Constants.VERTEX_Z_GROUND;
+            BGNode.Rotation = 10f;
 
             HighDrawNode = new CCDrawNode();
             HighDrawNode.BlendFunc = CCBlendFunc.NonPremultiplied;
@@ -61,8 +75,8 @@ namespace CocosSharpMathGame
             //AddChild(mathSprite3);
 
             // a DrawNode is always useful for debugging
-            AddChild(drawNode);
-            drawNode.ZOrder = 0;
+            //AddChild(drawNode);
+            //drawNode.ZOrder = 0;
             mathSprite1.ZOrder = 1;
 
             // add a touch listener
@@ -186,7 +200,7 @@ namespace CocosSharpMathGame
             //drawNode.DrawSolidCircle(mathSprite1.Position, mathSprite1.ContentSize.Width / 2, CCColor4B.Gray);
             //drawNode.DrawSolidCircle(mathSprite2.Position, mathSprite2.ContentSize.Width / 2, CCColor4B.LightGray);
             //drawNode.DrawSolidCircle(mathSprite3.Position, mathSprite3.ContentSize.Width / 2, CCColor4B.Black);
-
+            UpdateCamera();
         }
 
         internal void UpdateCamera()

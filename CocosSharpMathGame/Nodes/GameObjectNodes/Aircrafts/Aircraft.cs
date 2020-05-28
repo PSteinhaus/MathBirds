@@ -608,7 +608,7 @@ namespace CocosSharpMathGame
             if (controlPoints.Count() < 3)
             {
                 controlPoints.Clear();
-                float range = Velocity * Constants.TURN_DURATION * 0.5f;
+                float range = Velocity * Constants.TURN_DURATION * 0.8f;
                 controlPoints.Add(new CCPoint(range, 1));
                 controlPoints.Add(new CCPoint(range + 1, 1));
                 controlPoints.Add(new CCPoint(range + 1, -1));
@@ -654,7 +654,7 @@ namespace CocosSharpMathGame
                 // DEBUG: draw the collision polygon of each part
                 //var poly = (Polygon)((CollisionTypePolygon)part.CollisionType).collisionPolygon.Clone();
                 //poly.TransformAccordingToGameObject(part);
-                //highNode.DrawPolygon(poly.Points, poly.Points.Length, CCColor4B.Transparent, 2f, CCColor4B.Aquamarine);
+                //correctHighNode.DrawPolygon(poly.Points, poly.Points.Length, CCColor4B.Transparent, 2f, CCColor4B.Aquamarine);
             }
         }
 
@@ -667,12 +667,9 @@ namespace CocosSharpMathGame
         /// <returns></returns>
         internal CCPoint EnergyToDestination(float Ekin, float Erot)
         {
-            //Console.WriteLine("Ekin: " + Ekin + ", Erot: " + Erot);
             // Erot = 1/2 * I * w^2     ->    w = sqrt((2 * Erot) / I)
-            //Console.WriteLine("MomentOfInertia: " + MomentOfInertia);
             float w = (float)Math.Sqrt((2 * Math.Abs(Erot)) / MomentOfInertia);
-            w = w * Math.Sign(Erot);// / Constants.STANDARD_SCALE;
-            //Console.WriteLine("w: " + w);
+            w = w * Math.Sign(Erot);
             // w * T = phiMax
             // distance = phiMax * R
             // -> R = distance / phiMax
@@ -682,11 +679,8 @@ namespace CocosSharpMathGame
             // v = sqrt((2 * Ekin) / m)
             float v = (float)Math.Sqrt((2 * Ekin) / Mass) * Constants.STANDARD_SCALE;
             float distance = v * Constants.TURN_DURATION;
-            //Console.WriteLine("Distance to Destination: " + distance);
             float phiMax = w * Constants.TURN_DURATION;
-            //Console.WriteLine("phiMax: " + phiMax);
             float radius = (float)Math.Abs(distance / phiMax);
-            //Console.WriteLine("Radius: " + radius);
             // now we know the radius of the circle on which the flight path lies
             // to get the position of the circle check whether the the curve goes left (w > 0), right (w < 0), or straight (w = 0)
             // and place the circle accordingly
@@ -708,7 +702,6 @@ namespace CocosSharpMathGame
             {
                 destination = new CCPoint(distance, 0);
             }
-            //Console.WriteLine("Destination is: " + destination);
             return destination;
         }
 
@@ -739,7 +732,7 @@ namespace CocosSharpMathGame
                 part.ExecuteOrders(dt);
             // fall from the sky if dead
             if (MyState == State.SHOT_DOWN)
-                ChangeVertexZ(-dt * 300);
+                ChangeVertexZ(dt * -500);
             return finished;
         }
 

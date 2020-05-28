@@ -22,7 +22,7 @@ namespace CocosSharpMathGame
             CollisionType = Collisions.CreateDiamondCollisionPolygon(this);
 
             // give the engine maneuver abilities
-            ManeuverAbility = new ManeuverAbility((float)Math.Pow(10, 5) * 0.15f, (float)Math.Pow(10, 5) * 1.5f);//, (float)Math.Pow(10, 5)*0.1f, (float)Math.Pow(10, 5));
+            ManeuverAbility = new ManeuverAbility((float)Math.Pow(10, 5) * 0.25f, (float)Math.Pow(10, 5) * 3.0f);//, (float)Math.Pow(10, 5)*0.1f, (float)Math.Pow(10, 5));
         }
 
 
