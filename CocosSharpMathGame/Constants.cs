@@ -13,6 +13,7 @@ namespace CocosSharpMathGame
         public const float STANDARD_SCALE = 8;
         public const float TURN_DURATION = 3f;  // executing orders takes 3.5 seconds
         public const float PI = (float)Math.PI;
+        public const float VERTEX_Z_GROUND = -10000f;
 
         public static float DegreesToRadians(float degrees)
         {
@@ -128,6 +129,12 @@ namespace CocosSharpMathGame
             return Math.Min(difference1, difference2);
         }
 
+        /// <summary>
+        /// WARNING: Do not call repeatetly in short intervals as the rng is seeded from the system clock!!! (use the overloaded version with "rng" parameter instead)
+        /// </summary>
+        /// <param name="point"></param>
+        /// <param name="range"></param>
+        /// <returns></returns>
         public static CCPoint RandomPointNear(CCPoint point, float range)
         {
             var rng = new Random();

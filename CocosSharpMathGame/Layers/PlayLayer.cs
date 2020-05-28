@@ -192,6 +192,7 @@ namespace CocosSharpMathGame
         internal void UpdateCamera()
         {
             Camera = new CCCamera(new CCRect(cameraPosition.X, cameraPosition.Y, CameraSize.Width, CameraSize.Height));
+            Camera.NearAndFarPerspectiveClipping = new CCNearAndFarClipping(1f, 1000000f);
         }
         internal void AddAircraft(Aircraft aircraft)
         {
@@ -247,20 +248,26 @@ namespace CocosSharpMathGame
                         TimeLeftExecutingOrders -= dt;
                         // DEBUG: Console.WriteLine("EXECUTING ORDERS; dt: " + dt);
                         // go through all aircrafts and let them execute their orders
+                        List<Aircraft> aircraftToBeRemoved = new List<Aircraft>();
                         foreach (var aircraft in Aircrafts)
+                        {
                             aircraft.ExecuteOrders(dt);
+                            if (aircraft.ToBeRemoved)
+                                aircraftToBeRemoved.Add(aircraft);
+                        }
+                        // remove aircrafts that have to be removed
+                        foreach (var aircraft in aircraftToBeRemoved)
+                            RemoveAircraft(aircraft);
                         // go through all projectiles and let them advance
                         // check whether a projectile needs to be removed
-                        List<Projectile> toBeRemoved = new List<Projectile>();
+                        List<Projectile> projectilesToBeRemoved = new List<Projectile>();
                         foreach (var projectile in Projectiles)
                         {
                            projectile.Advance(dt);
-                            if (projectile.CanBeRemoved()) toBeRemoved.Add(projectile);
+                            if (projectile.CanBeRemoved()) projectilesToBeRemoved.Add(projectile);
                         }
-                        foreach (var projectile in toBeRemoved)
-                        {
+                        foreach (var projectile in projectilesToBeRemoved)
                             RemoveProjectile(projectile);
-                        }
                         UpdateDrawNodes();
                         if (TimeLeftExecutingOrders <= 0)
                             StartPlanningPhase();

@@ -14,6 +14,12 @@ namespace CocosSharpMathGame
     /// </summary>
     internal abstract class Aircraft : GameObjectNode, ICollidible, IDrawNodeUser
     {
+        /// <summary>
+        /// when the aircraft dies it starts changing its vertexZ continously;
+        /// because of that it cannot use the global draw nodes and has to utilise new private draw nodes;
+        /// </summary>
+        protected CCDrawNode HighNodeWhenDead { get; set; }
+        protected CCDrawNode LowNodeWhenDead { get; set; }
         internal float Velocity
         {
             get
@@ -619,16 +625,32 @@ namespace CocosSharpMathGame
         internal void Die()
         {
             MyState = State.SHOT_DOWN;
+            HighNodeWhenDead = new CCDrawNode();
+            LowNodeWhenDead = new CCDrawNode();
+            LowNodeWhenDead.BlendFunc  = CCBlendFunc.NonPremultiplied;
+            HighNodeWhenDead.BlendFunc = CCBlendFunc.NonPremultiplied;
+            Parent.AddChild(HighNodeWhenDead);
+            Parent.AddChild(LowNodeWhenDead);
         }
 
         public void UseDrawNodes(CCDrawNode highNode, CCDrawNode lowNode)
         {
+            var correctHighNode = highNode;
+            var correctLowNode = lowNode;
+            if (MyState == State.SHOT_DOWN)
+            {
+                correctHighNode = HighNodeWhenDead;
+                correctLowNode = LowNodeWhenDead;
+                // clear the nodes before using them
+                HighNodeWhenDead.Clear();
+                LowNodeWhenDead.Clear();
+            }
             foreach (var part in TotalParts)
             {
                 if (part.ManeuverAbility != null)
-                    part.ManeuverAbility.CloudTailNode.UseDrawNodes(highNode, lowNode);
+                    part.ManeuverAbility.CloudTailNode.UseDrawNodes(correctHighNode, correctLowNode);
                 foreach (var damageTail in part.DamageCloudTailNodes)
-                    damageTail.UseDrawNodes(highNode, lowNode);
+                    damageTail.UseDrawNodes(correctHighNode, correctLowNode);
                 // DEBUG: draw the collision polygon of each part
                 //var poly = (Polygon)((CollisionTypePolygon)part.CollisionType).collisionPolygon.Clone();
                 //poly.TransformAccordingToGameObject(part);
@@ -715,7 +737,40 @@ namespace CocosSharpMathGame
             // let your parts act
             foreach (var part in TotalParts)
                 part.ExecuteOrders(dt);
+            // fall from the sky if dead
+            if (MyState == State.SHOT_DOWN)
+                ChangeVertexZ(-dt * 300);
             return finished;
+        }
+
+        protected void ChangeVertexZ(float value)
+        {
+            VertexZ += value;
+            if (!((int)VertexZ).Equals(ZOrder))
+                ZOrder = (int)VertexZ;
+            // also update your draw nodes
+            if (HighNodeWhenDead != null)
+            {
+                HighNodeWhenDead.VertexZ = VertexZ;
+                HighNodeWhenDead.ZOrder  = ZOrder + 1;
+            }
+            if (LowNodeWhenDead != null)
+            {
+                LowNodeWhenDead.VertexZ = VertexZ;
+                LowNodeWhenDead.ZOrder  = ZOrder - 1;
+            }
+            if (VertexZ < Constants.VERTEX_Z_GROUND)
+                TouchTheGround();
+        }
+
+        /// <summary>
+        /// Falling aircrafts meet the groud at some point.
+        /// This function is called when that happens.
+        /// </summary>
+        protected void TouchTheGround()
+        {
+            // for now all that happens is that the aircraft is removed
+            ToBeRemoved = true;
         }
 
         internal Aircraft() : base()
@@ -752,6 +807,10 @@ namespace CocosSharpMathGame
         {
             // remove your brothers (FlightPathControlNode & CloudTailNode)
             Parent.RemoveChild(FlightPathControlNode);
+            if (HighNodeWhenDead.Parent == Parent)
+                Parent.RemoveChild(HighNodeWhenDead);
+            if (LowNodeWhenDead.Parent == Parent)
+                Parent.RemoveChild(LowNodeWhenDead);
             foreach (var part in TotalParts)
                 part.PrepareForRemoval();
         }
@@ -761,6 +820,7 @@ namespace CocosSharpMathGame
         /// starting at the body and then searching recursively
         /// </summary>
         internal IEnumerable<Part> TotalParts { get; set; }
+        internal bool ToBeRemoved { get; private set; } = false;
 
         /// <summary>
         /// Set into a state so that the planning phase can act properly on this aircraft
