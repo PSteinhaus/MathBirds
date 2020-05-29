@@ -60,7 +60,7 @@ namespace CocosSharpMathGame
             BGNode.VertexZ = Constants.VERTEX_Z_GROUND;
             BGNode.AddChild(drawNode);
             const float bgsize = 30000f;
-            var bgColor = new CCColor4B(55, 55, 55);
+            var bgColor = new CCColor4B(35, 35, 35);
             for (int i=-40; i<40; i++)
             {
                 drawNode.DrawLine(new CCPoint(i * bgsize/40, -bgsize), new CCPoint(i * bgsize/40, bgsize), 20f, bgColor);
@@ -347,7 +347,7 @@ namespace CocosSharpMathGame
                         // check for zoom
                         var touch1 = touches[0];
                         var touch2 = touches[1];
-                        float zoomFactor = 1.5f * MyTouchExtensions.GetZoom(touch1, touch2);
+                        float zoomFactor = MyTouchExtensions.GetZoom(touch1, touch2);
                         if (!float.IsNaN(zoomFactor))
                         {
                             var oldCameraSize = new CCSize(CameraSize.Width, CameraSize.Height);
@@ -388,9 +388,6 @@ namespace CocosSharpMathGame
             CameraSize = new CCSize(oldCameraSize.Width * zoomFactor, oldCameraSize.Height * zoomFactor);
             float dw = CameraSize.Width - oldCameraSize.Width;
             float dh = CameraSize.Height - oldCameraSize.Height;
-            //CCPoint scrollCenter = mouseEvent.Cursor;
-            //float relativeX = (scrollCenter.X - CameraPosition.X) / oldCameraSize.Width;
-            //float relativeY = (scrollCenter.Y - CameraPosition.Y) / oldCameraSize.Height;
             CameraPosition = new CCPoint(CameraPosition.X - dw * 0.5f, CameraPosition.Y - dh * 0.5f);
             UpdateCamera();
         }

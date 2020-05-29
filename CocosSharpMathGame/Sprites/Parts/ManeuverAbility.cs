@@ -13,7 +13,7 @@ namespace CocosSharpMathGame
     /// </summary>
     internal class ManeuverAbility
     {
-        internal CloudTailNode CloudTailNode { get; private protected set; } = new CloudTailNode();
+        internal CloudTailNode CloudTailNode { get; private protected set; }
         /// <summary>
         /// How much propellment this part can generate (per second)
         /// </summary>
@@ -38,12 +38,15 @@ namespace CocosSharpMathGame
             PowerMin = powerMin;
             RotationBonusMax = rotationBonusMax;
             RotationBonusMin = rotationBonusMin;
+            if (PowerMax > 0)
+                CloudTailNode = new CloudTailNode();
         }
 
         internal void ExecuteOrders(float dt, CCPoint position, float rotation, bool decayOnly=false)
         {
             // advance the cloud tail lifecycle 
-            CloudTailNode.Advance(dt, position, rotation, decayOnly);
+            if (CloudTailNode != null)
+               CloudTailNode.Advance(dt, position, rotation, decayOnly);
         }
     }
 }

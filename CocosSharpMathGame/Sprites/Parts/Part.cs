@@ -108,7 +108,9 @@ namespace CocosSharpMathGame
         /// </summary>
         internal enum Type
         {
-            BODY, SINGLE_WING, WINGS, WEAPON, ENGINE, GUN
+            BODY, SINGLE_WING, WINGS, WEAPON, ENGINE, GUN,
+            RUDDER,
+            ROTOR
         }
         internal Type[] Types { get; set; }
         /// <summary>
@@ -194,7 +196,7 @@ namespace CocosSharpMathGame
                     baseRefSize *= (1 + TotalParts.Count()) * 0.8f;
                     specialBonus += TotalMaxHealth;
                 }
-                float shakeAmount = baseRefSize * 20 * healthFactor + specialBonus;
+                float shakeAmount = baseRefSize * 16 * healthFactor + specialBonus;
                 ((PlayLayer)Layer).AddScreenShake(shakeAmount, shakeAmount);
             }
         }
@@ -450,6 +452,15 @@ namespace CocosSharpMathGame
             }
             foreach (var damageTail in DamageCloudTailNodes)
                 damageTail.Advance(dt, PositionWorldspace, TotalRotation);
+        }
+
+        protected MassPoint[] CreateDiamondMassPoints(float massPerPoint)
+        {
+            var points = DiamondCollisionPoints();
+            var massPoints = new MassPoint[4];
+            for (int i = 0; i < massPoints.Length; i++)
+                massPoints[i] = new MassPoint(points[i].X, points[i].Y, massPerPoint);
+            return massPoints;
         }
 
         internal void PrepareForRemoval()

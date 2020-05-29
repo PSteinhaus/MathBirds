@@ -153,7 +153,7 @@ namespace CocosSharpMathGame
                 // if you're now close enough to the perfect angle (and in range) start shooting
                 if (CanShoot()
                     && CCPoint.Distance(MyPart.PositionWorldspace, TargetPart.PositionWorldspace) <= ShootingRange
-                    && (Constants.AbsAngleDifferenceDeg(angleToAimFor, MyPart.MyRotation) <= 5f || WouldHit()))
+                    && (Constants.AbsAngleDifferenceDeg(angleToAimFor, MyPart.MyRotation) <= 2f || WouldHit()))
                 {
                     TryShoot();
                 }
@@ -307,8 +307,8 @@ namespace CocosSharpMathGame
             var testWeapon = new WeaponAbility(myPart);
             testWeapon.ProjectileBlueprint = new TestProjectile();
             testWeapon.CalcBaseValuesFromProjectile();
-            testWeapon.ShootDelay = 0.25f;
-            testWeapon.MaxTurningAngle = 45f;
+            testWeapon.ShootDelay = 0.5f;
+            testWeapon.MaxTurningAngle = 15f;
             testWeapon.TurningAnglePerSecond = testWeapon.MaxTurningAngle;
             testWeapon.CalcAttentionAngle();
             return testWeapon;

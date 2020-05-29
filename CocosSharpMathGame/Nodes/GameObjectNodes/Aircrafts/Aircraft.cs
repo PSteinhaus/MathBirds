@@ -667,7 +667,7 @@ namespace CocosSharpMathGame
             }
             foreach (var part in TotalParts)
             {
-                if (part.ManeuverAbility != null)
+                if (part.ManeuverAbility != null && part.ManeuverAbility.CloudTailNode != null)
                     part.ManeuverAbility.CloudTailNode.UseDrawNodes(correctHighNode, correctLowNode);
                 foreach (var damageTail in part.DamageCloudTailNodes)
                     damageTail.UseDrawNodes(correctHighNode, correctLowNode);

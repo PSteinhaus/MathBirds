@@ -52,11 +52,11 @@ namespace CocosSharpMathGame
         }
         internal bool TouchStartedOnItCircle(CCTouch touch)
         {
-            return touch.StartLocation.IsNear(BoundingBoxTransformedToWorld.Center, ScaledContentSize.Width / 2);
+            return touch.StartLocation.IsNear(BoundingBoxTransformedToWorld.Center, ScaledContentSize.Width * 0.75f);
         }
         internal bool TouchIsOnItCircle(CCTouch touch)
         {
-            return touch.Location.IsNear(BoundingBoxTransformedToWorld.Center, ScaledContentSize.Width / 2);
+            return touch.Location.IsNear(BoundingBoxTransformedToWorld.Center, ScaledContentSize.Width * 0.75f);
         }
     }
 }

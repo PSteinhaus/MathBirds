@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CocosSharp;
+using CocosSharpMathGame.Sprites.Parts;
 
 namespace CocosSharpMathGame
 {
@@ -14,21 +15,19 @@ namespace CocosSharpMathGame
             IsManeuverPolygonDrawn = true;
             Body = new TestBody();
             // mount the wings
-            //wings = new TestWings(); // OLD
-            var wing1 = new TestWing();
-            var wing2 = new TestWing();
-            Body.MountPart(wing1);
-            Body.MountPart(wing2);
-            // give the wings some engines
-            wing1.MountPart(new TestEngine());
-            var engine2 = new TestEngine();
-            wing2.MountPart(engine2);
+            var wings = new TestDoubleWing();
+            Body.MountPart(wings);
+            // mount the rotor
+            Body.MountPart(new TestRotor());
+            // and the rudders
+            Body.MountPart(new TestRudder());
+            Body.MountPart(new TestRudder());
             //Body.MountPart(new TestEngineStrong());
             if (withWeapon)
             {
                 // give both wings guns
-                wing1.MountPart(new TestWeapon());
-                wing2.MountPart(new TestWeapon());
+                wings.MountPart(new TestWeapon());
+                wings.MountPart(new TestWeapon());
             }
             /*
             foreach (var part in TotalParts)

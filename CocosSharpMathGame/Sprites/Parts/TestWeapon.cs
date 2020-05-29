@@ -9,11 +9,11 @@ namespace CocosSharpMathGame
 {
     internal class TestWeapon : Part
     {
-        internal TestWeapon() : base("testEngine.png") // for now, as there is no gun sprite yet
+        internal TestWeapon() : base("testWeapon.png") // for now, as there is no gun sprite yet
         {
             // set your types
             Types = new Type[] { Type.GUN };
-            AnchorPoint = CCPoint.AnchorMiddle;
+            AnchorPoint = new CCPoint(1/ContentSize.Width, 0.5f);
 
             // specify the mass points
             MassPoints = new MassPoint[] { new MassPoint(ContentSize.Width / 2, ContentSize.Height / 2, 30) };

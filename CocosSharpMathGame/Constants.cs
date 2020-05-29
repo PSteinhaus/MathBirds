@@ -10,7 +10,7 @@ namespace CocosSharpMathGame
     {
         public const int COCOS_WORLD_WIDTH = 1080;
         public const int COCOS_WORLD_HEIGHT = 1920;
-        public const float STANDARD_SCALE = 8;
+        public const float STANDARD_SCALE = 4;
         public const float TURN_DURATION = 3f;  // executing orders takes this long
         public const float PI = (float)Math.PI;
         public const float VERTEX_Z_GROUND = -10000f;

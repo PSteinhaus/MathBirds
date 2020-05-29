@@ -12,7 +12,7 @@ namespace CocosSharpMathGame
     {
         internal TestProjectile()
         {
-            Velocity = 800f;
+            Velocity = 1000f;
             LifeTime = 1.5f;
             Damage = 1f;
         }

@@ -7,57 +7,71 @@
 			<key>testBody.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{0,0},{16,5}}</string>
+				<string>{{0,0},{35,10}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
 				<false/>
 				<key>sourceColorRect</key>
-				<string>{{0,7},{16,5}}</string>
+				<string>{{0,0},{35,10}}</string>
 				<key>sourceSize</key>
-				<string>{16,19}</string>
+				<string>{35,10}</string>
 			</dict>
 
-			<key>testEngine.png</key>
+			<key>testDoubleWing.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{0,26},{5,3}}</string>
+				<string>{{0,11},{12,44}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
 				<false/>
 				<key>sourceColorRect</key>
-				<string>{{0,0},{5,3}}</string>
+				<string>{{0,0},{12,44}}</string>
 				<key>sourceSize</key>
-				<string>{5,3}</string>
+				<string>{12,44}</string>
 			</dict>
 
-			<key>testWing.png</key>
+			<key>testRotor.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{6,6},{4,10}}</string>
+				<string>{{13,11},{8,14}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
 				<false/>
 				<key>sourceColorRect</key>
-				<string>{{0,0},{4,10}}</string>
+				<string>{{0,0},{8,14}}</string>
 				<key>sourceSize</key>
-				<string>{4,10}</string>
+				<string>{8,14}</string>
 			</dict>
 
-			<key>testWings.png</key>
+			<key>testRudder.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{0,6},{5,19}}</string>
+				<string>{{9,56},{4,5}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
 				<false/>
 				<key>sourceColorRect</key>
-				<string>{{5,0},{5,19}}</string>
+				<string>{{0,0},{4,5}}</string>
 				<key>sourceSize</key>
-				<string>{16,19}</string>
+				<string>{4,5}</string>
+			</dict>
+
+			<key>testWeapon.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{0,56},{8,3}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false/>
+				<key>sourceColorRect</key>
+				<string>{{0,0},{8,3}}</string>
+				<key>sourceSize</key>
+				<string>{8,3}</string>
 			</dict>
 
 		</dict>
@@ -67,7 +81,7 @@
 			<key>format</key>
 			<integer>2</integer>
 			<key>size</key>
-			<string>{32,32}</string>
+			<string>{64,64}</string>
 			<key>textureFileName</key>
 			<string>parts.png</string>
 			</dict>
