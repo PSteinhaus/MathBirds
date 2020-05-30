@@ -60,7 +60,7 @@ namespace CocosSharpMathGame
             BGNode.VertexZ = Constants.VERTEX_Z_GROUND;
             BGNode.AddChild(drawNode);
             const float bgsize = 30000f;
-            var bgColor = new CCColor4B(35, 35, 35);
+            var bgColor = new CCColor4B(40, 40, 40);
             for (int i=-40; i<40; i++)
             {
                 drawNode.DrawLine(new CCPoint(i * bgsize/40, -bgsize), new CCPoint(i * bgsize/40, bgsize), 20f, bgColor);
@@ -116,7 +116,8 @@ namespace CocosSharpMathGame
             var secondAircraft = new TestAircraft(withWeapon: true);
             var secondTeam = new Team();
             secondAircraft.Team = secondTeam;
-            secondAircraft.ChangeColor(CCColor3B.Red);
+            var color = new CCColor3B(200, 200, 200);
+            secondAircraft.ChangeColor(color);
             var ai1 = new StandardAI();
             secondAircraft.AI = ai1;
             AddAircraft(secondAircraft);
@@ -145,7 +146,7 @@ namespace CocosSharpMathGame
             //testAircraft.wings.ZOrder = -1;
             //Console.WriteLine("ZOrder Parent now: " + testAircraft.ZOrder);
             //Console.WriteLine("ZOrder now: " + testAircraft.wings.ZOrder);
-            drawNode.DrawRect(testAircraft.BoundingBoxTransformedToWorld, CCColor4B.Green);
+            //drawNode.DrawRect(testAircraft.BoundingBoxTransformedToWorld, CCColor4B.Green);
             //drawNode.DrawSolidCircle( bounds.Center, 50, CCColor4B.Red);
             //drawNode.DrawSolidCircle(testAircraft.Position, 60, CCColor4B.Blue);
             //Console.WriteLine("Bounds: "+testAircraft.BoundingBoxTransformedToWorld);

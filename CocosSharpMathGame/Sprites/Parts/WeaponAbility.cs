@@ -72,7 +72,7 @@ namespace CocosSharpMathGame
                 return TargetPart.Parent as Aircraft;
             }
         }
-        internal float UpdateTargetDelay { get; set; } = 0.5f;
+        internal float UpdateTargetDelay { get; set; } = 0.25f;
         internal float CooldownUntilNextTargetUpdate { get; set; }
 
         /// <summary>
@@ -113,8 +113,8 @@ namespace CocosSharpMathGame
                     {
                         float absAngle = (float)Math.Abs(anglesFromTo[i]);
                         var part = partsInRange[i];
-                        if (absAngle < minAngle &&
-                            (TargetPart == null || !(part.Parent == TargetPart.Parent && TargetPart == TargetAircraft.Body)))  // don't switch from a body to a different part of the same aircraft
+                        if (absAngle < minAngle) //&&
+                            //(TargetPart == null || !(part.Parent == TargetPart.Parent && TargetPart == TargetAircraft.Body)))  // don't switch from a body to a different part of the same aircraft
                         {
                             TargetPart = part;
                             minAngle = absAngle;
@@ -128,10 +128,9 @@ namespace CocosSharpMathGame
                     {
                         float absAngle = (float)Math.Abs(anglesFromTo[i]);
                         var part = partsInRange[i];
-                        bool isBody = part == part.Aircraft.Body;
                         // now also try parts that are not already in reach
-                        if (absAngle < minAngle &&
-                            (TargetPart == null || !(part.Parent == TargetPart.Parent && TargetPart == TargetAircraft.Body)))  // don't switch from a body to a different part of the same aircraft
+                        if (absAngle < minAngle) //&&
+                            //(TargetPart == null || !(part.Parent == TargetPart.Parent && TargetPart == TargetAircraft.Body)))  // don't switch from a body to a different part of the same aircraft
                         {
                             TargetPart = part;
                             minAngle = absAngle;

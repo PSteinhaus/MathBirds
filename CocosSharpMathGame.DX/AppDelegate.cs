@@ -13,7 +13,7 @@ namespace CocosSharpMathGame.DX
         {
             application.ContentRootDirectory = "Content";
             var windowSize = mainWindow.WindowSizeInPixels;
-            mainWindow.DisplayStats = true;
+            //mainWindow.DisplayStats = true;
 
             // This will set the world bounds to be (0,0, w, h)
             // CCSceneResolutionPolicy.ShowAll will ensure that the aspect ratio is preserved

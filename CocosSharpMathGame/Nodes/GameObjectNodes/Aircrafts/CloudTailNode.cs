@@ -67,14 +67,16 @@ namespace CocosSharpMathGame
                 scale = (float)Math.Sin(Math.PI / 2 * lifePercentage * (1 / max));
             else
                 scale = (float)Math.Cos(Math.PI / 2 * (lifePercentage - max));
-            byte value = (lifePercentage <= 0.5) ? (byte)255 : (byte)(255f * 2 * (1 - lifePercentage));
+            //byte value = (lifePercentage <= 0.5) ? (byte)255 : (byte)(255f * 2 * (1 - lifePercentage));
             color = Color;
-            color.A = value;
+            //color.A = value;
         }
 
         internal virtual void UseDrawNode(CCDrawNode highNode, CCDrawNode lowNode)
         {
-            (DrawLow ? lowNode : highNode).DrawPolygon(Polygon.Points, Polygon.Points.Length, Color, 0, CCColor4B.Transparent);
+            //(DrawLow ? lowNode : highNode).DrawPolygon(Polygon.Points, Polygon.Points.Length, Color, 0, CCColor4B.Transparent);
+            ScaleAndColor(out float scale, out CCColor4B color);
+            (DrawLow ? lowNode : highNode).DrawPolygon(Polygon.Points, Polygon.Points.Length, CCColor4B.Transparent, ReferenceSize/6*scale, Color);
         }
 
         protected void Follow()

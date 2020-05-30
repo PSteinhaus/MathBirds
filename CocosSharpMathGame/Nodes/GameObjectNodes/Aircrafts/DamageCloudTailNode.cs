@@ -90,6 +90,7 @@ namespace CocosSharpMathGame
         {
             ScaleAndColor(out float scale, out CCColor4B color);
             (DrawLow ? lowNode : highNode).DrawSolidCircle(Polygon.PivotPoint, ReferenceSize * scale, color);
+            //(DrawLow ? lowNode : highNode).DrawSolidCircle(Polygon.PivotPoint, ReferenceSize * scale * 0.95f, CCColor4B.Black);
         }
     }
     internal class DamageCloudTailNode : CloudTailNode

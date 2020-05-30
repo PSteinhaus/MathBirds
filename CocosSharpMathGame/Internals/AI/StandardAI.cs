@@ -33,9 +33,9 @@ namespace CocosSharpMathGame
                         closestAircraft = aircraft;
                 }
             }
-            // set path towards him
+            // set path towards where he might be at the end of the next turn
             if (closestAircraft != null)
-                Aircraft.TryToSetFlightPathHeadTo(closestAircraft.Position);
+                Aircraft.TryToSetFlightPathHeadTo(closestAircraft.Position + (closestAircraft.VelocityVector * Constants.TURN_DURATION));
         }
     }
 }

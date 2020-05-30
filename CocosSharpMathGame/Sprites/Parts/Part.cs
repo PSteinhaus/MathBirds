@@ -176,8 +176,11 @@ namespace CocosSharpMathGame
                         damageTail.AutoAddClouds = false;
                     if (Health / MaxHealth < 0.5f)
                     {
-                        byte value = (byte)rng.Next(135, 255);
-                        damageTail.CloudColor = new CCColor4B((byte)rng.Next(value, 255), value, 0);
+                        byte value = (byte)rng.Next(105, 256);
+                        damageTail.CloudColor = new CCColor4B((byte)rng.Next(value, 256), value, 0);
+                        //damageTail.CloudColor = rng.Next(0, 2) == 0 ? CCColor4B.Yellow : CCColor4B.Red;
+                        //damageTail.CloudColor = rng.Next(0,3) == 0 ? CCColor4B.Black : new CCColor4B(255, 255, 255);
+                        //damageTail.CloudColor = new CCColor4B(255, 255, 255);
                     }
                     DamageCloudTailNodes.Add(damageTail);
                     break;
