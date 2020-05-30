@@ -116,24 +116,40 @@ namespace CocosSharpMathGame
             var secondAircraft = new TestAircraft(withWeapon: true);
             var secondTeam = new Team();
             secondAircraft.Team = secondTeam;
-            var color = new CCColor3B(200, 200, 200);
+            var color = new CCColor3B(160, 160, 160);
             secondAircraft.ChangeColor(color);
             var ai1 = new StandardAI();
             secondAircraft.AI = ai1;
             AddAircraft(secondAircraft);
             secondAircraft.MoveBy(bounds.Size.Width / 5, bounds.Size.Height * 1.3f);
-            secondAircraft.RotateBy(60f);
+            secondAircraft.RotateBy(-108f);
 
-            /*
-            var thirdAircraft = new TestAircraft();
+            // add two other planes from different teams
+            var thirdAircraft = new TestAircraft(withWeapon: true);
             thirdAircraft.Team = secondTeam;
-            thirdAircraft.ChangeColor(CCColor3B.Red);
-            var ai2 = new StandardAI();
-            thirdAircraft.AI = ai2;
+            thirdAircraft.ChangeColor(color);
+            thirdAircraft.AI = new StandardAI();
             AddAircraft(thirdAircraft);
-            thirdAircraft.MoveBy(bounds.Size.Width * 1.2f, bounds.Size.Height * 0.1f);
-            thirdAircraft.RotateBy(-20f);
-            */
+            thirdAircraft.MoveBy(bounds.Size.Width / 3, bounds.Size.Height * 1.4f);
+            thirdAircraft.RotateBy(-100f);
+
+            var fourthAircraft = new TestAircraft();
+            var thirdTeam = new Team();
+            fourthAircraft.Team = thirdTeam;
+            var colorTeam3 = new CCColor3B(200, 200, 200);
+            fourthAircraft.ChangeColor(colorTeam3);
+            fourthAircraft.AI = new StandardAI();
+            AddAircraft(fourthAircraft);
+            fourthAircraft.MoveBy(bounds.Size.Width * 1.2f, bounds.Size.Height * 0.1f);
+            fourthAircraft.RotateBy(-10f);
+
+            var fifthAircraft = new TestAircraft();
+            fifthAircraft.Team = thirdTeam;
+            fifthAircraft.ChangeColor(colorTeam3);
+            fifthAircraft.AI = new StandardAI();
+            AddAircraft(fifthAircraft);
+            fifthAircraft.MoveBy(bounds.Size.Width * 1.3f, bounds.Size.Height * 0.2f);
+            fifthAircraft.RotateBy(-20f);
 
             StartPlanningPhase();
 
