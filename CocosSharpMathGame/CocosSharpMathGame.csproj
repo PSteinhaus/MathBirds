@@ -151,6 +151,8 @@
     <Compile Include="Internals\TouchExtension.cs" />
     <Compile Include="Internals\TriDiagonalMatrix.cs" />
     <Compile Include="Layers\GUILayer.cs" />
+    <Compile Include="Layers\HangarLayer.cs" />
+    <Compile Include="Layers\MyLayer.cs" />
     <Compile Include="Layers\PlayLayer.cs" />
     <Compile Include="MathChallenges\AddChallenge.cs" />
     <Compile Include="MathChallenges\MathChallenge.cs" />

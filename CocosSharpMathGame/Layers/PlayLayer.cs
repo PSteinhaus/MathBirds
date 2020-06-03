@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework;
 
 namespace CocosSharpMathGame
 {
-    public class PlayLayer : CCLayerColor
+    public class PlayLayer : MyLayer
     {
         internal CCNode BGNode { get; private protected set; }
         internal enum GameState
@@ -21,35 +21,6 @@ namespace CocosSharpMathGame
         internal List<Projectile> Projectiles { get; } = new List<Projectile>();
         internal List<IDrawNodeUser> DrawNodeUsers { get; } = new List<IDrawNodeUser>();
         private TestAircraft testAircraft;
-        private CCPoint cameraPosition = new CCPoint(0,0);
-        private CCPoint currentCameraPosition = new CCPoint(0, 0);
-        private CCPoint CameraPosition
-        {
-            get
-            {
-                return cameraPosition;
-            }
-            set
-            {
-                cameraPosition = value;
-            }
-        }
-        private CCSize cameraSize = new CCSize(Constants.COCOS_WORLD_WIDTH, Constants.COCOS_WORLD_HEIGHT);
-        internal CCSize CameraSize
-        {
-            get
-            {
-                return cameraSize;
-            }
-            set
-            {
-                cameraSize = value;
-                if (cameraSize.Width > MaxCameraWidth)
-                    cameraSize = new CCSize(MaxCameraWidth, MaxCameraHeight);
-            }
-        }
-        private CCPoint ShakeAmount { get; set; }
-        private CCPoint ScreenShakeVec { get; set; }
         internal CCDrawNode HighDrawNode { get; set; }
         internal CCDrawNode LowDrawNode { get; set; }
         public PlayLayer() : base(CCColor4B.Black)
@@ -60,7 +31,7 @@ namespace CocosSharpMathGame
             BGNode.VertexZ = Constants.VERTEX_Z_GROUND;
             BGNode.AddChild(drawNode);
             const float bgsize = 30000f;
-            var bgColor = new CCColor4B(40, 40, 40);
+            var bgColor = new CCColor4B(28, 28, 28);
             for (int i=-40; i<40; i++)
             {
                 drawNode.DrawLine(new CCPoint(i * bgsize/40, -bgsize), new CCPoint(i * bgsize/40, bgsize), 20f, bgColor);
@@ -88,21 +59,20 @@ namespace CocosSharpMathGame
             // add a touch listener
             var touchListener = new CCEventListenerTouchAllAtOnce();
             touchListener.OnTouchesBegan = OnTouchesBegan;
-            touchListener.OnTouchesMoved = OnTouchesMoved;
+            touchListener.OnTouchesMoved = OnTouchesMovedMoveAndZoom;
             touchListener.OnTouchesEnded = OnTouchesEnded;
             AddEventListener(touchListener, this);
 
             // add a mouse listener
             var mouseListener = new CCEventListenerMouse();
-            mouseListener.OnMouseScroll = OnMouseScroll;
+            mouseListener.OnMouseScroll = OnMouseScrollZoom;
             AddEventListener(mouseListener, this);
         }
 
         protected override void AddedToScene()
         {
             
-            base.AddedToScene();    // MAGIC
-            Schedule();
+            base.AddedToScene();
             var bounds = VisibleBoundsWorldspace;
             testAircraft = new TestAircraft();
             var playerTeam = new Team();
@@ -171,11 +141,6 @@ namespace CocosSharpMathGame
             UpdateCamera();
         }
 
-        internal void UpdateCamera()
-        {
-            Camera = new CCCamera(new CCRect(cameraPosition.X+ScreenShakeVec.X, cameraPosition.Y+ScreenShakeVec.Y, CameraSize.Width, CameraSize.Height));
-            Camera.NearAndFarPerspectiveClipping = new CCNearAndFarClipping(1f, 1000000f);
-        }
         internal void AddAircraft(Aircraft aircraft)
         {
             Aircrafts.Add(aircraft);
@@ -199,57 +164,6 @@ namespace CocosSharpMathGame
             Projectiles.Remove(projectile);
             DrawNodeUsers.Remove(projectile);
             RemoveChild(projectile);
-        }
-
-        internal void AddScreenShake(float shakeX, float shakeY)
-        {
-            ShakeAmount += new CCPoint(shakeX, shakeY);
-        }
-        private float timeSinceLastShake = 30f;
-        private CCPoint currentShakePoint = CCPoint.Zero;
-        private CCPoint nextShakePoint;
-        private void ShakeScreen(float dt)
-        {
-            const float shakeDelay = 0.032625f;
-            const float reductionFactor = 0.8f;
-            const float reductionFactorCutoff = 80f;
-            const float cutoffLength = 50f;
-            timeSinceLastShake += dt;
-            if (ShakeAmount != CCPoint.Zero)
-            {
-                // check if it's time for a new shake point
-                if (timeSinceLastShake >= shakeDelay)
-                {
-                    var rng = new Random();
-                    currentShakePoint = ScreenShakeVec;
-                    int sign1 = rng.Next(0, 2) == 1 ? 1 : -1;
-                    int sign2 = rng.Next(0, 2) == 1 ? 1 : -1;
-                    nextShakePoint = new CCPoint(sign1 * (float)rng.NextDouble() * ShakeAmount.X, sign2 * (float)rng.NextDouble() * ShakeAmount.Y);
-                    timeSinceLastShake = timeSinceLastShake % shakeDelay;
-                }
-                // calculate the current shake
-                // the actual shake point is somewhere between the current and the next shake point
-                ScreenShakeVec = currentShakePoint + (nextShakePoint - currentShakePoint) * timeSinceLastShake / shakeDelay;
-                // reduce the shake
-                float reduction;
-                var length = ShakeAmount.Length;
-                if (length < cutoffLength)
-                    reduction = dt * reductionFactorCutoff;
-                else
-                    reduction = dt * length * reductionFactor;
-                if (ShakeAmount.X > ShakeAmount.Y)
-                    ShakeAmount -= new CCPoint(reduction, ShakeAmount.Y / ShakeAmount.X * reduction);
-                else
-                    ShakeAmount -= new CCPoint(ShakeAmount.X / ShakeAmount.Y * reduction, reduction);
-                if (ShakeAmount.X < 0) ShakeAmount = new CCPoint(0, ShakeAmount.Y);
-                if (ShakeAmount.Y < 0) ShakeAmount = new CCPoint(ShakeAmount.X, 0);
-                UpdateCamera();
-            }
-            else if (ScreenShakeVec != CCPoint.Zero)
-            {
-                ScreenShakeVec = CCPoint.Zero;
-                UpdateCamera();
-            }
         }
 
         private float TimeLeftExecutingOrders { get; set; }
@@ -307,8 +221,8 @@ namespace CocosSharpMathGame
                     }
                     break;
             }
-            // shake the screen
-            ShakeScreen(dt);
+            // shake the screen (now managed by MyLayer)
+            //ShakeScreen(dt);
         }
         /// <summary>
         /// Draw everything that is supposed to be drawn by the DrawNode
@@ -325,8 +239,9 @@ namespace CocosSharpMathGame
                 aircraft.UseDrawNodes(HighDrawNode, LowDrawNode);
         }
 
-        void OnTouchesBegan(List<CCTouch> touches, CCEvent touchEvent)
+        new void OnTouchesBegan(List<CCTouch> touches, CCEvent touchEvent)
         {
+            base.OnTouchesBegan(touches, touchEvent);
             if (touches.Count > 0)
             {
                 //var touch = touches[0];
@@ -339,74 +254,15 @@ namespace CocosSharpMathGame
             }
         }
 
-        void OnTouchesMoved(List<CCTouch> touches, CCEvent touchEvent)
+        new private protected void OnTouchesEnded(List<CCTouch> touches, CCEvent touchEvent)
         {
-            switch (touches.Count)
-            {
-                case 1:
-                    {
-                        var touch = touches[0];
-                        var xDif = touch.Location.X - touch.PreviousLocation.X;
-                        var yDif = touch.Location.Y - touch.PreviousLocation.Y;
-                        CameraPosition = new CCPoint(CameraPosition.X - xDif, CameraPosition.Y - yDif);
-                        UpdateCamera();
-                        //var touch = touches[0];
-                        //var startLoc = touch.StartLocation;
-                        //Console.WriteLine(startLoc);
-                        //if (testAircraft.BoundingBoxTransformedToWorld.ContainsPoint(startLoc))
-                        //    drawNode.Visible = false;
-                        //if (testAircraft.ManeuverPolygon.ContainsPoint(startLoc))
-                        //   testAircraft.IsManeuverPolygonDrawn = false;
-                    }
-                    break;
-                case 2:
-                    {
-                        // check for zoom
-                        var touch1 = touches[0];
-                        var touch2 = touches[1];
-                        float zoomFactor = MyTouchExtensions.GetZoom(touch1, touch2);
-                        if (!float.IsNaN(zoomFactor))
-                        {
-                            var oldCameraSize = new CCSize(CameraSize.Width, CameraSize.Height);
-                            CameraSize = new CCSize(oldCameraSize.Width * zoomFactor, oldCameraSize.Height * zoomFactor);
-                            float dw = CameraSize.Width - oldCameraSize.Width;
-                            float dh = CameraSize.Height - oldCameraSize.Height;
-                            CCPoint touchCenter = new CCPoint((touch1.Location.X + touch2.Location.X) / 2, (touch1.Location.Y + touch2.Location.Y) / 2);
-                            float relativeX = (touchCenter.X - CameraPosition.X) / oldCameraSize.Width;
-                            float relativeY = (touchCenter.Y - CameraPosition.Y) / oldCameraSize.Height;
-                            CameraPosition = new CCPoint(CameraPosition.X - dw * relativeX, CameraPosition.Y - dh * relativeY);
-                            UpdateCamera();
-                        }
-                    }
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        void OnTouchesEnded(List<CCTouch> touches, CCEvent touchEvent)
-        {
+            base.OnTouchesEnded(touches, touchEvent);
             if (touches.Count > 0)
             {
                 //drawNode.Visible = true;
                 //testAircraft.IsManeuverPolygonDrawn = true;
                 //Console.WriteLine("Released: "+touches[0].Location.ToString());
             }
-        }
-
-        private float MaxCameraWidth = Constants.COCOS_WORLD_WIDTH * 8;
-        private float MaxCameraHeight = Constants.COCOS_WORLD_HEIGHT * 8;
-
-        private void OnMouseScroll(CCEventMouse mouseEvent)
-        {
-            // also enable zooming with mouse
-            var oldCameraSize = new CCSize(CameraSize.Width, CameraSize.Height);
-            var zoomFactor = mouseEvent.ScrollY > 0 ? mouseEvent.ScrollY / 100 : - 1/(mouseEvent.ScrollY / 100);
-            CameraSize = new CCSize(oldCameraSize.Width * zoomFactor, oldCameraSize.Height * zoomFactor);
-            float dw = CameraSize.Width - oldCameraSize.Width;
-            float dh = CameraSize.Height - oldCameraSize.Height;
-            CameraPosition = new CCPoint(CameraPosition.X - dw * 0.5f, CameraPosition.Y - dh * 0.5f);
-            UpdateCamera();
         }
     }
 }

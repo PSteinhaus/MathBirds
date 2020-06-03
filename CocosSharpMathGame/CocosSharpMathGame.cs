@@ -1,4 +1,5 @@
 ﻿using Xamarin.Forms;
+using CocosSharp;
 
 namespace CocosSharpMathGame
 {
@@ -23,6 +24,8 @@ namespace CocosSharpMathGame
 		protected override void OnResume ()
 		{
 			// Handle when your app resumes
+			UIElement.spriteSheet = new CCSpriteSheet("ui.plist");
+			Part.spriteSheet = new CCSpriteSheet("parts.plist");
 		}
 	}
 }

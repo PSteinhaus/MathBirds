@@ -374,6 +374,7 @@ namespace CocosSharpMathGame
             {
                 return ErotRight + ErotBonusRight - ErotLeft - ErotBonusLeft;
             }
+            /*
             bool RightSideIsTurnedDown()
             {
                 for (int i = 0; i < rightSideCoefficients.Length; i++)
@@ -398,6 +399,7 @@ namespace CocosSharpMathGame
                     if (leftSideCoefficients[i] < 0.999) return false;
                 return true;
             }
+            */
             // Try to turn up the jth parts coefficient and return whether it was an increase or not
             bool TurnUpRightSide(int j, float coefficient)
             {

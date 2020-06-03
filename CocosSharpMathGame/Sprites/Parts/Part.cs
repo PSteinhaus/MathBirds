@@ -60,7 +60,9 @@ namespace CocosSharpMathGame
         {
             get
             {
-                return new CCPoint(BoundingBoxTransformedToParent.MinX, Flipped ? BoundingBoxTransformedToParent.MaxY : BoundingBoxTransformedToParent.MinY);
+                return Parent != null ?
+                    new CCPoint(BoundingBoxTransformedToParent.MinX, Flipped ? BoundingBoxTransformedToParent.MaxY : BoundingBoxTransformedToParent.MinY) :
+                    new CCPoint(BoundingBox.MinX, Flipped ? BoundingBox.MaxY : BoundingBox.MinY);
             }
         }
         /// <summary>
@@ -113,10 +115,15 @@ namespace CocosSharpMathGame
             ROTOR
         }
         internal Type[] Types { get; set; }
+        internal enum SizeType
+        {
+            TINY, SMALL, REGULAR, LARGE, HUGE, GIANT, GARGANTUAN
+        }
+        internal SizeType MySizeType { get; set; } = SizeType.REGULAR;
         /// <summary>
         /// Holds the SpriteFrames for all parts
         /// </summary>
-        static protected CCSpriteSheet spriteSheet = new CCSpriteSheet("parts.plist");
+        static internal CCSpriteSheet spriteSheet = new CCSpriteSheet("parts.plist");
         internal Part MountParent { get; set; } = null;
         // DEBUG: switch back to protected
         internal PartMount[] PartMounts { get; set; } = new PartMount[0];
@@ -419,6 +426,7 @@ namespace CocosSharpMathGame
             // and tell it that you're its mount-parent now
             if (mounted)
             {
+                Console.WriteLine("mounted!");
                 // if the mount point is lower than the anchor of the body you have to flip the part (mirror on x axis)
                 if (PosLeftLower.Y + PartMounts[mountIndex].Position.Y < Aircraft.Body.PositionY)
                     part.Flip();
@@ -469,6 +477,25 @@ namespace CocosSharpMathGame
         internal void PrepareForRemoval()
         {
             
+        }
+
+        /// <summary>
+        /// unmounts all mounted parts including parts mounted on monuted parts etc.
+        /// </summary>
+        /// <returns></returns>
+        internal void Disassemble()
+        {
+            foreach (var part in TotalParts)
+                part.UnmountAll();
+        }
+
+        /// <summary>
+        /// unmounts all directly mounted parts
+        /// </summary>
+        internal void UnmountAll()
+        {
+            foreach (PartMount partMount in PartMounts)
+                partMount.UnmountPart();
         }
     }
 }

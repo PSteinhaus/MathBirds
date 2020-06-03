@@ -53,7 +53,7 @@ namespace CocosSharpMathGame
 			{
 				Console.WriteLine("YES");
 				// show the stats
-				gameView.Stats.Enabled = true;
+				//gameView.Stats.Enabled = true;
 
 				// This sets the game "world" resolution:
 				gameView.DesignResolution = new CCSizeI(Constants.COCOS_WORLD_WIDTH, Constants.COCOS_WORLD_HEIGHT);
@@ -72,10 +72,12 @@ namespace CocosSharpMathGame
 				// GameScene is the root of the CocosSharp rendering hierarchy:
 				//gameScene = new GameScene(gameView);
 				var myScene = new CCScene(gameView);
-				var playLayer = new PlayLayer();
+				//var playLayer = new PlayLayer();
+				var hangarLayer = new HangarLayer();
 
-				myScene.AddChild(playLayer);
-				myScene.AddChild(playLayer.GUILayer);
+				myScene.AddChild(hangarLayer);
+				//myScene.AddChild(playLayer);
+				//myScene.AddChild(playLayer.GUILayer);
 
 				// Starts CocosSharp:
 				gameView.RunWithScene(myScene);

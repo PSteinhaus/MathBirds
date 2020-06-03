@@ -22,5 +22,5 @@ namespace CocosSharpMathGame.Droid
 			Console.WriteLine("YES??");
 			LoadApplication(new App());
 		}
-	}
+    }
 }
