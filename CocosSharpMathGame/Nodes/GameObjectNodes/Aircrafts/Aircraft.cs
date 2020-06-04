@@ -214,7 +214,7 @@ namespace CocosSharpMathGame
 
             // change the AnchorPoint to the center of mass
             var oldAnchor = AnchorPoint;
-            AnchorPoint = new CCPoint(CenterOfMass.X / ContentSize.Width, CenterOfMass.Y / ContentSize.Height);
+            ResetAnchorPoint();
             // account for the movement of the anchor
             float dx = (AnchorPoint.X - oldAnchor.X) * ContentSize.Width;
             float dy = (AnchorPoint.Y - oldAnchor.Y) * ContentSize.Height;
@@ -223,6 +223,11 @@ namespace CocosSharpMathGame
 
             // recalculate the maneuver polygon
             CalculateManeuverPolygon(deathPossible);
+        }
+
+        internal void ResetAnchorPoint()
+        {
+            AnchorPoint = new CCPoint(CenterOfMass.X / ContentSize.Width, CenterOfMass.Y / ContentSize.Height);
         }
 
         protected Part body = null;

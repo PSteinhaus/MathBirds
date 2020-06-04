@@ -10,7 +10,7 @@ namespace CocosSharpMathGame
     /// <summary>
     /// All visible objects in the sky that aren't Sprites are GameObjectNodes (maybe excluding effects like shots or shields)
     /// </summary>
-    internal abstract class GameObjectNode : CCNode, IGameObject
+    internal class GameObjectNode : CCNode, IGameObject
     {
         public bool MyVisible {
             get
@@ -70,6 +70,23 @@ namespace CocosSharpMathGame
             if (Parent != null && (Parent is IGameObject g))
                 scale += g.GetScale();
             return scale;
+        }
+        /// <summary>
+        /// sets the scaling to fit a certain width in pixels
+        /// </summary>
+        /// <param name="width">how wide the sprite shall be (in world pixels)</param>
+        public void FitToWidth(float desiredWidth)
+        {
+            Scale = desiredWidth / ContentSize.Width;
+        }
+
+        /// <summary>
+        /// sets the scaling to fit a certain height in pixels
+        /// </summary>
+        /// <param name="height">how high the sprite shall be (in world pixels)</param>
+        public void FitToHeight(float desiredHeight)
+        {
+            Scale = desiredHeight / ContentSize.Height;
         }
         internal GameObjectNode()
         {

@@ -72,11 +72,38 @@ namespace CocosSharpMathGame
                 scale += g.GetScale();
             return scale;
         }
-        internal GameObjectSprite(CCSpriteFrame spriteFrame) : base(spriteFrame)
+        /// <summary>
+        /// sets the scaling to fit a certain width in pixels
+        /// </summary>
+        /// <param name="width">how wide the sprite shall be (in world pixels)</param>
+        public void FitToWidth(float desiredWidth)
+        {
+            Scale = desiredWidth / ContentSize.Width;
+        }
+
+        /// <summary>
+        /// sets the scaling to fit a certain height in pixels
+        /// </summary>
+        /// <param name="height">how high the sprite shall be (in world pixels)</param>
+        public void FitToHeight(float desiredHeight)
+        {
+            Scale = desiredHeight / ContentSize.Height;
+        }
+
+        private void Init()
         {
             IsAntialiased = false;
             AnchorPoint = CCPoint.AnchorMiddle;
             Scale = Constants.STANDARD_SCALE;
+        }
+
+        internal GameObjectSprite() : base()
+        {
+            Init();
+        }
+        internal GameObjectSprite(CCSpriteFrame spriteFrame) : base(spriteFrame)
+        {
+            Init();
         }
 
         /// <summary>
