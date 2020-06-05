@@ -11,8 +11,9 @@ namespace CocosSharpMathGame
 {
     internal class ScrollableCollectionNode : UIElementNode
     {
-        internal float XBorder { get; set; } = 10f;
-        internal float YBorder { get; set; } = 10f;
+        internal float MaxScale { get; set; } = Constants.STANDARD_SCALE;
+        internal float XBorder { get; set; } = 20f;
+        internal float YBorder { get; set; } = 20f;
         internal List<CCNode> Collection { get; private protected set; } = new List<CCNode>();
         // standard behavior is a horizontal collection with one row
         private int columns;
@@ -25,7 +26,7 @@ namespace CocosSharpMathGame
             set
             {
                 columns = value;
-                CollectionNode.ContentSize = new CCSize(columns * BoxSize.Width, CollectionNode.ContentSize.Height);
+                CollectionNode.ContentSize = new CCSize(columns * (BoxSize.Width+XBorder), CollectionNode.ContentSize.Height);
             }
         } 
         private int rows;
@@ -38,7 +39,7 @@ namespace CocosSharpMathGame
             set
             {
                 rows = value;
-                CollectionNode.ContentSize = new CCSize(CollectionNode.ContentSize.Width, rows * BoxSize.Height);
+                CollectionNode.ContentSize = new CCSize(CollectionNode.ContentSize.Width, rows * (BoxSize.Height+YBorder));
             }
         }
         private CCSize boxSize;
@@ -54,7 +55,7 @@ namespace CocosSharpMathGame
             set
             {
                 boxSize = value;
-                CollectionNode.ContentSize = new CCSize(columns * boxSize.Width, rows * boxSize.Height);
+                CollectionNode.ContentSize = new CCSize(columns * (boxSize.Width+XBorder), rows * (boxSize.Height+YBorder));
             }
         }
         internal bool Clicked { get; private protected set; } = false;
@@ -66,6 +67,7 @@ namespace CocosSharpMathGame
             CollectionNode.Scale = 1f;
             CollectionNode.AnchorPoint = CCPoint.AnchorUpperLeft;
             CollectionNode.PositionY = contentSize.Height;
+            CollectionNode.PositionX = MaxX;
             AddChild(CollectionNode);
             AnchorPoint = CCPoint.AnchorLowerLeft;
             Scale = 1f;
@@ -103,7 +105,7 @@ namespace CocosSharpMathGame
                 Collection.Add(ccNode);
                 CollectionNode.AddChild(ccNode);
                 // place the node correctly
-                ccNode.AnchorPoint = CCPoint.AnchorUpperLeft;
+                ccNode.AnchorPoint = CCPoint.AnchorMiddle;
                 ccNode.Position = PositionInCollection(Collection.Count() - 1);
                 float ratioWidth  = ccNode.ContentSize.Width  / BoxSize.Width;
                 float ratioHeight = ccNode.ContentSize.Height / BoxSize.Height;
@@ -111,6 +113,8 @@ namespace CocosSharpMathGame
                     gameObject.FitToWidth(BoxSize.Width);
                 else
                     gameObject.FitToHeight(BoxSize.Height);
+                if (gameObject.GetScale() > MaxScale)
+                    ccNode.Scale = MaxScale;
                 return true;
             }
             return false;
@@ -118,15 +122,22 @@ namespace CocosSharpMathGame
 
         internal CCPoint PositionInCollection(int index)
         {
-            return new CCPoint((index % Columns) * (BoxSize.Width + XBorder), CollectionNode.ContentSize.Height - (index / Columns) * (BoxSize.Height + YBorder));
+            return new CCPoint((index % Columns) * (BoxSize.Width + XBorder) + BoxSize.Width / 2, CollectionNode.ContentSize.Height - (index / Columns) * (BoxSize.Height + YBorder) - BoxSize.Height / 2);
         }
         internal float MinX
         {
             get
             {
-                float minX = ContentSize.Width - BoxSize.Width * MaxBoxesPerRow;
-                if (minX > 0) minX = 0;
+                float minX = ContentSize.Width - BoxSize.Width * MaxBoxesPerRow - XBorder;
+                if (minX > MaxX) minX = MaxX;
                 return minX;
+            }
+        }
+        internal float MaxX
+        {
+            get
+            {
+                return XBorder;
             }
         }
 
@@ -142,7 +153,7 @@ namespace CocosSharpMathGame
             get
             {
                 float minY = MinY;
-                float maxY = minY + BoxSize.Height * MaxBoxesPerColumn - ContentSize.Height;
+                float maxY = minY + (BoxSize.Height + YBorder) * MaxBoxesPerColumn - ContentSize.Height - YBorder;
                 if (maxY < minY) maxY = MinY;
                 return maxY;
             }
@@ -171,7 +182,7 @@ namespace CocosSharpMathGame
         private void MoveCollectionNode(CCPoint movement)
         {
             CollectionNode.Position += movement;
-            CollectionNode.PositionX = Constants.Clamp(CollectionNode.PositionX + movement.X, MinX, 0);
+            CollectionNode.PositionX = Constants.Clamp(CollectionNode.PositionX + movement.X, MinX, MaxX);
             CollectionNode.PositionY = Constants.Clamp(CollectionNode.PositionY + movement.Y, MinY, MaxY);
         }
 
@@ -234,7 +245,17 @@ namespace CocosSharpMathGame
                         if (Rows == 1 && Math.Abs(touch.Delta.Y) > Math.Abs(touch.Delta.X) && Math.Abs(touch.Delta.Y) > 16.0)
                         {
                             foreach (var node in Collection)
-                                if (node.BoundingBoxTransformedToWorld.ContainsPoint(touch.StartLocation))
+                                if (node.BoundingBoxTransformedToWorld.ContainsPoint(new CCPoint(touch.Location.X, touch.StartLocation.Y)))
+                                {
+                                    RemoveFromCollection(node, touch);
+                                    Pressed = false;
+                                    return;
+                                }
+                        }
+                        else if (Columns == 1 && Math.Abs(touch.Delta.X) > Math.Abs(touch.Delta.Y) && Math.Abs(touch.Delta.X) > 16.0)
+                        {
+                            foreach (var node in Collection)
+                                if (node.BoundingBoxTransformedToWorld.ContainsPoint(new CCPoint(touch.StartLocation.X, touch.Location.Y)))
                                 {
                                     RemoveFromCollection(node, touch);
                                     Pressed = false;

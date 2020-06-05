@@ -68,7 +68,7 @@ namespace CocosSharpMathGame
         {
             float scale = ScaledContentSize.Width / ContentSize.Width;
             if (Parent != null && (Parent is IGameObject g))
-                scale += g.GetScale();
+                scale *= g.GetScale();
             return scale;
         }
         /// <summary>

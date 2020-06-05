@@ -31,13 +31,13 @@ namespace CocosSharpMathGame
             base.AddedToScene();
 
             var bounds = VisibleBoundsWorldspace;
-            TakeoffCollectionNode = new ScrollableCollectionNode(new CCSize(bounds.Size.Width, bounds.Size.Height / 6));
+            TakeoffCollectionNode = new ScrollableCollectionNode(new CCSize(bounds.Size.Width, bounds.Size.Height / 7));
             float borderToCollection = 30f;
             TakeoffNode.Position = CCPoint.Zero;
             TakeoffNode.AnchorPoint = CCPoint.AnchorLowerLeft;
             TakeoffNode.AddChild(TakeoffCollectionNode);
             TakeoffCollectionNode.PositionY = borderToCollection;
-            TakeoffCollectionNode.Columns = 100;
+            TakeoffCollectionNode.Columns = 10;
             TakeoffCollectionNode.Rows = 1;
             TakeoffCollectionNode.BoxSize = new CCSize(TakeoffCollectionNode.ContentSize.Height, TakeoffCollectionNode.ContentSize.Height);
             AddChild(TakeoffNode, zOrder: 1);
@@ -46,6 +46,7 @@ namespace CocosSharpMathGame
             AddChild(drawNode, zOrder: -1);
             drawNode.DrawRect(TakeoffNode.BoundingBoxTransformedToWorld, CCColor4B.Black);
             drawNode.DrawLine(new CCPoint(0, TakeoffNode.BoundingBoxTransformedToWorld.UpperRight.Y), TakeoffNode.BoundingBoxTransformedToWorld.UpperRight, 8f, CCColor4B.White);
+            drawNode.DrawLine(CCPoint.Zero, new CCPoint (TakeoffNode.BoundingBoxTransformedToWorld.MaxX, 0), 8f, CCColor4B.White);
             // listen to the TakeoffCollectionNode
             TakeoffCollectionNode.CollectionRemovalEvent += HangarLayer.ReceiveAircraftFromCollection;
         }
