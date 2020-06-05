@@ -13,9 +13,11 @@ namespace CocosSharpMathGame
     /// </summary>
     public class MyLayer : CCLayerColor
     {
+        private protected Scroller Scroller { get; set; } = new Scroller();
         public MyLayer(CCColor4B color) : base(color)
         {
             Schedule();
+            Scroller.MoveFunction = (movePoint) => { CameraPosition -= movePoint; UpdateCamera(); };
         }
         private CCPoint ShakeAmount { get; set; }
         private protected CCPoint ScreenShakeVec { get; private set; } = CCPoint.Zero;
@@ -81,24 +83,8 @@ namespace CocosSharpMathGame
             // shake the screen
             ShakeScreen(dt);
             // scroll on using inertia
-            ScrollUsingInertia(dt);
-        }
-
-        private CCPoint ScrollVelocity { get; set; }
-        private float ScrollTime { get; set; }
-        private float TotalScrollTime { get; set; }
-
-        internal void ScrollUsingInertia(float dt)
-        {
-            if (ScrollVelocity != CCPoint.Zero)
-            {
-                //Console.WriteLine("REALLY SCROLLING: " + ScrollVelocity);
-                CameraPosition += ScrollVelocity * (1 - (float)Math.Pow(ScrollTime / TotalScrollTime, 1)) * dt;
-                UpdateCamera();
-                ScrollTime += dt;
-                if (ScrollTime > TotalScrollTime)
-                    ScrollVelocity = CCPoint.Zero;
-            }
+            if (Scroller != null)
+                Scroller.Update(dt);
         }
 
         internal void AddScreenShake(float shakeX, float shakeY)
@@ -159,7 +145,8 @@ namespace CocosSharpMathGame
                 case 1:
                     {
                         // stop all scrolling
-                        ScrollVelocity = CCPoint.Zero;
+                        if (Scroller != null)
+                            Scroller.OnTouchesBegan(touches, touchEvent);
                     }
                     break;
                 default:
@@ -174,11 +161,8 @@ namespace CocosSharpMathGame
                 case 1:
                     {
                         // move the camera
-                        var touch = touches[0];
-                        var xDif = touch.Location.X - touch.PreviousLocation.X;
-                        var yDif = touch.Location.Y - touch.PreviousLocation.Y;
-                        CameraPosition = new CCPoint(CameraPosition.X - xDif, CameraPosition.Y - yDif);
-                        UpdateCamera();
+                        if (Scroller != null)
+                            Scroller.OnTouchesMoved(touches, touchEvent);
                     }
                     break;
                 case 2:
@@ -225,15 +209,8 @@ namespace CocosSharpMathGame
                 case 1:
                     {
                         // start inert scrolling
-                        var touch = touches[0];
-                        var xDif = touch.Location.X - touch.PreviousLocation.X;
-                        var yDif = touch.Location.Y - touch.PreviousLocation.Y;
-                        CCPoint DiffOnScreen = touch.LocationOnScreen - touch.PreviousLocationOnScreen;
-                        ScrollVelocity = new CCPoint(-xDif, -yDif);
-                        ScrollVelocity *= (float)Math.Pow(DiffOnScreen.Length, 0.2);
-                        ScrollVelocity *= 16;
-                        ScrollTime = 0;
-                        TotalScrollTime = (float)Math.Pow(DiffOnScreen.Length, 0.4) / 8;
+                        if (Scroller != null)
+                            Scroller.OnTouchesEnded(touches, touchEvent);
                     }
                     break;
                 default:

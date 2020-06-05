@@ -10,6 +10,7 @@ namespace CocosSharpMathGame
     abstract internal class UIElementNode : GameObjectNode
     {
         protected bool Pressed { get; set; } = false;
+        internal float RadiusFactor { get; set; } = 0.5f;
         internal void MakeClickable(Action<List<CCTouch>, CCEvent> onTouchesBegan, Action<List<CCTouch>, CCEvent> onTouchesMoved = null, Action<List<CCTouch>, CCEvent> onTouchesEnded = null, Action<List<CCTouch>, CCEvent> onTouchesCancelled = null, bool touchMustEndOnIt = true, bool IsCircleButton = false, bool swallowTouch = true)
         {
             Func<CCTouch, bool> touchStartedOnIt = null;
@@ -45,11 +46,11 @@ namespace CocosSharpMathGame
         }
         internal bool TouchStartedOnItCircle(CCTouch touch)
         {
-            return touch.StartLocation.IsNear(BoundingBoxTransformedToWorld.Center, ScaledContentSize.Width * 0.75f);
+            return touch.StartLocation.IsNear(BoundingBoxTransformedToWorld.Center, ScaledContentSize.Width * RadiusFactor);
         }
         internal bool TouchIsOnItCircle(CCTouch touch)
         {
-            return touch.Location.IsNear(BoundingBoxTransformedToWorld.Center, ScaledContentSize.Width * 0.75f);
+            return touch.Location.IsNear(BoundingBoxTransformedToWorld.Center, ScaledContentSize.Width * RadiusFactor);
         }
     }
 }

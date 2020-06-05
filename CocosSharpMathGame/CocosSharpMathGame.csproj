@@ -147,6 +147,7 @@
     <Compile Include="Internals\CubicSpline.cs" />
     <Compile Include="Internals\Polygon.cs" />
     <Compile Include="Internals\PolygonWithSplines.cs" />
+    <Compile Include="Internals\Scroller.cs" />
     <Compile Include="Internals\Team.cs" />
     <Compile Include="Internals\TouchExtension.cs" />
     <Compile Include="Internals\TriDiagonalMatrix.cs" />

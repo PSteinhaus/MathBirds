@@ -16,6 +16,7 @@ namespace CocosSharpMathGame
         internal FlightPathHead() : base("flightPathHead.png")
         {
             Scale = Constants.STANDARD_SCALE*2;
+            RadiusFactor = 1f;  // make the button a bit easier to hit
             // add a touch listener
             MakeClickable(OnTouchesBegan, OnTouchesMoved, IsCircleButton: true);
         }

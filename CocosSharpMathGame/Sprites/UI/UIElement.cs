@@ -11,6 +11,7 @@ namespace CocosSharpMathGame
     {
         static internal CCSpriteSheet spriteSheet = new CCSpriteSheet("ui.plist");
         protected bool Pressed { get; set; } = false;
+        internal float RadiusFactor { get; set; } = 0.5f;
         internal UIElement(string textureName) : base(spriteSheet.Frames.Find(_ => _.TextureFilename.Equals(textureName)))
         {
 
@@ -51,11 +52,11 @@ namespace CocosSharpMathGame
         }
         internal bool TouchStartedOnItCircle(CCTouch touch)
         {
-            return touch.StartLocation.IsNear(BoundingBoxTransformedToWorld.Center, ScaledContentSize.Width * 0.75f);
+            return touch.StartLocation.IsNear(BoundingBoxTransformedToWorld.Center, ScaledContentSize.Width * RadiusFactor);
         }
         internal bool TouchIsOnItCircle(CCTouch touch)
         {
-            return touch.Location.IsNear(BoundingBoxTransformedToWorld.Center, ScaledContentSize.Width * 0.75f);
+            return touch.Location.IsNear(BoundingBoxTransformedToWorld.Center, ScaledContentSize.Width * RadiusFactor);
         }
     }
 }

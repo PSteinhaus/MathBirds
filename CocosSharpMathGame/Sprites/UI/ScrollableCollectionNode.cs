@@ -11,6 +11,7 @@ namespace CocosSharpMathGame
 {
     internal class ScrollableCollectionNode : UIElementNode
     {
+        private protected Scroller Scroller { get; set; } = new Scroller();
         internal float MaxScale { get; set; } = Constants.STANDARD_SCALE;
         internal float XBorder { get; set; } = 20f;
         internal float YBorder { get; set; } = 20f;
@@ -71,6 +72,7 @@ namespace CocosSharpMathGame
             AddChild(CollectionNode);
             AnchorPoint = CCPoint.AnchorLowerLeft;
             Scale = 1f;
+            Scroller.MoveFunction = MoveCollectionNode;
             MakeClickable(OnTouchesBegan, OnTouchesMoved, OnTouchesEnded, null, touchMustEndOnIt: false);
         }
 
@@ -78,9 +80,9 @@ namespace CocosSharpMathGame
         {
             base.Update(dt);
             // scroll on using inertia
-            ScrollUsingInertia(dt);
+            Scroller.Update(dt);
         }
-
+        /*
         private CCPoint ScrollVelocity { get; set; }
         private float ScrollTime { get; set; }
         private float TotalScrollTime { get; set; }
@@ -96,7 +98,7 @@ namespace CocosSharpMathGame
                     ScrollVelocity = CCPoint.Zero;
             }
         }
-
+        */
         internal bool AddToCollection(IGameObject gameObject)
         {
             if(Collection.Count() < Columns * Rows) // if there is space left
@@ -186,21 +188,6 @@ namespace CocosSharpMathGame
             CollectionNode.PositionY = Constants.Clamp(CollectionNode.PositionY + movement.Y, MinY, MaxY);
         }
 
-        private protected void OnTouchesBegan(List<CCTouch> touches, CCEvent touchEvent)
-        {
-            switch (touches.Count)
-            {
-                case 1:
-                    {
-                        // stop all scrolling
-                        ScrollVelocity = CCPoint.Zero;
-                    }
-                    break;
-                default:
-                    break;
-            }
-        }
-
         protected void RemoveFromCollection(CCNode node, CCTouch touchOnRemove=null)
         {
             Collection.Remove(node);
@@ -235,6 +222,20 @@ namespace CocosSharpMathGame
 
         internal event EventHandler<CollectionRemovalEventArgs> CollectionRemovalEvent;
 
+        private protected void OnTouchesBegan(List<CCTouch> touches, CCEvent touchEvent)
+        {
+            switch (touches.Count)
+            {
+                case 1:
+                    {
+                        // stop all scrolling
+                        Scroller.OnTouchesBegan(touches, touchEvent);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
         private protected void OnTouchesMoved(List<CCTouch> touches, CCEvent touchEvent)
         {
             switch (touches.Count)
@@ -262,8 +263,8 @@ namespace CocosSharpMathGame
                                     return;
                                 }
                         }
-                        // move the collectionNode
-                        MoveCollectionNode(touch.Delta);
+                        // move the collectionNode via scroller
+                        Scroller.OnTouchesMoved(touches, touchEvent);
                     }
                     break;
                 default:
@@ -278,15 +279,7 @@ namespace CocosSharpMathGame
                 case 1:
                     {
                         // start inert scrolling
-                        var touch = touches[0];
-                        var xDif = touch.Location.X - touch.PreviousLocation.X;
-                        var yDif = touch.Location.Y - touch.PreviousLocation.Y;
-                        CCPoint DiffOnScreen = touch.LocationOnScreen - touch.PreviousLocationOnScreen;
-                        ScrollVelocity = new CCPoint(xDif, yDif);
-                        ScrollVelocity *= (float)Math.Pow(DiffOnScreen.Length, 0.2);
-                        ScrollVelocity *= 16;
-                        ScrollTime = 0;
-                        TotalScrollTime = (float)Math.Pow(DiffOnScreen.Length, 0.4) / 8;
+                        Scroller.OnTouchesEnded(touches, touchEvent);
                     }
                     break;
                 default:
