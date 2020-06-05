@@ -7,15 +7,54 @@
 		<key>flightPathHead.png</key>
 		<dict>
 			<key>frame</key>
-			<string>{{0,0},{15,15}}</string>
+			<string>{{0,0},{31,31}}</string>
 			<key>offset</key>
 			<string>{0,0}</string>
 			<key>rotated</key>
 			<false/>
 			<key>sourceColorRect</key>
-			<string>{{0,0},{15,15}}</string>
+			<string>{{0,0},{31,31}}</string>
 			<key>sourceSize</key>
-			<string>{15,15}</string>
+			<string>{31,31}</string>
+		</dict>
+		<key>hangarOptionEnd.png</key>
+		<dict>
+			<key>frame</key>
+			<string>{{0,32},{22,64}}</string>
+			<key>offset</key>
+			<string>{0,0}</string>
+			<key>rotated</key>
+			<false/>
+			<key>sourceColorRect</key>
+			<string>{{0,0},{22,64}}</string>
+			<key>sourceSize</key>
+			<string>{22,64}</string>
+		</dict>
+		<key>hangarOptionMid.png</key>
+		<dict>
+			<key>frame</key>
+			<string>{{46,0},{1,64}}</string>
+			<key>offset</key>
+			<string>{0,0}</string>
+			<key>rotated</key>
+			<false/>
+			<key>sourceColorRect</key>
+			<string>{{0,0},{1,64}}</string>
+			<key>sourceSize</key>
+			<string>{1,64}</string>
+		</dict>
+		<key>hangarOptionStart.png</key>
+		<dict>
+			<key>frame</key>
+			<string>{{23,32},{22,64}}</string>
+			<key>offset</key>
+			<string>{0,0}</string>
+			<key>rotated</key>
+			<false/>
+			<key>sourceColorRect</key>
+			<string>{{0,0},{22,64}}</string>
+			<key>sourceSize</key>
+			<string>{22,64}</string>
 		</dict>
 	</dict>
 	<key>metadata</key>
@@ -23,7 +62,7 @@
 		<key>format</key>
 		<integer>2</integer>
 		<key>size</key>
-		<string>{15,15}</string>
+		<string>{64,128}</string>
 		<key>textureFileName</key>
 		<string>ui.png</string>
 	</dict>

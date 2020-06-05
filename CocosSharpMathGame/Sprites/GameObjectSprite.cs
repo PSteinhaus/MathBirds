@@ -10,7 +10,7 @@ namespace CocosSharpMathGame
     /// <summary>
     /// All visible objects in the sky that aren't pure Nodes are GameObjectSprites (maybe excluding effects like shots or shields)
     /// </summary>
-    internal abstract class GameObjectSprite : CCSprite, IGameObject
+    internal class GameObjectSprite : CCSprite, IGameObject
     {
         public bool MyVisible
         {
@@ -95,11 +95,6 @@ namespace CocosSharpMathGame
             IsAntialiased = false;
             AnchorPoint = CCPoint.AnchorMiddle;
             Scale = Constants.STANDARD_SCALE;
-        }
-
-        internal GameObjectSprite() : base()
-        {
-            Init();
         }
         internal GameObjectSprite(CCSpriteFrame spriteFrame) : base(spriteFrame)
         {

@@ -15,7 +15,7 @@ namespace CocosSharpMathGame
         }
         internal GameState State { get; private set; } = GameState.PLANNING;
         public GUILayer GUILayer { get; set; }
-        private MathSprite mathSprite1 = new MathSprite("(a+b)*((x))");
+        //private MathSprite mathSprite1;
         private CCDrawNode drawNode = new CCDrawNode();
         internal List<Aircraft> Aircrafts { get; set; } = new List<Aircraft>();
         internal List<Projectile> Projectiles { get; } = new List<Projectile>();
@@ -54,7 +54,7 @@ namespace CocosSharpMathGame
             // a DrawNode is always useful for debugging
             //AddChild(drawNode);
             //drawNode.ZOrder = 0;
-            mathSprite1.ZOrder = 1;
+            //mathSprite1.ZOrder = 1;
 
             // add a touch listener
             var touchListener = new CCEventListenerTouchAllAtOnce();

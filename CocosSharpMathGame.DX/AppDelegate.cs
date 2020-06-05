@@ -48,8 +48,8 @@ namespace CocosSharpMathGame.DX
 
             scene.AddChild(hangarLayer.GUILayer);
             scene.AddChild(hangarLayer, zOrder:-1);
-            //scene.AddChild(playLayer);
             //scene.AddChild(playLayer.GUILayer);
+            //scene.AddChild(playLayer, zOrder:-1);
 
             mainWindow.RunWithScene(scene);
         }

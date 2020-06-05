@@ -11,7 +11,7 @@ namespace CocosSharpMathGame
     {
         internal ExecuteOrdersButton() : base("flightPathHead.png")
         {
-            Scale = 12f;
+            Scale = 6f;
             MakeClickable(OnTouchesBegan, onTouchesEnded: OnTouchesEnded, onTouchesCancelled:OnTouchesCancelled, touchMustEndOnIt:false, IsCircleButton: true);
         }
 

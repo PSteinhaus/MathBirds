@@ -54,7 +54,7 @@ namespace CocosSharpMathGame
             {
                 CalcBoundaries();
             }
-            CameraSize = new CCSize(MaxCameraWidth, MaxCameraHeight) / 8;
+            CameraSize = new CCSize(MaxCameraWidth, MaxCameraHeight) / 2;
             CameraPosition = new CCPoint(-CameraSize.Width / 2, -CameraSize.Height / 2);
             UpdateCamera();
         }

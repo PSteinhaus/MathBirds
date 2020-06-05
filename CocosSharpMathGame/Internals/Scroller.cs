@@ -12,7 +12,7 @@ namespace CocosSharpMathGame
     /// </summary>
     internal class Scroller
     {
-        private CCPoint ScrollVelocity { get; set; }
+        internal CCPoint ScrollVelocity { get; set; }
         private float ScrollTime { get; set; }
         private float TotalScrollTime { get; set; }
         internal Action<CCPoint> MoveFunction { get; set; }

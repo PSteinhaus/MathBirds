@@ -187,13 +187,17 @@
     <Compile Include="Sprites\Projectiles\Projectile.cs" />
     <Compile Include="Sprites\Projectiles\TestProjectile.cs" />
     <Compile Include="Sprites\UI\Button.cs" />
+    <Compile Include="Sprites\UI\Carousel.cs" />
     <Compile Include="Sprites\UI\CircleButton.cs" />
     <Compile Include="Sprites\UI\ExecuteOrdersButton.cs" />
     <Compile Include="Sprites\UI\FlightPathHead.cs" />
+    <Compile Include="Sprites\UI\HangarOptionNode.cs" />
+    <Compile Include="Sprites\UI\HorizontalScalingButton.cs" />
     <Compile Include="Sprites\UI\RectButton.cs" />
     <Compile Include="Sprites\UI\ScrollableCollectionNode.cs" />
     <Compile Include="Sprites\UI\UIElement.cs" />
     <Compile Include="Sprites\UI\UIElementNode.cs" />
+    <Compile Include="Sprites\UI\VerticalScalingButton.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Content\hd\fonts\" />
@@ -206,6 +210,10 @@
     <Content Include="Content\hd\graphics\ui.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Data\sprites\flightPathHead.png" />
+    <Content Include="Data\sprites\hangarOptionEnd.png" />
+    <Content Include="Data\sprites\hangarOptionMid.png" />
+    <Content Include="Data\sprites\hangarOptionStart.png" />
     <Content Include="Data\sprites\testBody.png" />
     <Content Include="Data\sprites\testDoubleWing.png" />
     <Content Include="Data\sprites\testEngine.png" />

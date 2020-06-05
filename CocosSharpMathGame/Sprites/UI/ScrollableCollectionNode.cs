@@ -59,7 +59,6 @@ namespace CocosSharpMathGame
                 CollectionNode.ContentSize = new CCSize(columns * (boxSize.Width+XBorder), rows * (boxSize.Height+YBorder));
             }
         }
-        internal bool Clicked { get; private protected set; } = false;
         internal GameObjectNode CollectionNode { get; private protected set; } = new GameObjectNode();
         internal ScrollableCollectionNode(CCSize contentSize)
         {
@@ -82,23 +81,6 @@ namespace CocosSharpMathGame
             // scroll on using inertia
             Scroller.Update(dt);
         }
-        /*
-        private CCPoint ScrollVelocity { get; set; }
-        private float ScrollTime { get; set; }
-        private float TotalScrollTime { get; set; }
-
-        internal void ScrollUsingInertia(float dt)
-        {
-            if (ScrollVelocity != CCPoint.Zero)
-            {
-                //Console.WriteLine("REALLY SCROLLING: " + ScrollVelocity);
-                MoveCollectionNode(ScrollVelocity * (1 - (float)Math.Pow(ScrollTime / TotalScrollTime, 1)) * dt);
-                ScrollTime += dt;
-                if (ScrollTime > TotalScrollTime)
-                    ScrollVelocity = CCPoint.Zero;
-            }
-        }
-        */
         internal bool AddToCollection(IGameObject gameObject)
         {
             if(Collection.Count() < Columns * Rows) // if there is space left

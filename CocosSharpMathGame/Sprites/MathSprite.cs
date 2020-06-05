@@ -12,7 +12,7 @@ namespace CocosSharpMathGame
     /// </summary>
     class MathSprite : GameObjectSprite
     {
-        public MathSprite(string _infix) : base()
+        public MathSprite(string _infix) : base(UIElement.spriteSheet.Frames.Find(_ => _.TextureFilename.Equals("testRotor.png"))) // just a placeholder
         {
             // create and set the texture
             MathToTexture.CreateAndAddTexture(_infix, _infix);
