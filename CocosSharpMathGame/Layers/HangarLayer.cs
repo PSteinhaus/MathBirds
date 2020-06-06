@@ -64,28 +64,6 @@ namespace CocosSharpMathGame
             CreateActions();
         }
 
-        internal void StartTransition(object sender, EventArgs args)
-        {
-            StopAllTransitionActions();
-            State = HangarState.TRANSITION;
-            // stop all current transition actions
-            // get the state to go to
-            var carousel = (Carousel)sender;
-            var middle = carousel.MiddleNode;
-            if (middle == GUILayer.HangarOptionHangar)
-            {
-                // TODO: start a transition to the hangar state
-                GUILayer.TakeoffNode.AddAction(TakeoffNodeToHangar);
-                BGNode.AddAction(BGFadeIn);
-            }
-            else if (middle == GUILayer.HangarOptionWorkshop)
-            {
-                // TODO: start a transition to the workshop state
-                GUILayer.TakeoffNode.AddAction(TakeoffNodeLeave);
-                BGNode.AddAction(BGFadeOut);
-            }
-        }
-
         internal void IncreaseBGAlpha()
         {
             BGColor = new CCColor4B(BGColor.R, BGColor.G, BGColor.B, (byte)(BGColor.A + 1 <= byte.MaxValue ? BGColor.A + 1 : byte.MaxValue));
@@ -124,6 +102,27 @@ namespace CocosSharpMathGame
         private CCAction BGFadeOut;
         private CCAction BGFadeIn;
 
+        internal void StartTransition(object sender, EventArgs args)
+        {
+            StopAllTransitionActions();
+            State = HangarState.TRANSITION;
+            // stop all current transition actions
+            // get the state to go to
+            var carousel = (Carousel)sender;
+            var middle = carousel.MiddleNode;
+            if (middle == GUILayer.HangarOptionHangar)
+            {
+                // TODO: start a transition to the hangar state
+                GUILayer.TakeoffNode.AddAction(TakeoffNodeToHangar);
+                BGNode.AddAction(BGFadeIn);
+            }
+            else if (middle == GUILayer.HangarOptionWorkshop)
+            {
+                // TODO: start a transition to the workshop state
+                GUILayer.TakeoffNode.AddAction(TakeoffNodeLeave);
+                BGNode.AddAction(BGFadeOut);
+            }
+        }
         private void StopAllTransitionActions()
         {
             GUILayer.TakeoffNode.StopAction(TakeoffNodeToHangar.Tag);
