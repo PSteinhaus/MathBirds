@@ -17,6 +17,8 @@ namespace CocosSharpMathGame
         internal ScrollableCollectionNode TakeoffCollectionNode { get; private protected set; }
         internal CCNode TakeoffNode { get; private protected set; } = new CCNode();
         private HangarLayer HangarLayer { get; set; }
+        internal GameObjectNode HangarOptionHangar { get; private protected set; }
+        internal GameObjectNode HangarOptionWorkshop { get; private protected set; }
         public HangarGUILayer(HangarLayer hangarLayer) : base(CCColor4B.Transparent)
         {
             HangarLayer = hangarLayer;
@@ -32,19 +34,17 @@ namespace CocosSharpMathGame
             base.AddedToScene();
 
             var bounds = VisibleBoundsWorldspace;
-            var testOption1 = new HangarOptionNode();
-            var testOption2 = new HangarOptionNode();
-            var testOption3 = new HangarOptionNode();
-            HangarOptionCarousel = new Carousel(new CCSize(bounds.Size.Width, testOption1.ScaledContentSize.Height));
+            HangarOptionHangar = new HangarOptionNode();
+            HangarOptionWorkshop = new HangarOptionNode();
+            HangarOptionCarousel = new Carousel(new CCSize(bounds.Size.Width, HangarOptionHangar.ScaledContentSize.Height));
             HangarOptionCarousel.NodeAnchor = CCPoint.AnchorMiddleTop;
             AddChild(HangarOptionCarousel);
             HangarOptionCarousel.AnchorPoint = CCPoint.AnchorUpperLeft;
             HangarOptionCarousel.Position = new CCPoint(0, bounds.MaxY);
-            HangarOptionCarousel.AddToCollection(testOption1);
-            HangarOptionCarousel.AddToCollection(testOption2);
-            HangarOptionCarousel.AddToCollection(testOption3);
+            HangarOptionCarousel.AddToCollection(HangarOptionHangar);
+            HangarOptionCarousel.AddToCollection(HangarOptionWorkshop);
             TakeoffCollectionNode = new ScrollableCollectionNode(new CCSize(bounds.Size.Width, bounds.Size.Height / 7));
-            float borderToCollection = 30f;
+            float borderToCollection = 15f;
             TakeoffNode.Position = CCPoint.Zero;
             TakeoffNode.AnchorPoint = CCPoint.AnchorLowerLeft;
             TakeoffNode.AddChild(TakeoffCollectionNode);
@@ -55,12 +55,16 @@ namespace CocosSharpMathGame
             AddChild(TakeoffNode, zOrder: 1);
             TakeoffNode.ContentSize = new CCSize(TakeoffCollectionNode.ContentSize.Width, TakeoffCollectionNode.ContentSize.Height + 2 * borderToCollection);
             var drawNode = new CCDrawNode();
-            AddChild(drawNode, zOrder: -1);
+            TakeoffNode.AddChild(drawNode, zOrder: -1);
             drawNode.DrawRect(TakeoffNode.BoundingBoxTransformedToWorld, CCColor4B.Black);
-            drawNode.DrawLine(new CCPoint(0, TakeoffNode.BoundingBoxTransformedToWorld.UpperRight.Y), TakeoffNode.BoundingBoxTransformedToWorld.UpperRight, 4f, CCColor4B.White);
-            drawNode.DrawLine(CCPoint.Zero, new CCPoint (TakeoffNode.BoundingBoxTransformedToWorld.MaxX, 0), 4f, CCColor4B.White);
-            // listen to the TakeoffCollectionNode
+            drawNode.DrawLine(new CCPoint(0, TakeoffNode.BoundingBoxTransformedToWorld.UpperRight.Y), TakeoffNode.BoundingBoxTransformedToWorld.UpperRight, 8f, CCColor4B.White);
+            drawNode.DrawLine(CCPoint.Zero, new CCPoint (TakeoffNode.BoundingBoxTransformedToWorld.MaxX, 0), 8f, CCColor4B.White);
+            TakeoffNode.ContentSize = new CCSize(TakeoffNode.ContentSize.Width, TakeoffNode.ContentSize.Height + 2 * 4f);
+            TakeoffNode.PositionY += 8f;
+            // let the hangar listen to the TakeoffCollectionNode
             TakeoffCollectionNode.CollectionRemovalEvent += HangarLayer.ReceiveAircraftFromCollection;
+            // let the hangar listen to the Carousel for a change of the middle node
+            HangarOptionCarousel.MiddleChangedEvent += HangarLayer.StartTransition;
         }
 
         new private protected void OnTouchesEnded(List<CCTouch> touches, CCEvent touchEvent)

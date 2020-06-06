@@ -4,13 +4,22 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CocosSharp;
+using SkiaSharp;
 
 namespace CocosSharpMathGame
 {
     public class HangarLayer : MyLayer
     {
+        const float TRANSITION_TIME = 0.5f;
+        internal enum HangarState
+        {
+            TRANSITION, HANGAR, WORKSHOP, SCRAPYARD
+        }
+        internal HangarState State = HangarState.HANGAR;
         public HangarGUILayer GUILayer { get; set; }
         internal CCNode BGNode { get; private protected set; }
+        private CCDrawNode BGDrawNode { get; set; }
+        private CCColor4B BGColor { get; set; } = new CCColor4B(50, 50, 50);
         internal List<Aircraft> Aircrafts = new List<Aircraft>();
         internal List<Part> Parts = new List<Part>();
         public HangarLayer() : base(CCColor4B.Black)
@@ -18,15 +27,10 @@ namespace CocosSharpMathGame
             GUILayer = new HangarGUILayer(this);
             BGNode = new CCNode();
             AddChild(BGNode);
-            var drawNode = new CCDrawNode();
-            BGNode.AddChild(drawNode);
-            const float bgsize = 6000f;
-            var bgColor = new CCColor4B(50, 50, 50);
-            for (int i = -40; i < 40; i++)
-            {
-                drawNode.DrawLine(new CCPoint(i * bgsize / 40, -bgsize), new CCPoint(i * bgsize / 40, bgsize), 4f, bgColor);
-                drawNode.DrawLine(new CCPoint(-bgsize, i * bgsize / 40), new CCPoint(bgsize, i * bgsize / 40), 4f, bgColor);
-            }
+            BGDrawNode = new CCDrawNode();
+            BGDrawNode.BlendFunc = CCBlendFunc.NonPremultiplied;
+            BGNode.AddChild(BGDrawNode);
+            DrawBG();
             BGNode.ZOrder = -20;
             //BGNode.Rotation = 45f;
             // add some aircrafts
@@ -57,6 +61,76 @@ namespace CocosSharpMathGame
             CameraSize = new CCSize(MaxCameraWidth, MaxCameraHeight) / 2;
             CameraPosition = new CCPoint(-CameraSize.Width / 2, -CameraSize.Height / 2);
             UpdateCamera();
+            CreateActions();
+        }
+
+        internal void StartTransition(object sender, EventArgs args)
+        {
+            StopAllTransitionActions();
+            State = HangarState.TRANSITION;
+            // stop all current transition actions
+            // get the state to go to
+            var carousel = (Carousel)sender;
+            var middle = carousel.MiddleNode;
+            if (middle == GUILayer.HangarOptionHangar)
+            {
+                // TODO: start a transition to the hangar state
+                GUILayer.TakeoffNode.AddAction(TakeoffNodeToHangar);
+                BGNode.AddAction(BGFadeIn);
+            }
+            else if (middle == GUILayer.HangarOptionWorkshop)
+            {
+                // TODO: start a transition to the workshop state
+                GUILayer.TakeoffNode.AddAction(TakeoffNodeLeave);
+                BGNode.AddAction(BGFadeOut);
+            }
+        }
+
+        internal void IncreaseBGAlpha()
+        {
+            BGColor = new CCColor4B(BGColor.R, BGColor.G, BGColor.B, (byte)(BGColor.A + 1 <= byte.MaxValue ? BGColor.A + 1 : byte.MaxValue));
+            DrawBG();
+        }
+
+        internal void DecreaseBGAlpha()
+        {
+            BGColor = new CCColor4B(BGColor.R, BGColor.G, BGColor.B, (byte)(BGColor.A - 1 >= 0 ? BGColor.A - 1 : 0));
+            DrawBG();
+        }
+
+        internal void DrawBG()
+        {
+            BGDrawNode.Clear();
+            const float bgSize = 6000f;
+            for (int i = -40; i < 40; i++)
+            {
+                BGDrawNode.DrawLine(new CCPoint(i * bgSize / 40, -bgSize), new CCPoint(i * bgSize / 40, bgSize), 4f, BGColor);
+                BGDrawNode.DrawLine(new CCPoint(-bgSize, i * bgSize / 40), new CCPoint(bgSize, i * bgSize / 40), 4f, BGColor);
+            }
+        }
+
+        private void CreateActions()
+        {
+            const float easeRate = 0.6f;
+            TakeoffNodeToHangar = new CCEaseIn(new CCMoveTo(TRANSITION_TIME, new CCPoint(0, 8f)), easeRate);
+            TakeoffNodeLeave    = new CCEaseIn(new CCMoveTo(TRANSITION_TIME, new CCPoint(0, -GUILayer.TakeoffNode.BoundingBoxTransformedToWorld.Size.Height)), easeRate);
+            BGFadeOut           = new CCRepeat(new CCSequence(new CCCallFunc(DecreaseBGAlpha), new CCDelayTime(TRANSITION_TIME / 255)), 255);
+            BGFadeIn            = new CCRepeat(new CCSequence(new CCCallFunc(IncreaseBGAlpha), new CCDelayTime(TRANSITION_TIME / 255)), 255);
+            // TODO: MORE ACTIONS ARE NEEDED
+        }
+
+        private CCAction TakeoffNodeToHangar;
+        private CCAction TakeoffNodeLeave;
+        private CCAction BGFadeOut;
+        private CCAction BGFadeIn;
+
+        private void StopAllTransitionActions()
+        {
+            GUILayer.TakeoffNode.StopAction(TakeoffNodeToHangar.Tag);
+            GUILayer.TakeoffNode.StopAction(TakeoffNodeLeave.Tag);
+            BGNode.StopAction(BGFadeOut.Tag);
+            BGNode.StopAction(BGFadeIn.Tag);
+            // TODO: Stop the rest of the actions
         }
 
         internal CCPoint GUICoordinatesToHangar(CCPoint pointInGUICoord)

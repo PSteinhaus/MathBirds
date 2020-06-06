@@ -1,70 +1,75 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
-<dict>
-	<key>frames</key>
 	<dict>
-		<key>flightPathHead.png</key>
+		<key>frames</key>
 		<dict>
-			<key>frame</key>
-			<string>{{0,0},{31,31}}</string>
-			<key>offset</key>
-			<string>{0,0}</string>
-			<key>rotated</key>
-			<false/>
-			<key>sourceColorRect</key>
-			<string>{{0,0},{31,31}}</string>
-			<key>sourceSize</key>
-			<string>{31,31}</string>
+			<key>flightPathHead.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{0,0},{31,31}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false/>
+				<key>sourceColorRect</key>
+				<string>{{0,0},{31,31}}</string>
+				<key>sourceSize</key>
+				<string>{31,31}</string>
+			</dict>
+
+			<key>hangarOptionEnd.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{18,32},{17,50}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false/>
+				<key>sourceColorRect</key>
+				<string>{{0,0},{17,50}}</string>
+				<key>sourceSize</key>
+				<string>{17,50}</string>
+			</dict>
+
+			<key>hangarOptionMid.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{36,0},{1,50}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false/>
+				<key>sourceColorRect</key>
+				<string>{{0,0},{1,50}}</string>
+				<key>sourceSize</key>
+				<string>{1,50}</string>
+			</dict>
+
+			<key>hangarOptionStart.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{0,32},{17,50}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false/>
+				<key>sourceColorRect</key>
+				<string>{{0,0},{17,50}}</string>
+				<key>sourceSize</key>
+				<string>{17,50}</string>
+			</dict>
+
 		</dict>
-		<key>hangarOptionEnd.png</key>
+
+		<key>metadata</key>
 		<dict>
-			<key>frame</key>
-			<string>{{0,32},{22,64}}</string>
-			<key>offset</key>
-			<string>{0,0}</string>
-			<key>rotated</key>
-			<false/>
-			<key>sourceColorRect</key>
-			<string>{{0,0},{22,64}}</string>
-			<key>sourceSize</key>
-			<string>{22,64}</string>
+			<key>format</key>
+			<integer>2</integer>
+			<key>size</key>
+			<string>{64,128}</string>
+			<key>textureFileName</key>
+			<string>ui.png</string>
+			</dict>
 		</dict>
-		<key>hangarOptionMid.png</key>
-		<dict>
-			<key>frame</key>
-			<string>{{46,0},{1,64}}</string>
-			<key>offset</key>
-			<string>{0,0}</string>
-			<key>rotated</key>
-			<false/>
-			<key>sourceColorRect</key>
-			<string>{{0,0},{1,64}}</string>
-			<key>sourceSize</key>
-			<string>{1,64}</string>
-		</dict>
-		<key>hangarOptionStart.png</key>
-		<dict>
-			<key>frame</key>
-			<string>{{23,32},{22,64}}</string>
-			<key>offset</key>
-			<string>{0,0}</string>
-			<key>rotated</key>
-			<false/>
-			<key>sourceColorRect</key>
-			<string>{{0,0},{22,64}}</string>
-			<key>sourceSize</key>
-			<string>{22,64}</string>
-		</dict>
-	</dict>
-	<key>metadata</key>
-	<dict>
-		<key>format</key>
-		<integer>2</integer>
-		<key>size</key>
-		<string>{64,128}</string>
-		<key>textureFileName</key>
-		<string>ui.png</string>
-	</dict>
-</dict>
 </plist>

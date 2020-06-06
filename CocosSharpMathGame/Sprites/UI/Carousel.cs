@@ -9,7 +9,20 @@ namespace CocosSharpMathGame
 {
     internal class Carousel : UIElementNode
     {
-        internal CCNode MiddleNode { get; set; }
+        private CCNode middleNode; 
+        internal CCNode MiddleNode
+        {
+            get { return middleNode; }
+            set
+            {
+                if (value != middleNode)
+                {
+                    middleNode = value;
+                    // fire the "middle changed" event
+                    MiddleChangedEvent?.Invoke(this, EventArgs.Empty);
+                }
+            }
+        }
         internal CCPoint NodeAnchor { get; set; } = CCPoint.AnchorMiddle;
         internal float ScaleFactor = Constants.STANDARD_SCALE;
         internal float Border { get; set; } = 0f;
@@ -128,6 +141,8 @@ namespace CocosSharpMathGame
             CollectionNode.RemoveChild(node);
             UpdatePositionsInCollection();
         }
+
+        internal event EventHandler MiddleChangedEvent;
 
         internal void UpdatePositionsInCollection()
         {
