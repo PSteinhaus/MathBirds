@@ -85,6 +85,7 @@ namespace CocosSharpMathGame
         {
             if(Collection.Count() < Columns * Rows) // if there is space left
             {
+
                 var ccNode = (CCNode)gameObject;
                 Collection.Add(ccNode);
                 CollectionNode.AddChild(ccNode);
