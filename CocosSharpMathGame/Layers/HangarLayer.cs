@@ -38,6 +38,7 @@ namespace CocosSharpMathGame
             AddAircraft(new TestAircraft(false), CCPoint.Zero);
             AddAircraft(new TestAircraft(), CCPoint.Zero);
             AddAircraft(new TestAircraft(), CCPoint.Zero);
+            AddAircraft(new TestAircraft(), CCPoint.Zero);
             // add a touch listener
             var touchListener = new CCEventListenerTouchAllAtOnce();
             touchListener.OnTouchesBegan = OnTouchesBegan;
@@ -62,6 +63,16 @@ namespace CocosSharpMathGame
             CameraPosition = new CCPoint(-CameraSize.Width / 2, -CameraSize.Height / 2);
             UpdateCamera();
             CreateActions();
+        }
+
+        public override void Update(float dt)
+        {
+            base.Update(dt);
+            if (State == HangarState.TRANSITION)
+            {
+                TimeInTransition += dt;
+                MoveCameraInTransition();
+            }
         }
 
         internal void IncreaseBGAlpha()
@@ -97,41 +108,158 @@ namespace CocosSharpMathGame
             // TODO: MORE ACTIONS ARE NEEDED
         }
 
+        internal float TimeInTransition = 0f;
+
+        private CCAction TransistionAction;
         private CCAction TakeoffNodeToHangar;
         private CCAction TakeoffNodeLeave;
         private CCAction BGFadeOut;
         private CCAction BGFadeIn;
+        private const int MoveAircraftTag  = 73828192;
+        private const int ScaleAircraftTag = 73828193;
 
-        internal void StartTransition(object sender, EventArgs args)
+        private CCPoint CameraPositionHangar;
+        private CCSize  CameraSizeHangar;
+
+        private CCPoint LastCameraPosition;
+        private CCPoint NextCameraPosition;
+        private CCSize  LastCameraSize;
+        private CCSize  NextCameraSize;
+        private void MoveCameraInTransition()
         {
-            StopAllTransitionActions();
-            State = HangarState.TRANSITION;
-            // stop all current transition actions
+            CameraPosition = LastCameraPosition + (NextCameraPosition - LastCameraPosition) * TimeInTransition / TRANSITION_TIME;
+            CameraSize = new CCSize(LastCameraSize.Width  + (NextCameraSize.Width  - LastCameraSize.Width)  * TimeInTransition / TRANSITION_TIME,
+                                    LastCameraSize.Height + (NextCameraSize.Height - LastCameraSize.Height) * TimeInTransition / TRANSITION_TIME);
+            UpdateCamera();
+        }
+        internal void MiddleNodeChanged(object sender, EventArgs args)
+        {
+            var state = HangarState.HANGAR;
             // get the state to go to
             var carousel = (Carousel)sender;
             var middle = carousel.MiddleNode;
             if (middle == GUILayer.HangarOptionHangar)
             {
-                // TODO: start a transition to the hangar state
-                GUILayer.TakeoffNode.AddAction(TakeoffNodeToHangar);
-                BGNode.AddAction(BGFadeIn);
+                state = HangarState.HANGAR;
             }
             else if (middle == GUILayer.HangarOptionWorkshop)
             {
-                // TODO: start a transition to the workshop state
+                state = HangarState.WORKSHOP;
+            }
+            StartTransition(state);
+        }
+
+        private Dictionary<Aircraft, CCPoint> HangarPositions = new Dictionary<Aircraft, CCPoint>();
+        private const float WorkshopBoxBorderY = 120f;
+        private CCPoint WorkshopPosition(Aircraft aircraft)
+        {
+            CCPoint pos = CCPoint.Zero;
+            Aircraft lastAircraft = null;
+            foreach (var aircr in Aircrafts)
+            {
+                if (lastAircraft != null)
+                {
+                    float scaleLast = WorkshopScale(lastAircraft);
+                    pos -= new CCPoint(0, lastAircraft.ContentSize.Height * scaleLast / 2);
+                    float scale = WorkshopScale(aircr);
+                    pos -= new CCPoint(0, aircr.ContentSize.Height * scale / 2 + WorkshopBoxBorderY);
+                }
+                if (aircr == aircraft)
+                    return pos;
+                lastAircraft = aircr;
+            }
+            return CCPoint.Zero;
+        }
+        private readonly CCPoint CameraPositionWorkshop = new CCPoint(-Constants.COCOS_WORLD_WIDTH / 2, -Constants.COCOS_WORLD_HEIGHT * 0.75f);
+        internal void StartTransition(HangarState state)
+        {
+            LastCameraPosition = CameraPosition;
+            LastCameraSize = CameraSize;
+            if (State == HangarState.HANGAR)
+            {
+                CameraPositionHangar = CameraPosition;
+                CameraSizeHangar = CameraSize;
+            }
+            State = HangarState.TRANSITION;
+            CalcBoundaries(); // allow the camera to move freely
+            // stop all current transition actions
+            StopAllTransitionActions();
+            // start transition actions
+            TransistionAction = new CCSequence(new CCDelayTime(TRANSITION_TIME), new CCCallFunc(() => FinalizeTransition(state)));
+            AddAction(TransistionAction);
+            if (state == HangarState.HANGAR)
+            {
+                GUILayer.TakeoffNode.AddAction(TakeoffNodeToHangar);
+                BGNode.AddAction(BGFadeIn);
+                foreach (var aircraft in Aircrafts)
+                {
+                    var moveAction = new CCMoveTo(TRANSITION_TIME, HangarPositions[aircraft]);
+                    moveAction.Tag = MoveAircraftTag;
+                    aircraft.AddAction(moveAction);
+                    var scaleAction = new CCScaleTo(TRANSITION_TIME, Constants.STANDARD_SCALE);
+                    scaleAction.Tag = ScaleAircraftTag;
+                    aircraft.AddAction(scaleAction);
+                }
+                NextCameraPosition = CameraPositionHangar;
+                NextCameraSize = CameraSizeHangar;
+            }
+            else if (state == HangarState.WORKSHOP)
+            {
                 GUILayer.TakeoffNode.AddAction(TakeoffNodeLeave);
                 BGNode.AddAction(BGFadeOut);
+                foreach (var aircraft in Aircrafts)
+                {
+                    var moveAction = new CCMoveTo(TRANSITION_TIME, WorkshopPosition(aircraft));
+                    moveAction.Tag = MoveAircraftTag;
+                    aircraft.AddAction(moveAction);
+                    var scaleAction = new CCScaleTo(TRANSITION_TIME, WorkshopScale(aircraft));
+                    scaleAction.Tag = ScaleAircraftTag;
+                    aircraft.AddAction(scaleAction);
+                }
+                NextCameraPosition = CameraPositionWorkshop;
+                NextCameraSize = new CCSize(Constants.COCOS_WORLD_WIDTH, Constants.COCOS_WORLD_HEIGHT);
             }
         }
+
+        private float WorkshopScale(Aircraft aircraft)
+        {
+            float scale = Constants.STANDARD_SCALE;
+            float maxWidth = Constants.COCOS_WORLD_WIDTH * 0.8f;
+            if (aircraft.ContentSize.Width * scale > maxWidth)
+                scale = maxWidth / aircraft.ContentSize.Width;
+            return scale;
+        }
+
+        private float WorkshopHeight()
+        {
+            if (!Aircrafts.Any())
+                return 0f;
+            return -WorkshopPosition(Aircrafts.Last()).Y;
+        }
+
         private void StopAllTransitionActions()
         {
+            if (TransistionAction != null) StopAction(TransistionAction.Tag);
             GUILayer.TakeoffNode.StopAction(TakeoffNodeToHangar.Tag);
             GUILayer.TakeoffNode.StopAction(TakeoffNodeLeave.Tag);
             BGNode.StopAction(BGFadeOut.Tag);
             BGNode.StopAction(BGFadeIn.Tag);
+            foreach (var aircraft in Aircrafts)
+            {
+                aircraft.StopAction(MoveAircraftTag);
+                aircraft.StopAction(ScaleAircraftTag);
+            }
+            TimeInTransition = 0; // reset transition time
             // TODO: Stop the rest of the actions
         }
-
+        private void FinalizeTransition(HangarState state)
+        {
+            State = state;
+            CameraPosition = NextCameraPosition;
+            CameraSize = NextCameraSize;
+            UpdateCamera();
+            CalcBoundaries();
+        }
         internal CCPoint GUICoordinatesToHangar(CCPoint pointInGUICoord)
         {
             return CameraPosition + pointInGUICoord * VisibleBoundsWorldspace.Size.Width / GUILayer.VisibleBoundsWorldspace.Size.Width;
@@ -201,6 +329,8 @@ namespace CocosSharpMathGame
                     placementRect = PlacementRect(SelectedAircraft);
                 }
             }
+            // update the saved hangar position
+            HangarPositions[SelectedAircraft] = SelectedAircraft.Position;
             SelectedAircraft = null;
             // update the camera boundary variables
             CalcBoundaries();
@@ -212,26 +342,49 @@ namespace CocosSharpMathGame
 
         internal void CalcBoundaries()
         {
-            const float BORDER = 300f;
-            float minX = float.PositiveInfinity;
-            float minY = float.PositiveInfinity;
-            float maxX = float.NegativeInfinity;
-            float maxY = float.NegativeInfinity;
-            foreach (var aircraft in Aircrafts)
+            switch(State)
             {
-                var rect = aircraft.BoundingBoxTransformedToWorld;
-                if (rect.MinX < minX) minX = rect.MinX;
-                if (rect.MinY < minY) minY = rect.MinY;
-                if (rect.MaxX > maxX) maxX = rect.MaxX;
-                if (rect.MaxY > maxY) maxY = rect.MaxY;
+                case HangarState.TRANSITION:
+                    {
+                        // during a transition everything goes (because the camera is moved by the program, not the player)
+                        CameraSpace = new CCRect(float.MinValue, float.MinValue, float.PositiveInfinity, float.PositiveInfinity);
+                        MaxCameraWidth = float.PositiveInfinity;
+                        MaxCameraHeight = float.PositiveInfinity;
+                    }
+                    break;
+                case HangarState.HANGAR:
+                    {
+                        const float BORDER = 300f;
+                        float minX = float.PositiveInfinity;
+                        float minY = float.PositiveInfinity;
+                        float maxX = float.NegativeInfinity;
+                        float maxY = float.NegativeInfinity;
+                        foreach (var aircraft in Aircrafts)
+                        {
+                            var rect = aircraft.BoundingBoxTransformedToWorld;
+                            if (rect.MinX < minX) minX = rect.MinX;
+                            if (rect.MinY < minY) minY = rect.MinY;
+                            if (rect.MaxX > maxX) maxX = rect.MaxX;
+                            if (rect.MaxY > maxY) maxY = rect.MaxY;
+                        }
+                        CameraSpace = new CCRect(minX - BORDER, minY - BORDER, maxX - minX + BORDER * 2, maxY - minY + BORDER * 2);
+                        var size = LargestAircraftSize();
+                        float widthRel = size.Width / Constants.COCOS_WORLD_WIDTH;
+                        float heightRel = size.Height / Constants.COCOS_WORLD_HEIGHT;
+                        float max = widthRel > heightRel ? widthRel : heightRel;
+                        MaxCameraWidth = Constants.COCOS_WORLD_WIDTH * max * 8;
+                        MaxCameraHeight = Constants.COCOS_WORLD_HEIGHT * max * 8;
+                    }
+                    break;
+                case HangarState.WORKSHOP:
+                    float cameraMinY = CameraPositionWorkshop.Y - WorkshopHeight() + Constants.COCOS_WORLD_HEIGHT * 0.25f;
+                    if (cameraMinY > CameraPositionWorkshop.Y) cameraMinY = CameraPositionWorkshop.Y;
+                    CameraSpace = new CCRect(CameraPositionWorkshop.X, cameraMinY, Constants.COCOS_WORLD_WIDTH, Constants.COCOS_WORLD_HEIGHT + Math.Abs(CameraPositionWorkshop.Y - cameraMinY) + Constants.COCOS_WORLD_HEIGHT * 0.25f);
+                    MaxCameraWidth  = Constants.COCOS_WORLD_WIDTH;
+                    MaxCameraHeight = Constants.COCOS_WORLD_HEIGHT;
+                    break;
             }
-            CameraSpace = new CCRect(minX - BORDER, minY - BORDER, maxX - minX + BORDER * 2, maxY - minY + BORDER * 2);
-            var size = LargestAircraftSize();
-            float widthRel  = size.Width  / Constants.COCOS_WORLD_WIDTH;
-            float heightRel = size.Height / Constants.COCOS_WORLD_HEIGHT;
-            float max = widthRel > heightRel ? widthRel : heightRel;
-            MaxCameraWidth  = Constants.COCOS_WORLD_WIDTH  * max * 8;
-            MaxCameraHeight = Constants.COCOS_WORLD_HEIGHT * max * 8;
+            
         }
 
         internal CCRect PlacementRect(Aircraft aircraft)
@@ -301,11 +454,22 @@ namespace CocosSharpMathGame
             {
                 case 1:
                     {
-                        // if you are currently moving an aircraft move the aircraft
-                        if (SelectedAircraft != null)
-                            SelectedAircraft.Position += touches[0].Delta;
+                        bool moveCam = true;
+                        switch (State)
+                        {
+                            case HangarState.HANGAR:
+                                {
+                                    // if you are currently moving an aircraft move the aircraft
+                                    if (SelectedAircraft != null)
+                                    {
+                                        SelectedAircraft.Position += touches[0].Delta;
+                                        moveCam = false;
+                                    }
+                                }
+                                break;
+                        }
                         // move the camera
-                        else
+                        if (moveCam)
                             OnTouchesMovedMoveAndZoom(touches, touchEvent);
                     }
                     break;

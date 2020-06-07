@@ -64,7 +64,7 @@ namespace CocosSharpMathGame
             // let the hangar listen to the TakeoffCollectionNode
             TakeoffCollectionNode.CollectionRemovalEvent += HangarLayer.ReceiveAircraftFromCollection;
             // let the hangar listen to the Carousel for a change of the middle node
-            HangarOptionCarousel.MiddleChangedEvent += HangarLayer.StartTransition;
+            HangarOptionCarousel.MiddleChangedEvent += HangarLayer.MiddleNodeChanged;
         }
 
         new private protected void OnTouchesEnded(List<CCTouch> touches, CCEvent touchEvent)
