@@ -10,6 +10,7 @@ namespace CocosSharpMathGame
     abstract internal class UIElementNode : GameObjectNode
     {
         protected bool Pressed { get; set; } = false;
+        internal bool Pressable { get; set; } = true;
         internal float RadiusFactor { get; set; } = 0.5f;
         internal void MakeClickable(Action<List<CCTouch>, CCEvent> onTouchesBegan, Action<List<CCTouch>, CCEvent> onTouchesMoved = null, Action<List<CCTouch>, CCEvent> onTouchesEnded = null, Action<List<CCTouch>, CCEvent> onTouchesCancelled = null, bool touchMustEndOnIt = true, bool IsCircleButton = false, bool swallowTouch = true)
         {
@@ -27,7 +28,7 @@ namespace CocosSharpMathGame
             }
             // add a touch listener
             var touchListener = new CCEventListenerTouchAllAtOnce();
-            touchListener.OnTouchesBegan =                                      (arg1, arg2) => { if (MyVisible && touchStartedOnIt(arg1[0]))                                   { if (swallowTouch) arg2.StopPropogation(); Pressed = true; onTouchesBegan(arg1, arg2); } };
+            touchListener.OnTouchesBegan =                                      (arg1, arg2) => { if (Pressable && MyVisible && touchStartedOnIt(arg1[0]))                      { if (swallowTouch) arg2.StopPropogation(); Pressed = true; onTouchesBegan(arg1, arg2); } };
             if (onTouchesMoved != null) touchListener.OnTouchesMoved =          (arg1, arg2) => { if (MyVisible && Pressed)                                                     { if (swallowTouch) arg2.StopPropogation(); onTouchesMoved(arg1, arg2); } };
             if (onTouchesEnded != null) touchListener.OnTouchesEnded =          (arg1, arg2) => { if (MyVisible && touchMustEndOnIt ? touchIsOnIt(arg1[0]) : true && Pressed)   { if (swallowTouch) arg2.StopPropogation(); Pressed = false; onTouchesEnded(arg1, arg2); } };
             else touchListener.OnTouchesEnded =                                 (arg1, arg2) => { if (MyVisible && Pressed)                                                     { if (swallowTouch) arg2.StopPropogation(); Pressed = false; } };

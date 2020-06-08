@@ -19,12 +19,42 @@ namespace CocosSharpMathGame
         private HangarLayer HangarLayer { get; set; }
         internal GameObjectNode HangarOptionHangar { get; private protected set; }
         internal GameObjectNode HangarOptionWorkshop { get; private protected set; }
+        private IGameObject dragAndDropObject;
+        internal IGameObject DragAndDropObject
+        {
+            get { return dragAndDropObject; }
+            set
+            {
+                if (dragAndDropObject != null)
+                    RemoveChild((CCNode)dragAndDropObject);
+                dragAndDropObject = value;
+                if (dragAndDropObject != null)
+                {
+                    if (((CCNode)dragAndDropObject).Parent != null)
+                    {
+                        ((CCNode)dragAndDropObject).Scale = HangarScaleToGUI() * dragAndDropObject.GetScale();
+                        ((CCNode)dragAndDropObject).Position = HangarCoordinatesToGUI(((CCNode)dragAndDropObject).Position);
+                        ((CCNode)dragAndDropObject).Parent.RemoveChild((CCNode)dragAndDropObject);
+                    }
+                    AddChild((CCNode)dragAndDropObject, 100);
+                }
+            }
+        }
+        internal CCPoint HangarCoordinatesToGUI(CCPoint pointInHangarCoord)
+        {
+            return (pointInHangarCoord - HangarLayer.CameraPosition) * HangarScaleToGUI();
+        }
+
+        internal float HangarScaleToGUI()
+        {
+            return VisibleBoundsWorldspace.Size.Width / HangarLayer.VisibleBoundsWorldspace.Size.Width;
+        }
         public HangarGUILayer(HangarLayer hangarLayer) : base(CCColor4B.Transparent)
         {
             HangarLayer = hangarLayer;
             // add a touch listener
             var touchListener = new CCEventListenerTouchAllAtOnce();
-            //touchListener.OnTouchesBegan = OnTouchesBegan;
+            touchListener.OnTouchesMoved = OnTouchesMoved;
             touchListener.OnTouchesEnded = OnTouchesEnded;
             AddEventListener(touchListener, this);
         }
@@ -49,7 +79,7 @@ namespace CocosSharpMathGame
             TakeoffNode.AnchorPoint = CCPoint.AnchorLowerLeft;
             TakeoffNode.AddChild(TakeoffCollectionNode);
             TakeoffCollectionNode.PositionY = borderToCollection;
-            TakeoffCollectionNode.Columns = 10;
+            TakeoffCollectionNode.Columns = 4;
             TakeoffCollectionNode.Rows = 1;
             TakeoffCollectionNode.BoxSize = new CCSize(TakeoffCollectionNode.ContentSize.Height, TakeoffCollectionNode.ContentSize.Height);
             AddChild(TakeoffNode, zOrder: 1);
@@ -67,31 +97,71 @@ namespace CocosSharpMathGame
             HangarOptionCarousel.MiddleChangedEvent += HangarLayer.MiddleNodeChanged;
         }
 
-        new private protected void OnTouchesEnded(List<CCTouch> touches, CCEvent touchEvent)
+        private protected void OnTouchesMoved(List<CCTouch> touches, CCEvent touchEvent)
         {
             switch (touches.Count)
             {
                 case 1:
                     {
-                        if (TakeoffNode.BoundingBoxTransformedToParent.ContainsPoint(touches[0].Location))
+                        var touch = touches[0];
+                        if (DragAndDropObject != null)
                         {
-                            // if an aircraft is selected deselect it and place it
-                            var selectedAircraft = HangarLayer.SelectedAircraft;
-                            if (selectedAircraft != null)
-                            {
-                                touchEvent.StopPropogation();
-                                {
-                                    HangarLayer.RemoveChild(selectedAircraft);
-                                    TakeoffCollectionNode.AddToCollection(selectedAircraft);
-                                    HangarLayer.SelectedAircraft = null;
-                                }
-                            }
+                            ((CCNode)DragAndDropObject).Position += touch.Delta;
                         }
                     }
                     break;
                 default:
                     break;
             }
+        }
+
+        new private protected void OnTouchesEnded(List<CCTouch> touches, CCEvent touchEvent)
+        {
+            switch (touches.Count)
+            {
+                case 1:
+                    {
+                        var touch = touches[0];
+                        if (DragAndDropObject != null)
+                        {
+                            switch (HangarLayer.State)
+                            {
+                                case HangarLayer.HangarState.HANGAR:
+                                    var selectedAircraft = DragAndDropObject as Aircraft;
+                                    DragAndDropObject = null;
+                                    if (selectedAircraft != null)
+                                    {
+                                        touchEvent.StopPropogation();
+                                        // if an aircraft is dragged upon the takeoff node add it to the collection
+                                        if (!(TakeoffNode.BoundingBoxTransformedToParent.ContainsPoint(touch.Location) && TakeoffCollectionNode.AddToCollection(selectedAircraft)))
+                                        {
+                                            // if not, then place it back into the hangar
+                                            HangarLayer.AddChild(selectedAircraft);
+                                            selectedAircraft.Scale = Constants.STANDARD_SCALE;
+                                            HangarLayer.PlaceAircraft(selectedAircraft, HangarLayer.GUICoordinatesToHangar(selectedAircraft.Position));
+                                        }
+                                    }
+                                    break;
+                            }
+                            DragAndDropObject = null;
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        internal void DisableTouchBegan()
+        {
+            TakeoffCollectionNode.Pressable = false;
+            // the carousel on top is usually exempted from this, as it is not dangerous to click on it
+        }
+
+        internal void EnableTouchBegan()
+        {
+            TakeoffCollectionNode.Pressable = true;
+            HangarOptionCarousel.Pressable = true;
         }
     }
 }

@@ -74,7 +74,7 @@ namespace CocosSharpMathGame
             if (!Available)
                 return false;
             // else check if the part may be mounted here
-            else if (AllowedTypes.Intersect(part.Types).Any())
+            else if (AllowedTypes.Intersect(part.Types).Any() && AllowedSizes.Contains(part.MySizeType))
             {
                 MountedPart = part;
                 // make sure the part is actually at the position of the mount

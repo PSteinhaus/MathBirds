@@ -20,7 +20,7 @@ namespace CocosSharpMathGame
         internal CCNode BGNode { get; private protected set; }
         private CCDrawNode BGDrawNode { get; set; }
         private CCColor4B BGColor { get; set; } = new CCColor4B(50, 50, 50);
-        private Aircraft RotationSelectedAircraft;
+        private IGameObject RotationSelectedNode;
         internal List<Aircraft> Aircrafts = new List<Aircraft>();
         internal List<Part> Parts = new List<Part>();
         public HangarLayer() : base(CCColor4B.Black)
@@ -187,6 +187,8 @@ namespace CocosSharpMathGame
             CalcBoundaries(); // allow the camera to move freely
             // stop all current transition actions
             StopAllTransitionActions();
+            // disable the touchBegan listeners for all gui elements
+            GUILayer.DisableTouchBegan();
             // start transition actions
             TransistionAction = new CCSequence(new CCDelayTime(TRANSITION_TIME), new CCCallFunc(() => FinalizeTransition(state)));
             AddAction(TransistionAction);
@@ -196,6 +198,7 @@ namespace CocosSharpMathGame
                 BGNode.AddAction(BGFadeIn);
                 foreach (var aircraft in Aircrafts)
                 {
+                    if (aircraft.Parent != this) continue;
                     var moveAction = new CCMoveTo(TRANSITION_TIME, HangarPositions[aircraft]);
                     moveAction.Tag = MoveAircraftTag;
                     aircraft.AddAction(moveAction);
@@ -215,6 +218,7 @@ namespace CocosSharpMathGame
                 BGNode.AddAction(BGFadeOut);
                 foreach (var aircraft in Aircrafts)
                 {
+                    if (aircraft.Parent != this) continue;
                     var moveAction = new CCMoveTo(TRANSITION_TIME, WorkshopPosition(aircraft));
                     moveAction.Tag = MoveAircraftTag;
                     aircraft.AddAction(moveAction);
@@ -249,6 +253,7 @@ namespace CocosSharpMathGame
         private void StopAllTransitionActions()
         {
             if (TransistionAction != null) StopAction(TransistionAction.Tag);
+            GUILayer.EnableTouchBegan();
             GUILayer.TakeoffNode.StopAction(TakeoffNodeToHangar.Tag);
             GUILayer.TakeoffNode.StopAction(TakeoffNodeLeave.Tag);
             BGNode.StopAction(BGFadeOut.Tag);
@@ -269,37 +274,42 @@ namespace CocosSharpMathGame
             CameraSize = NextCameraSize;
             UpdateCamera();
             CalcBoundaries();
+            GUILayer.EnableTouchBegan();
         }
         internal CCPoint GUICoordinatesToHangar(CCPoint pointInGUICoord)
         {
-            return CameraPosition + pointInGUICoord * VisibleBoundsWorldspace.Size.Width / GUILayer.VisibleBoundsWorldspace.Size.Width;
+            return CameraPosition + pointInGUICoord * GUIScaleToHangar();
+        }
+
+        internal float GUIScaleToHangar()
+        {
+            return VisibleBoundsWorldspace.Size.Width / GUILayer.VisibleBoundsWorldspace.Size.Width;
         }
 
         internal void ReceiveAircraftFromCollection(object sender, ScrollableCollectionNode.CollectionRemovalEventArgs e)
         {
             Aircraft aircraft = (Aircraft)e.RemovedNode;
-            AddChild(aircraft);
-            SelectedAircraft = aircraft;
+            //AddChild(aircraft);
+            //SelectedAircraft = aircraft;
             aircraft.ResetAnchorPoint();
-            aircraft.Position = GUICoordinatesToHangar(e.TouchOnRemove.Location);
-            Console.WriteLine("Touch: " + GUICoordinatesToHangar(e.TouchOnRemove.Location));
+            aircraft.Position = e.TouchOnRemove.Location;
+            GUILayer.DragAndDropObject = aircraft;
         }
 
         internal void AddAircraft(Aircraft aircraft, CCPoint hangarPos)
         {
             Aircrafts.Add(aircraft);
             AddChild(aircraft);
-            SelectedAircraft = aircraft;
             HangarRotations[aircraft] = 0f;
-            PlaceSelectedAircraft(hangarPos);
+            PlaceAircraft(aircraft, hangarPos);
         }
 
-        internal void PlaceSelectedAircraft(CCPoint hangarPos)
+        internal void PlaceAircraft(Aircraft aircraft, CCPoint hangarPos)
         {
             const float SAFETY = 0.001f; // numeric safety
-            SelectedAircraft.Position = hangarPos;
-            var placementRect = PlacementRect(SelectedAircraft);
-            if (RectAvailable(placementRect, out CCRect blockingRect))
+            aircraft.Position = hangarPos;
+            var placementRect = PlacementRect(aircraft);
+            if (RectAvailable(placementRect, out CCRect blockingRect, aircraft))
             {
                 // all is well, the position is available
             }
@@ -322,10 +332,10 @@ namespace CocosSharpMathGame
                         movement = new CCPoint(0, blockingRect.MinY - placementRect.MaxY - SAFETY);
                     else
                         movement = new CCPoint(0, blockingRect.MaxY - placementRect.MinY + SAFETY);
-                SelectedAircraft.Position += movement;
-                placementRect = PlacementRect(SelectedAircraft);
+                aircraft.Position += movement;
+                placementRect = PlacementRect(aircraft);
                 // check whether the new position is available
-                while (!RectAvailable(placementRect, out blockingRect))
+                while (!RectAvailable(placementRect, out blockingRect, aircraft))
                 {
                     // it's not, so move further (into the same direction as before)
                     if (movement.Y == 0)
@@ -336,13 +346,12 @@ namespace CocosSharpMathGame
                         movement = movement.Y < 0 ?
                                     new CCPoint(0, blockingRect.MinY - placementRect.MaxY - SAFETY) :
                                     new CCPoint(0, blockingRect.MaxY - placementRect.MinY + SAFETY);
-                    SelectedAircraft.Position += movement;
-                    placementRect = PlacementRect(SelectedAircraft);
+                    aircraft.Position += movement;
+                    placementRect = PlacementRect(aircraft);
                 }
             }
             // update the saved hangar position
-            HangarPositions[SelectedAircraft] = SelectedAircraft.Position;
-            SelectedAircraft = null;
+            HangarPositions[aircraft] = aircraft.Position;
             // update the camera boundary variables
             CalcBoundaries();
             // and also the camera itself
@@ -378,7 +387,8 @@ namespace CocosSharpMathGame
                             if (rect.MaxX > maxX) maxX = rect.MaxX;
                             if (rect.MaxY > maxY) maxY = rect.MaxY;
                         }
-                        CameraSpace = new CCRect(minX - BORDER, minY - BORDER, maxX - minX + BORDER * 2, maxY - minY + BORDER * 2);
+                        float takeoffNodeHeight = GUILayer.TakeoffNode.ContentSize.Height * VisibleBoundsWorldspace.Size.Width / GUILayer.VisibleBoundsWorldspace.Size.Width;
+                        CameraSpace = new CCRect(minX - BORDER, minY - BORDER - takeoffNodeHeight, maxX - minX + BORDER * 2, maxY - minY + BORDER * 2 + takeoffNodeHeight);
                         var size = LargestAircraftSize();
                         float widthRel = size.Width / Constants.COCOS_WORLD_WIDTH;
                         float heightRel = size.Height / Constants.COCOS_WORLD_HEIGHT;
@@ -405,12 +415,12 @@ namespace CocosSharpMathGame
             return new CCRect(rect.MinX - BORDER, rect.MinY - BORDER, rect.Size.Width + BORDER * 2, rect.Size.Height + BORDER * 2);
         }
 
-        internal bool RectAvailable(CCRect rect, out CCRect blockingRect)
+        internal bool RectAvailable(CCRect rect, out CCRect blockingRect, Aircraft exceptedAircraft=null)
         {
             blockingRect = CCRect.Zero;
             foreach (var aircraft in Aircrafts)
             {
-                if (aircraft == SelectedAircraft) continue;
+                if ((exceptedAircraft != null && aircraft == exceptedAircraft) || aircraft.Parent != this) continue;
                 var placementRect = PlacementRect(aircraft);
                 if (placementRect.IntersectsRect(rect))
                 {
@@ -437,7 +447,6 @@ namespace CocosSharpMathGame
             }
             return size;
         }
-
         internal Aircraft SelectedAircraft { get; set; } = null;
         new private protected void OnTouchesBegan(List<CCTouch> touches, CCEvent touchEvent)
         {
@@ -447,23 +456,30 @@ namespace CocosSharpMathGame
                 case 1:
                     {
                         var touch = touches[0];
-                        // if the touch is upon an aircraft, select it
-                        foreach (var aircraft in Aircrafts)
-                            if (aircraft.Parent == this && aircraft.BoundingBoxTransformedToWorld.ContainsPoint(touch.StartLocation))
-                            {
-                                CCRect box = aircraft.BoundingBoxTransformedToWorld;
-                                CCRect reducedBoundingBox = new CCRect(box.MinX + box.Size.Width / 4,
-                                                                       box.MinY + box.Size.Height / 4,
-                                                                       box.Size.Width / 2, box.Size.Height / 2);
-                                if (reducedBoundingBox.ContainsPoint(touch.StartLocation))
-                                    SelectedAircraft = aircraft;
-                                else if (State == HangarState.HANGAR)   // currently rotation should only be accessable at the hangar stage
-                                {
-                                    // rotate the aircraft!
-                                    RotationSelectedAircraft = aircraft;
-                                }
+                        switch(State)
+                        {
+                            case HangarState.HANGAR:
+                                // if the touch is upon an aircraft, select it
+                                foreach (var aircraft in Aircrafts)
+                                    if (aircraft.Parent == this && aircraft.BoundingBoxTransformedToWorld.ContainsPoint(touch.StartLocation))
+                                    {
+                                        CCRect box = aircraft.BoundingBoxTransformedToWorld;
+                                        CCRect reducedBoundingBox = new CCRect(box.MinX + box.Size.Width / 4,
+                                                                               box.MinY + box.Size.Height / 4,
+                                                                               box.Size.Width / 2, box.Size.Height / 2);
+                                        if (reducedBoundingBox.ContainsPoint(touch.StartLocation))
+                                        {
+                                            GUILayer.DragAndDropObject = aircraft;
+                                        }
+                                        else
+                                        {
+                                            // rotate the aircraft!
+                                            RotationSelectedNode = aircraft;
+                                        }
+                                        break;
+                                    }
                                 break;
-                            }
+                        }
                     }
                     break;
                 default:
@@ -478,31 +494,20 @@ namespace CocosSharpMathGame
                     {
                         var touch = touches[0];
                         bool moveCam = true;
-                        // if you are currently rotating an aircraft rotate it
-                        if (RotationSelectedAircraft != null)
+                        // if you are currently rotating a node rotate it
+                        if (RotationSelectedNode != null)
                         {
                             moveCam = false;
-                            CCPoint pos = RotationSelectedAircraft.PositionWorldspace;
+                            CCPoint pos = ((CCNode)RotationSelectedNode).BoundingBoxTransformedToWorld.Center;
                             CCPoint vecPosToPrevTouch = pos - touch.PreviousLocation;
                             CCPoint vecPosToTouch = pos - touch.Location;
                             float previousAngle = Constants.DxDyToCCDegrees(vecPosToPrevTouch.X, vecPosToPrevTouch.Y);
                             float currentAngle  = Constants.DxDyToCCDegrees(vecPosToTouch.X, vecPosToTouch.Y);
                             float dAngle = Constants.AngleFromToDeg(previousAngle, currentAngle);
-                            RotationSelectedAircraft.RotateBy(dAngle);
+                            RotationSelectedNode.MyRotation += dAngle;
                         }
-                        switch (State)
-                        {
-                            case HangarState.HANGAR:
-                                {
-                                    // if you are currently moving an aircraft move the aircraft
-                                    if (SelectedAircraft != null)
-                                    {
-                                        SelectedAircraft.Position += touch.Delta;
-                                        moveCam = false;
-                                    }
-                                }
-                                break;
-                        }
+                        if (GUILayer.DragAndDropObject != null)
+                            moveCam = false;
                         // move the camera
                         if (moveCam)
                             OnTouchesMovedMoveAndZoom(touches, touchEvent);
@@ -524,19 +529,15 @@ namespace CocosSharpMathGame
             {
                 case 1:
                     {
-                        // if an aircraft is selected for rotation deselect it
-                        if (RotationSelectedAircraft != null)
+                        var touch = touches[0];
+                        // if a node is selected for rotation deselect it
+                        if (RotationSelectedNode != null)
                         {
                             if (State == HangarState.HANGAR)
-                                HangarRotations[RotationSelectedAircraft] = RotationSelectedAircraft.MyRotation;
-                            RotationSelectedAircraft = null;
+                                HangarRotations[(Aircraft)RotationSelectedNode] = RotationSelectedNode.MyRotation;
+                            RotationSelectedNode = null;
                         }
-                        // if an aircraft is selected deselect it and place it
-                        if (SelectedAircraft != null)
-                        {
-                            PlaceSelectedAircraft(SelectedAircraft.Position);
-                        }
-                        else // else scroll with inertia
+                        else if (State != HangarState.TRANSITION) // else scroll with inertia
                             base.OnTouchesEnded(touches, touchEvent);
                     }
                     break;

@@ -27,7 +27,7 @@ namespace CocosSharpMathGame
             set
             {
                 columns = value;
-                CollectionNode.ContentSize = new CCSize(columns * (BoxSize.Width+XBorder), CollectionNode.ContentSize.Height);
+                CollectionNode.ContentSize = new CCSize(columns * BoxSize.Width + (columns - 1) * XBorder, CollectionNode.ContentSize.Height);
             }
         } 
         private int rows;
@@ -40,7 +40,7 @@ namespace CocosSharpMathGame
             set
             {
                 rows = value;
-                CollectionNode.ContentSize = new CCSize(CollectionNode.ContentSize.Width, rows * (BoxSize.Height+YBorder));
+                CollectionNode.ContentSize = new CCSize(CollectionNode.ContentSize.Width, rows * BoxSize.Height + (rows - 1) * YBorder);
             }
         }
         private CCSize boxSize;
@@ -85,7 +85,8 @@ namespace CocosSharpMathGame
         {
             if(Collection.Count() < Columns * Rows) // if there is space left
             {
-
+                // reset rotation
+                gameObject.MyRotation = 0f;
                 var ccNode = (CCNode)gameObject;
                 Collection.Add(ccNode);
                 CollectionNode.AddChild(ccNode);
@@ -100,6 +101,7 @@ namespace CocosSharpMathGame
                     gameObject.FitToHeight(BoxSize.Height);
                 if (gameObject.GetScale() > MaxScale)
                     ccNode.Scale = MaxScale;
+                MoveCollectionNode(CCPoint.Zero);
                 return true;
             }
             return false;
@@ -113,7 +115,7 @@ namespace CocosSharpMathGame
         {
             get
             {
-                float minX = ContentSize.Width - BoxSize.Width * MaxBoxesPerRow - XBorder;
+                float minX = MaxX - BoxSize.Width * (MaxBoxesPerRow - 1); //- XBorder;
                 if (minX > MaxX) minX = MaxX;
                 return minX;
             }
@@ -122,7 +124,7 @@ namespace CocosSharpMathGame
         {
             get
             {
-                return XBorder;
+                return ContentSize.Width / 2 - BoxSize.Width / 2;
             }
         }
 
@@ -130,7 +132,7 @@ namespace CocosSharpMathGame
         {
             get
             {
-                return ContentSize.Height;
+                return ContentSize.Height / 2 + BoxSize.Height / 2;
             }
         }
         internal float MaxY
@@ -164,9 +166,13 @@ namespace CocosSharpMathGame
             }
         }
 
+        /// <summary>
+        /// WARNING: The movement taken here has to be given in world coordinates.
+        /// </summary>
+        /// <param name="movement"></param>
         private void MoveCollectionNode(CCPoint movement)
         {
-            CollectionNode.Position += movement;
+            CollectionNode.Position += movement / Constants.STANDARD_SCALE;
             CollectionNode.PositionX = Constants.Clamp(CollectionNode.PositionX + movement.X, MinX, MaxX);
             CollectionNode.PositionY = Constants.Clamp(CollectionNode.PositionY + movement.Y, MinY, MaxY);
         }
@@ -186,6 +192,7 @@ namespace CocosSharpMathGame
                 args.TouchOnRemove = touchOnRemove;
                 handler(this, args);
             }
+            MoveCollectionNode(CCPoint.Zero);
         }
 
         private void UpdateCollectionPositions()
@@ -207,6 +214,7 @@ namespace CocosSharpMathGame
 
         private protected void OnTouchesBegan(List<CCTouch> touches, CCEvent touchEvent)
         {
+            Console.WriteLine(Pressable);
             switch (touches.Count)
             {
                 case 1:
