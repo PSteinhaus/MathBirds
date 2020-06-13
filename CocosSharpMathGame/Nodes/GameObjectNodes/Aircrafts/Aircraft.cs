@@ -121,6 +121,49 @@ namespace CocosSharpMathGame
         /// Aircrafts can be rotated by force. How much force is necessary for a certain rotation is defined by the moment of intertia.
         /// </summary>
         internal float MomentOfInertia { get; private protected set; }
+        private bool inWorkshopConfiguration = false;
+        internal bool InWorkshopConfiguration
+        {
+            get { return inWorkshopConfiguration; }
+            set
+            {
+                if (value != inWorkshopConfiguration)
+                {
+                    if (value == true)
+                        Body?.EnterWorkshopConfiguration();
+                    else
+                        Body?.EnterHangarConfiguration();
+                    inWorkshopConfiguration = value;
+                }
+            }
+        }
+        internal CCSize CalcContentSize(out float xMin, out float yMin)
+        {
+            if (!TotalParts.Any()) { xMin = 0; yMin = 0; return CCSize.Zero; }
+            // go through the bounding boxes of all parts and get the new total dimensions
+            xMin = float.PositiveInfinity; yMin = float.PositiveInfinity;
+            float xMax = float.NegativeInfinity; float yMax = float.NegativeInfinity;
+            foreach (var part in TotalParts)
+            {
+                CCRect box = part.BoundingBoxTransformedToParent;
+                if (box.MinX < xMin) xMin = box.MinX;
+                if (box.MinY < yMin) yMin = box.MinY;
+                if (box.MaxX > xMax) xMax = box.MaxX;
+                if (box.MaxY > yMax) yMax = box.MaxY;
+            }
+            return new CCSize(xMax - xMin, yMax - yMin);
+        }
+        private void UpdateContentSize(bool movePartsAccordingly=true)
+        {
+            ContentSize = CalcContentSize(out float xMin, out float yMin);
+            if (movePartsAccordingly)
+                // move all parts to account for the change
+                foreach (var part in TotalParts)
+                {
+                    part.PositionX -= xMin;
+                    part.PositionY -= yMin;
+                }
+        }
 
         /// <summary>
         /// Gives access to all parts of this aircraft that have a ManeuverAbility
@@ -176,48 +219,33 @@ namespace CocosSharpMathGame
         /// </summary>
         internal void PartsChanged(bool deathPossible = false)
         {
+            TotalParts = Body == null ? new List<Part>() : Body.TotalParts;
+            var oldContentSize = ScaledContentSize;
             // update the ContentSize and move all parts to fit into it
-            var oldContentSize = ContentSize;
-            TotalParts = Body.TotalParts;
-            var totalParts = TotalParts;
-            // go through the bounding boxes of all parts and get the new total dimensions
-            float xMin = float.PositiveInfinity; float yMin = float.PositiveInfinity;
-            float xMax = float.NegativeInfinity; float yMax = float.NegativeInfinity;
-            foreach (var part in totalParts)
-            {
-                CCRect box = part.BoundingBoxTransformedToParent;
-                if (box.MinX < xMin) xMin = box.MinX;
-                if (box.MinY < yMin) yMin = box.MinY;
-                if (box.MaxX > xMax) xMax = box.MaxX;
-                if (box.MaxY > yMax) yMax = box.MaxY;
-            }
-            ContentSize = new CCSize(xMax - xMin, yMax - yMin);
-            // move all parts to account for the change
-            foreach (var part in totalParts)
-            {
-                part.PositionX -= xMin;
-                part.PositionY -= yMin;
-            }
-            // recalculate all part-emergent data
+            UpdateContentSize();
 
+            // recalculate all part-emergent data
             Mass = 0;
-            foreach (var part in totalParts)
+            foreach (var part in TotalParts)
                 Mass += part.MassSingle;
             Console.WriteLine("Mass: " + Mass);
 
-            CenterOfMass = Body.CenterOfMass;
+            CenterOfMass = Body != null ? Body.CenterOfMass : CCPoint.Zero;
             Console.WriteLine("Height: " + ContentSize.Height);
             Console.WriteLine("Width: " + ContentSize.Width);
             Console.WriteLine("Center of mass: " + CenterOfMass);
 
-            MomentOfInertia = Body.MomentOfInertia;
+            MomentOfInertia = Body != null ? Body.MomentOfInertia : 0;
 
             // change the AnchorPoint to the center of mass
             var oldAnchor = AnchorPoint;
             ResetAnchorPoint();
             // account for the movement of the anchor
-            float dx = (AnchorPoint.X - oldAnchor.X) * ContentSize.Width;
-            float dy = (AnchorPoint.Y - oldAnchor.Y) * ContentSize.Height;
+            CCSize contentSize = ScaledContentSize;
+            if (oldContentSize.Width > ScaledContentSize.Width || oldContentSize.Height > ScaledContentSize.Height)
+                contentSize = oldContentSize;
+            float dx = (AnchorPoint.X - oldAnchor.X) * contentSize.Width;
+            float dy = (AnchorPoint.Y - oldAnchor.Y) * contentSize.Height;
             PositionX += dx;
             PositionY += dy;
 
@@ -227,7 +255,7 @@ namespace CocosSharpMathGame
 
         internal void ResetAnchorPoint()
         {
-            AnchorPoint = new CCPoint(CenterOfMass.X / ContentSize.Width, CenterOfMass.Y / ContentSize.Height);
+            NormalAnchorPoint = (ContentSize.Width != 0 && ContentSize.Height != 0) ? new CCPoint(CenterOfMass.X / ContentSize.Width, CenterOfMass.Y / ContentSize.Height) : CCPoint.AnchorMiddle;
         }
 
         protected Part body = null;
@@ -240,19 +268,20 @@ namespace CocosSharpMathGame
             {
                 return body;
             }
-            private protected set
+            set
             {
-                // first remove the old body if there is one
+                // first remove the old body (and everything connected to it) if there is one
                 if (body != null)
-                    RemoveChild(body);
+                    RemoveAllChildren();
                 body = value;
                 if (value != null)
                 {
-                    AddChild(body);
-                    // update ContentSize
-                    PartsChanged();
-                    //ContentSize = body.ScaledContentSize;
+                    foreach (var part in body.TotalParts)
+                        AddChild(part, part.CalcZOrder());
+                    foreach (var mount in body.PartMounts)
+                        mount.UpdateMountedPartPosition();
                 }
+                PartsChanged();
             }
         }
 
@@ -646,7 +675,6 @@ namespace CocosSharpMathGame
             // now create the polygon and update
             var newManeuverPolygon = new PolygonWithSplines(controlPoints.ToArray());
             UpdateManeuverPolygonToThis(newManeuverPolygon);
-            // now pray it works...
         }
 
         internal void Die()
@@ -798,10 +826,11 @@ namespace CocosSharpMathGame
             FlightPathControlNode = new FlightPathControlNode(this);
             ControlledByPlayer = false;
             // DEBUG
+            /*
             AddChild(maneuverPolygonDrawNode);
-            maneuverPolygonDrawNode.AnchorPoint = CCPoint.AnchorLowerLeft;  // does this do anything?
             maneuverPolygonDrawNode.Scale = 1 / Constants.STANDARD_SCALE;
             IsManeuverPolygonDrawn = false;
+            */
         }
 
         internal void TryToSetFlightPathHeadTo(CCPoint position)

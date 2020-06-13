@@ -110,7 +110,7 @@ namespace CocosSharpMathGame
         /// </summary>
         internal enum Type
         {
-            BODY, SINGLE_WING, WINGS, WEAPON, ENGINE, GUN,
+            BODY, SINGLE_WING, WINGS, ENGINE, GUN,
             RUDDER,
             ROTOR
         }
@@ -125,6 +125,105 @@ namespace CocosSharpMathGame
         /// </summary>
         static internal CCSpriteSheet spriteSheet = new CCSpriteSheet("parts.plist");
         internal Part MountParent { get; set; } = null;
+
+        internal void EnterWorkshopConfiguration()
+        {
+            const float BORDER = 8f;
+            foreach (var part in MountedParts)
+            {
+                if (part == null) continue;
+                CCPoint oldPos = part.Position;
+                // move all mounted parts from their mount points
+                // move them in the direction of the vector going from your position to the position of the part
+                CCPoint vec = part.Position - this.Position;
+                if (vec.Equals(CCPoint.Zero))
+                    vec = new CCPoint(1, 0);
+                CCPoint vecNormalized = CCPoint.Normalize(vec);
+                // scale the vector, so that the bounding boxes no longer touch (+ a little bit of extra space)
+                CCPoint finalVec = CCPoint.Zero;
+                CCRect box = BoundingBoxTransformedToParent;
+                CCRect boxPart = part.BoundingBoxTransformedToParent;
+                if (vec.Y == 0)
+                {
+                    if (vec.X < 0)
+                        finalVec = new CCPoint(box.MinX - boxPart.MaxX - BORDER, 0);
+                    else
+                        finalVec = new CCPoint(box.MaxX - boxPart.MinX + BORDER, 0);
+                }
+                else if (vec.X == 0)
+                {
+                    if (vec.Y < 0)
+                        finalVec = new CCPoint(0, box.MinY - boxPart.MaxY - BORDER);
+                    else
+                        finalVec = new CCPoint(0, box.MaxY - boxPart.MinY + BORDER);
+                }
+                else if (vec.Y < 0)
+                {
+                    if (vec.X < 0)
+                    {
+                        var vec1 = new CCPoint(box.MinX - boxPart.MaxX - BORDER, vecNormalized.Y * Math.Abs(box.MinX - boxPart.MaxX - BORDER));
+                        var vec2 = new CCPoint(vecNormalized.X * Math.Abs(box.MinY - boxPart.MaxY - BORDER), box.MinY - boxPart.MaxY - BORDER);
+                        finalVec = vec1.Length < vec2.Length ? vec1 : vec2;
+                    }
+                    else
+                    {
+                        var vec1 = new CCPoint(box.MaxX - boxPart.MinX + BORDER, vecNormalized.Y * Math.Abs(box.MaxX - boxPart.MinX + BORDER));
+                        var vec2 = new CCPoint(vecNormalized.X * Math.Abs(box.MinY - boxPart.MaxY - BORDER), box.MinY - boxPart.MaxY - BORDER);
+                        finalVec = vec1.Length < vec2.Length ? vec1 : vec2;
+                    }
+                }
+                else
+                {
+                    if (vec.X < 0)
+                    {
+                        var vec1 = new CCPoint(box.MinX - boxPart.MaxX - BORDER, vecNormalized.Y * Math.Abs(box.MinX - boxPart.MaxX - BORDER));
+                        var vec2 = new CCPoint(vecNormalized.X * Math.Abs(box.MaxY - boxPart.MinY + BORDER), box.MaxY - boxPart.MinY + BORDER);
+                        finalVec = vec1.Length < vec2.Length ? vec1 : vec2;
+                    }
+                    else
+                    {
+                        var vec1 = new CCPoint(box.MaxX - boxPart.MinX + BORDER, vecNormalized.Y * Math.Abs(box.MaxX - boxPart.MinX + BORDER));
+                        var vec2 = new CCPoint(vecNormalized.X * Math.Abs(box.MaxY - boxPart.MinY + BORDER), box.MaxY - boxPart.MinY + BORDER);
+                        finalVec = vec1.Length < vec2.Length ? vec1 : vec2;
+                    }
+                }
+                // move the part
+                part.Position += finalVec;
+                // to make sure that there are no intersections check for intersections with all other parts (exept the ones that belong to your hierarchy)
+                var myParts = part.TotalParts;
+                foreach (var aircraftPart in Aircraft.TotalParts)
+                {
+                    if (myParts.Contains(aircraftPart)) continue;
+                    bool collisionDetected = false;
+                    while (aircraftPart.BoundingBoxTransformedToParent.IntersectsRect(part.BoundingBoxTransformedToParent))
+                    {
+                        collisionDetected = true;
+                        part.Position += vecNormalized;
+                    }
+                    if (collisionDetected)
+                        part.Position += vecNormalized * BORDER;
+                }
+                // move all the parts that belong to you with you
+                foreach (var mountedPart in part.TotalParts)
+                    if (mountedPart != part)
+                        mountedPart.Position += part.Position - oldPos;
+                
+                part.EnterWorkshopConfiguration();
+            }
+        }
+
+        internal void EnterHangarConfiguration()
+        {
+            foreach (var part in MountedParts)
+            {
+                if (part == null) continue;
+                // move all mounted parts back to their mount points
+                foreach (var mount in PartMounts)
+                    if (mount.MountedPart == part) mount.UpdateMountedPartPosition();
+                part.EnterHangarConfiguration();
+            }
+        }
+
         // DEBUG: switch back to protected
         internal PartMount[] PartMounts { get; set; } = new PartMount[0];
 
@@ -422,19 +521,36 @@ namespace CocosSharpMathGame
             // check the index
             if (mountIndex < PartMounts.Length)
                 mounted = PartMounts[mountIndex].MountPart(part);
-            // if it was sucessfully mounted add it as a child of your parent (the aircraft)
-            // and tell it that you're its mount-parent now
-            if (mounted)
-            {
-                Console.WriteLine("mounted!");
-                // if the mount point is lower than the anchor of the body you have to flip the part (mirror on x axis)
-                if (PosLeftLower.Y + PartMounts[mountIndex].Position.Y < Aircraft.Body.PositionY)
-                    part.Flip();
-                Parent.AddChild(part, zOrder: this.ZOrder + PartMounts[mountIndex].Dz);
-                part.MountParent = this;
-                (Parent as Aircraft).PartsChanged();
-            }
             return mounted;
+        }
+
+        internal int CalcZOrder()
+        {
+            // calculate the ZOrder recursively
+            int dz = 0;
+            Part part = this;
+            while (part!=null && part.MountPoint != null)
+            {
+                dz += part.MountPoint.Dz;
+                part = part.MountParent;
+            }
+            return dz;
+        }
+
+        internal PartMount MountPoint
+        {
+            get
+            {
+                PartMount mp = null;
+                if (MountParent == null) return null;
+                foreach (var mountPoint in MountParent.PartMounts)
+                    if (mountPoint.MountedPart == this)
+                    {
+                        mp = mountPoint;
+                        break;
+                    }
+                return mp;
+            }
         }
 
         internal bool MountPart (Part part)
@@ -496,6 +612,16 @@ namespace CocosSharpMathGame
         {
             foreach (PartMount partMount in PartMounts)
                 partMount.UnmountPart();
+        }
+
+        internal void Unmount(Part part)
+        {
+            foreach (PartMount partMount in PartMounts)
+                if (partMount.MountedPart == part)
+                {
+                    partMount.UnmountPart();
+                    break;
+                }
         }
     }
 }

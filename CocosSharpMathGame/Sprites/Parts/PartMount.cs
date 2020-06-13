@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CocosSharp;
+using Xamarin.Forms.Internals;
 
 namespace CocosSharpMathGame
 {
@@ -51,15 +52,108 @@ namespace CocosSharpMathGame
             AllowedTypes = allowedTypes;
             MountedPart = null;
             NullRotation = 0;
-            Dz = -1;
+            Dz = 1;
         }
 
         internal void UpdateMountedPartPosition()
         {
-            MountedPart.Position = MyPart.PosLeftLower + Position;
+            if (MountedPart == null) return;
+            MountedPart.Position = AircraftPosition;
             MountedPart.NullRotation = NullRotation;
+            foreach (var mountPoint in MountedPart.PartMounts)
+                mountPoint.UpdateMountedPartPosition();
         }
-
+        internal CCPoint AircraftPosition
+        {
+            get { return MyPart.PosLeftLower + Position; }
+        }
+        internal CCPoint PositionWorldspace
+        {
+            get { return MyPart.Aircraft.ConvertToWorldspace(AircraftPosition); }
+        }        
+        internal CCPoint PositionModifyAircraft
+        {
+            get
+            {
+                float BORDER = 32f;
+                CCPoint pos = PositionWorldspace;
+                CCPoint vec = pos - MyPart.PositionWorldspace;
+                if (vec.Equals(CCPoint.Zero))
+                    vec = new CCPoint(1, 0);
+                CCPoint vecNormalized = CCPoint.Normalize(vec);
+                // scale the vector, so that the bounding boxes no longer touch (+ a little bit of extra space)
+                CCPoint finalVec = CCPoint.Zero;
+                CCRect box = MyPart.BoundingBoxTransformedToWorld;
+                if (vec.Y == 0)
+                {
+                    if (vec.X < 0)
+                        finalVec = new CCPoint(box.MinX - pos.X - BORDER, 0);
+                    else
+                        finalVec = new CCPoint(box.MaxX - pos.X + BORDER, 0);
+                }
+                else if (vec.X == 0)
+                {
+                    if (vec.Y < 0)
+                        finalVec = new CCPoint(0, box.MinY - pos.Y - BORDER);
+                    else
+                        finalVec = new CCPoint(0, box.MaxY - pos.Y + BORDER);
+                }
+                else if (vec.Y < 0)
+                {
+                    if (vec.X < 0)
+                    {
+                        var vec1 = new CCPoint(box.MinX - pos.X - BORDER, vecNormalized.Y * Math.Abs(box.MinX - pos.X - BORDER));
+                        var vec2 = new CCPoint(vecNormalized.X * Math.Abs(box.MinY - pos.Y - BORDER), box.MinY - pos.Y - BORDER);
+                        finalVec = vec1.Length < vec2.Length ? vec1 : vec2;
+                    }
+                    else
+                    {
+                        var vec1 = new CCPoint(box.MaxX - pos.X + BORDER, vecNormalized.Y * Math.Abs(box.MaxX - pos.X + BORDER));
+                        var vec2 = new CCPoint(vecNormalized.X * Math.Abs(box.MinY - pos.Y - BORDER), box.MinY - pos.Y - BORDER);
+                        finalVec = vec1.Length < vec2.Length ? vec1 : vec2;
+                    }
+                }
+                else
+                {
+                    if (vec.X < 0)
+                    {
+                        var vec1 = new CCPoint(box.MinX - pos.X - BORDER, vecNormalized.Y * Math.Abs(box.MinX - pos.X - BORDER));
+                        var vec2 = new CCPoint(vecNormalized.X * Math.Abs(box.MaxY - pos.Y + BORDER), box.MaxY - pos.Y + BORDER);
+                        finalVec = vec1.Length < vec2.Length ? vec1 : vec2;
+                    }
+                    else
+                    {
+                        var vec1 = new CCPoint(box.MaxX - pos.X + BORDER, vecNormalized.Y * Math.Abs(box.MaxX - pos.X + BORDER));
+                        var vec2 = new CCPoint(vecNormalized.X * Math.Abs(box.MaxY - pos.Y + BORDER), box.MaxY - pos.Y + BORDER);
+                        finalVec = vec1.Length < vec2.Length ? vec1 : vec2;
+                    }
+                }
+                CCPoint returnVec = pos + finalVec;
+                bool passed = false;
+                while (!passed)
+                {
+                    passed = true;
+                    foreach (var aircraftPart in MyPart.Aircraft.TotalParts)
+                    {
+                        if (Collisions.CollideBoundingBoxCircle(aircraftPart.BoundingBoxTransformedToWorld, returnVec, BORDER))
+                        {
+                            passed = false;
+                            returnVec += finalVec;
+                        }
+                    }
+                    foreach (var mountPoint in MyPart.PartMounts)
+                    {
+                        if (mountPoint == this) continue;
+                        else if (MyPart.PartMounts.IndexOf(this) > MyPart.PartMounts.IndexOf(mountPoint) && mountPoint.Available && mountPoint.PositionModifyAircraft.IsNear(returnVec, BORDER))
+                        {
+                            passed = false;
+                            returnVec += vecNormalized * BORDER;
+                        }
+                    }
+                }
+                return returnVec;
+            }
+        }
         /// <summary>
         /// tries to mount a given part
         /// </summary>
@@ -74,16 +168,31 @@ namespace CocosSharpMathGame
             if (!Available)
                 return false;
             // else check if the part may be mounted here
-            else if (AllowedTypes.Intersect(part.Types).Any() && AllowedSizes.Contains(part.MySizeType))
+            else if (CanMount(part))
             {
                 MountedPart = part;
+                part.MountParent = MyPart;
                 // make sure the part is actually at the position of the mount
                 UpdateMountedPartPosition();
                 //Console.WriteLine("MyPart Position: " + MyPart.Position);
                 //Console.WriteLine("Mount: " + part.Position);
+                // if it was sucessfully mounted add it as a child of your parts parent (the aircraft)
+                // and tell it that your part is its mount-parent now
+                // if the mount point is lower than the anchor of the body the part has to be flipped (mirror on x axis)
+                if ((MyPart.PosLeftLower.Y + Position.Y <  MyPart.Aircraft.Body.PositionY && part.Flipped == false) ||
+                    (MyPart.PosLeftLower.Y + Position.Y >= MyPart.Aircraft.Body.PositionY && part.Flipped == true))
+                    part.Flip();
+                foreach (var singlePart in part.TotalParts)
+                    MyPart.Parent.AddChild(singlePart, zOrder: singlePart.CalcZOrder());
+                (MyPart.Parent as Aircraft).PartsChanged();
                 return true;
             };
             return false;
+        }
+
+        internal bool CanMount(Part part)
+        {
+            return AllowedTypes.Intersect(part.Types).Any() && AllowedSizes.Contains(part.MySizeType);
         }
 
         internal Part UnmountPart()
@@ -100,7 +209,9 @@ namespace CocosSharpMathGame
             if (MyPart.Parent is Aircraft aircraft)
             {
                 // let the aircraft that the part was mounted on react to the loss
-                aircraft.RemoveChild(mountedPart);
+                // also remove all parts that are mounted on the removed part
+                foreach (Part part in mountedPart.TotalParts)
+                    aircraft.RemoveChild(part);
                 aircraft.PartsChanged();
             }
             // return the formerly mounted part

@@ -13,11 +13,13 @@ namespace CocosSharpMathGame
         {
             // set your types
             Types = new Type[] { Type.WINGS };
-            AnchorPoint = CCPoint.AnchorMiddle;
+            NormalAnchorPoint = CCPoint.AnchorMiddle;
 
             // add mounts points for guns
             var gunMount1 = new PartMount(this, new CCPoint(ContentSize.Width / 2, (ContentSize.Height - (ContentSize.Height / 4))), Type.GUN);
             var gunMount2 = new PartMount(this, new CCPoint(ContentSize.Width / 2,                       (ContentSize.Height / 4)), Type.GUN);
+            gunMount1.Dz = -1;
+            gunMount2.Dz = -1;
             PartMounts = new PartMount[] { gunMount1, gunMount2 };
 
             // specify the collision polygon

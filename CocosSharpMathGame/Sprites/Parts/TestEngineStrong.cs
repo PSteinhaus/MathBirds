@@ -13,7 +13,7 @@ namespace CocosSharpMathGame
         {
             // set your types
             Types = new Type[] { Type.ENGINE };
-            AnchorPoint = CCPoint.AnchorMiddle;
+            NormalAnchorPoint = CCPoint.AnchorMiddle;
 
             // specify the mass points
             MassPoints = new MassPoint[] { new MassPoint(ContentSize.Width / 2, ContentSize.Height / 2, 30) };

@@ -13,7 +13,7 @@ namespace CocosSharpMathGame
         {
             // set your types
             Types = new Type[] { Type.GUN };
-            AnchorPoint = new CCPoint(1/ContentSize.Width, 0.5f);
+            NormalAnchorPoint = new CCPoint(1/ContentSize.Width, 0.5f);
 
             // specify the mass points
             MassPoints = new MassPoint[] { new MassPoint(ContentSize.Width / 2, ContentSize.Height / 2, 30) };

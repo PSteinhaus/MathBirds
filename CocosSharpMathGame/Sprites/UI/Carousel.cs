@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CocosSharp;
+using Microsoft.Xna.Framework;
 
 namespace CocosSharpMathGame
 {
@@ -23,13 +24,14 @@ namespace CocosSharpMathGame
                 }
             }
         }
+        internal List<IGameObject> Collection { get; private protected set; } = new List<IGameObject>();
         internal CCPoint NodeAnchor { get; set; } = CCPoint.AnchorMiddle;
         internal float ScaleFactor = Constants.STANDARD_SCALE;
         internal float Border { get; set; } = 0f;
         internal float SpacingFactor { get; set; } = 1.3f;
         internal bool IsHorizontal { get; set; } = true;
         private protected Scroller Scroller { get; set; } = new Scroller();
-        private protected GameObjectNode CollectionNode { get; set; } = new GameObjectNode();
+        internal GameObjectNode CollectionNode { get; private protected set; } = new GameObjectNode();
         internal Carousel(CCSize contentSize)
         {
             Schedule();
@@ -78,12 +80,17 @@ namespace CocosSharpMathGame
             if (IsHorizontal ? CollectionNode.PositionX == MaxX || CollectionNode.PositionX == MinX : CollectionNode.PositionY == MaxY || CollectionNode.PositionY == MinY)
                 Scroller.ScrollVelocity = CCPoint.Zero;
             // update all individual nodes (for scale, zOrder, ...)
+            MiddleNode = UpdateNodes();
+            Snapped = false;
+        }
+        private protected virtual CCNode UpdateNodes()
+        {
             CCPoint middle = BoundingBoxTransformedToWorld.Center;
             int maxZOrder = int.MinValue;
             CCNode middleNode = null;
             foreach (var node in CollectionNode.Children)
             {
-                float value = (float)Math.Sin( (IsHorizontal ? 1 - Math.Abs(node.PositionWorldspace.X - middle.X) / ContentSize.Width * 1.0f : 1 - Math.Abs(node.PositionWorldspace.Y - middle.Y) / ContentSize.Height * 1.3f) * Math.PI/2 );
+                float value = (float)Math.Sin((IsHorizontal ? 1 - Math.Abs(node.PositionWorldspace.X - middle.X) / ContentSize.Width * 1.0f : 1 - Math.Abs(node.PositionWorldspace.Y - middle.Y) / ContentSize.Height * 1.3f) * Math.PI / 2);
                 node.Scale = value * ScaleFactor;
                 node.ZOrder = (int)(value * 1000);
                 if (node.ZOrder > maxZOrder)
@@ -92,21 +99,20 @@ namespace CocosSharpMathGame
                     middleNode = node;
                 }
             }
-            MiddleNode = middleNode;
-            Snapped = false;
+            return middleNode;
         }
         internal float MinX
         {
             get
             {
-                return IsHorizontal ? - CollectionNode.ContentSize.Width + ContentSize.Width / 2 : 0f;
+                return IsHorizontal ? - CollectionNode.ContentSize.Width + ContentSize.Width / 2 : (-CollectionNode.ContentSize.Width + ContentSize.Width) / 2;
             }
         }
         internal float MaxX
         {
             get
             {
-                return IsHorizontal ? ContentSize.Width / 2 : 0f;
+                return IsHorizontal ? ContentSize.Width / 2 : MinX;
             }
         }
 
@@ -121,13 +127,14 @@ namespace CocosSharpMathGame
         {
             get
             {
-                return IsHorizontal ? MinY : MinY + CollectionNode.ContentSize.Height;
+                return IsHorizontal ? MinY : ContentSize.Height / 2 + CollectionNode.ContentSize.Height;
             }
         }
 
         internal void AddToCollection(IGameObject gameObject)
         {
             var ccNode = (CCNode)gameObject;
+            Collection.Add(gameObject);
             CollectionNode.AddChild(ccNode);
             // place the node correctly
             ccNode.AnchorPoint = NodeAnchor;
@@ -136,9 +143,10 @@ namespace CocosSharpMathGame
                 MiddleNode = ccNode;
         }
 
-        protected void RemoveFromCollection(CCNode node)
+        protected void RemoveFromCollection(IGameObject gameObject)
         {
-            CollectionNode.RemoveChild(node);
+            CollectionNode.RemoveChild((CCNode)gameObject);
+            Collection.Remove(gameObject);
             UpdatePositionsInCollection();
         }
 
@@ -146,20 +154,21 @@ namespace CocosSharpMathGame
 
         internal void UpdatePositionsInCollection()
         {
-            var children = CollectionNode.Children;
-            if (!children.Any()) return;
+            if (!Collection.Any()) return;
             CCPoint position = CCPoint.Zero;
-            foreach (var node in children)
+            foreach (var gameObject in Collection)
             {
+                CCNode node = (CCNode)gameObject;
                 position += IsHorizontal ? new CCPoint(node.ContentSize.Width * SpacingFactor, 0) : new CCPoint(0, -node.ContentSize.Height * SpacingFactor);
                 node.Position = position;
                 position += IsHorizontal ? new CCPoint(node.ContentSize.Width * SpacingFactor + Border, 0) : new CCPoint(0, -node.ContentSize.Height * SpacingFactor - Border);
             }
-            var firstRect = children.First().BoundingBoxTransformedToParent;
-            var lastRect = children.Last().BoundingBoxTransformedToParent;
+            var firstRect = ((CCNode)Collection.First()).BoundingBoxTransformedToParent;
+            var lastRect = ((CCNode)Collection.Last()).BoundingBoxTransformedToParent;
             CCRect boundingRect = new CCRect(firstRect.MinX, firstRect.MaxY, lastRect.MaxX-firstRect.MinX, Math.Abs(firstRect.MaxY - lastRect.MinY));
-            foreach (var node in children)
+            foreach (var gameObject in Collection)
             {
+                CCNode node = (CCNode)gameObject;
                 node.Position -= boundingRect.LowerLeft;
             }
             CollectionNode.ContentSize = boundingRect.Size;

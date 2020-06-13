@@ -138,15 +138,30 @@ namespace CocosSharpMathGame
             }
         }
 
+        internal class SingleTouchEventArgs : EventArgs
+        {
+            internal SingleTouchEventArgs(CCTouch touch) : base()
+            {
+                Touch = touch;
+            }
+            internal CCTouch Touch { get; private set; }
+        }
+        internal event EventHandler<SingleTouchEventArgs> DoubleTapEvent;
+        private DateTime TimeLastTap { get; set; } = DateTime.MinValue;
+        internal float DoubleTapInterval { get; set; } = 0.25f;
         private protected void OnTouchesBegan(List<CCTouch> touches, CCEvent touchEvent)
         {
             switch (touches.Count)
             {
                 case 1:
                     {
+                        var now = DateTime.Now;
+                        if ((now - TimeLastTap).TotalSeconds < DoubleTapInterval)
+                            DoubleTapEvent?.Invoke(this, new SingleTouchEventArgs(touches[0]));
                         // stop all scrolling
                         if (Scroller != null)
                             Scroller.OnTouchesBegan(touches, touchEvent);
+                        TimeLastTap = now;
                     }
                     break;
                 default:

@@ -13,7 +13,7 @@ namespace CocosSharpMathGame
         {
             // set your types
             Types = new Type[] { Type.SINGLE_WING };
-            AnchorPoint = CCPoint.AnchorMiddleBottom;
+            NormalAnchorPoint = CCPoint.AnchorMiddleBottom;
 
             // add a mount point for two engines at the center of the wing
             var engineMount = new PartMount(this, new CCPoint(ContentSize.Width / 2, (ContentSize.Height / 2)), Type.ENGINE);

@@ -29,6 +29,16 @@ namespace CocosSharpMathGame
                     return true;
             }
         }
+        private CCPoint normalAnchorPoint = CCPoint.AnchorMiddle;
+        public CCPoint NormalAnchorPoint
+        {
+            get { return normalAnchorPoint; }
+            set
+            {
+                normalAnchorPoint = value;
+                AnchorPoint = value;
+            }
+        }
         // 0 is considered EAST; rotation is clockwise
         private float myRotation = 0;
         public float MyRotation
@@ -90,11 +100,17 @@ namespace CocosSharpMathGame
             Scale = desiredHeight / ContentSize.Height;
         }
 
+        public float Area
+        { 
+            get { return BoundingBoxTransformedToWorld.Size.Width * BoundingBoxTransformedToWorld.Size.Height; }
+        }
+
         private void Init()
         {
             IsAntialiased = false;
             AnchorPoint = CCPoint.AnchorMiddle;
             Scale = Constants.STANDARD_SCALE;
+            //IsColorCascaded = true;
         }
         internal GameObjectSprite(CCSpriteFrame spriteFrame) : base(spriteFrame)
         {

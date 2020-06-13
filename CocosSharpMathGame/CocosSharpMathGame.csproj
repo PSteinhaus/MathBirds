@@ -193,6 +193,9 @@
     <Compile Include="Sprites\UI\FlightPathHead.cs" />
     <Compile Include="Sprites\UI\HangarOptionNode.cs" />
     <Compile Include="Sprites\UI\HorizontalScalingButton.cs" />
+    <Compile Include="Sprites\UI\NonScalingCarousel.cs" />
+    <Compile Include="Sprites\UI\PartCarouselNode.cs" />
+    <Compile Include="Sprites\UI\PartCollectionBG.cs" />
     <Compile Include="Sprites\UI\RectButton.cs" />
     <Compile Include="Sprites\UI\ScrollableCollectionNode.cs" />
     <Compile Include="Sprites\UI\UIElement.cs" />

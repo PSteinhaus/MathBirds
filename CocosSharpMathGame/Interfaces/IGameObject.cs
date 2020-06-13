@@ -15,6 +15,8 @@ namespace CocosSharpMathGame
         bool MyVisible { get; }
         float MyRotation { get; set; }
         float TotalRotation { get; }
+        CCPoint NormalAnchorPoint { get; set; }
+        float Area { get; }
         void RotateTowards(float angle, float maxRotationAngle);
         float GetScale();
         /// <summary>

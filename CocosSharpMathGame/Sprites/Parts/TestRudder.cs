@@ -13,7 +13,7 @@ namespace CocosSharpMathGame.Sprites.Parts
         {
             // set your types
             Types = new Type[] { Type.RUDDER };
-            AnchorPoint = new CCPoint(0.5f, 0f);
+            NormalAnchorPoint = new CCPoint(0.5f, 0f);
 
             // specify the mass points
             MassPoints = CreateDiamondMassPoints(5f);

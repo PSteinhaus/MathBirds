@@ -15,7 +15,7 @@ namespace CocosSharpMathGame
         internal float MaxScale { get; set; } = Constants.STANDARD_SCALE;
         internal float XBorder { get; set; } = 20f;
         internal float YBorder { get; set; } = 20f;
-        internal List<CCNode> Collection { get; private protected set; } = new List<CCNode>();
+        internal List<IGameObject> Collection { get; private protected set; } = new List<IGameObject>();
         // standard behavior is a horizontal collection with one row
         private int columns;
         internal int Columns
@@ -88,7 +88,7 @@ namespace CocosSharpMathGame
                 // reset rotation
                 gameObject.MyRotation = 0f;
                 var ccNode = (CCNode)gameObject;
-                Collection.Add(ccNode);
+                Collection.Add(gameObject);
                 CollectionNode.AddChild(ccNode);
                 // place the node correctly
                 ccNode.AnchorPoint = CCPoint.AnchorMiddle;
@@ -172,17 +172,19 @@ namespace CocosSharpMathGame
         /// <param name="movement"></param>
         private void MoveCollectionNode(CCPoint movement)
         {
-            CollectionNode.Position += movement / Constants.STANDARD_SCALE;
             CollectionNode.PositionX = Constants.Clamp(CollectionNode.PositionX + movement.X, MinX, MaxX);
             CollectionNode.PositionY = Constants.Clamp(CollectionNode.PositionY + movement.Y, MinY, MaxY);
         }
 
-        protected void RemoveFromCollection(CCNode node, CCTouch touchOnRemove=null)
+        protected void RemoveFromCollection(IGameObject gameObject, CCTouch touchOnRemove=null)
         {
-            Collection.Remove(node);
+            var node = (CCNode)gameObject;
+            Collection.Remove(gameObject);
             CollectionNode.RemoveChild(node);
             UpdateCollectionPositions();
             node.Scale = Constants.STANDARD_SCALE;
+            // reset the anchor
+            node.AnchorPoint = gameObject.NormalAnchorPoint;
             // raise an event
             var handler = CollectionRemovalEvent;
             if (handler != null)
@@ -200,7 +202,7 @@ namespace CocosSharpMathGame
             var count = Collection.Count;
             for (int i=0; i<count; i++)
             {
-                Collection[i].Position = PositionInCollection(i);
+                ((CCNode)Collection[i]).Position = PositionInCollection(i);
             }
         }
 
@@ -237,7 +239,7 @@ namespace CocosSharpMathGame
                         if (Rows == 1 && Math.Abs(touch.Delta.Y) > Math.Abs(touch.Delta.X) && Math.Abs(touch.Delta.Y) > 16.0)
                         {
                             foreach (var node in Collection)
-                                if (node.BoundingBoxTransformedToWorld.ContainsPoint(new CCPoint(touch.Location.X, touch.StartLocation.Y)))
+                                if (((CCNode)node).BoundingBoxTransformedToWorld.ContainsPoint(new CCPoint(touch.Location.X, touch.StartLocation.Y)))
                                 {
                                     RemoveFromCollection(node, touch);
                                     Pressed = false;
@@ -247,7 +249,7 @@ namespace CocosSharpMathGame
                         else if (Columns == 1 && Math.Abs(touch.Delta.X) > Math.Abs(touch.Delta.Y) && Math.Abs(touch.Delta.X) > 16.0)
                         {
                             foreach (var node in Collection)
-                                if (node.BoundingBoxTransformedToWorld.ContainsPoint(new CCPoint(touch.StartLocation.X, touch.Location.Y)))
+                                if (((CCNode)node).BoundingBoxTransformedToWorld.ContainsPoint(new CCPoint(touch.StartLocation.X, touch.Location.Y)))
                                 {
                                     RemoveFromCollection(node, touch);
                                     Pressed = false;

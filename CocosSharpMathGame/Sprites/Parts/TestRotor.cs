@@ -13,7 +13,7 @@ namespace CocosSharpMathGame
         {
             // set your types
             Types = new Type[] { Type.ROTOR };
-            AnchorPoint = new CCPoint(3 / ContentSize.Width, 0.5f);
+            NormalAnchorPoint = new CCPoint(3 / ContentSize.Width, 0.5f);
 
             // specify the mass points
             MassPoints = CreateDiamondMassPoints(10f);

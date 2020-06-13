@@ -26,7 +26,7 @@ namespace CocosSharpMathGame
             if (withWeapon)
             {
                 // give both wings guns
-                wings.MountPart(new TestWeapon());
+                //wings.MountPart(new TestWeapon());
                 wings.MountPart(new TestWeapon());
             }
             /*
