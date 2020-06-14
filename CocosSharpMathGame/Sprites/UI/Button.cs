@@ -7,11 +7,48 @@ using CocosSharp;
 
 namespace CocosSharpMathGame
 {
-    abstract internal class Button : UIElement
+    internal abstract class Button : UIElement
     {
-        internal Button(string textureName) : base(textureName)
+        internal Button(string textureName, bool isCircleButton) : base(textureName)
         {
-
+            MakeClickable(OnTouchesBegan, onTouchesEnded: OnTouchesEnded, onTouchesCancelled: OnTouchesCancelled, touchMustEndOnIt: false, IsCircleButton: isCircleButton);
         }
+
+        internal void OnTouchesBegan(List<CCTouch> touches, CCEvent touchEvent)
+        {
+            touchEvent.StopPropogation();
+            if (touches.Count > 0)
+            {
+                // turn darker when pressed
+                Color = CCColor3B.Gray;
+            }
+        }
+
+        internal void OnTouchesEnded(List<CCTouch> touches, CCEvent touchEvent)
+        {
+            touchEvent.StopPropogation();
+            if (touches.Count > 0)
+            {
+                // turn back to original color when released
+                Color = CCColor3B.White;
+                var touch = touches[0];
+                if (TouchIsOnIt(touch))
+                {
+                    ButtonEnded(touch);
+                }
+            }
+        }
+
+        internal void OnTouchesCancelled(List<CCTouch> touches, CCEvent touchEvent)
+        {
+            touchEvent.StopPropogation();
+            if (touches.Count > 0)
+            {
+                // turn back to original color when released
+                Color = CCColor3B.White;
+            }
+        }
+
+        private protected abstract void ButtonEnded(CCTouch touch);
     }
 }

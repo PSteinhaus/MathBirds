@@ -15,7 +15,6 @@ namespace CocosSharpMathGame
         }
         internal GameState State { get; private set; } = GameState.PLANNING;
         public GUILayer GUILayer { get; set; }
-        //private MathSprite mathSprite1;
         private CCDrawNode drawNode = new CCDrawNode();
         internal List<Aircraft> Aircrafts { get; set; } = new List<Aircraft>();
         internal List<Projectile> Projectiles { get; } = new List<Projectile>();

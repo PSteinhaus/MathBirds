@@ -18,6 +18,9 @@ namespace CocosSharpMathGame
         internal ScrollableCollectionNode TakeoffCollectionNode { get; private protected set; }
         internal NonScalingCarousel PartCarousel { get; private protected set; }
         internal CCNode TakeoffNode { get; private protected set; } = new CCNode();
+        internal GOButton GOButton { get; private protected set; } = new GOButton();
+        internal readonly CCPoint GOButtonOutPosition = new CCPoint(Constants.COCOS_WORLD_WIDTH / 2, Constants.COCOS_WORLD_HEIGHT * 1.5f);
+        internal readonly CCPoint GOButtonInPosition  = new CCPoint(Constants.COCOS_WORLD_WIDTH / 2, Constants.COCOS_WORLD_HEIGHT * 0.9f);
         private HangarLayer HangarLayer { get; set; }
         internal GameObjectNode HangarOptionHangar { get; private protected set; }
         internal GameObjectNode HangarOptionWorkshop { get; private protected set; }
@@ -96,6 +99,7 @@ namespace CocosSharpMathGame
                 HangarLayer.AddPart(new TestWeapon());
                 HangarLayer.AddPart(new TestRudder());
             }
+            PartCarousel.Visible = false;
             AddChild(PartCarousel);
             // move the part carousel away as the hangar does not start there
             PartCarousel.PositionY += PartCarousel.ContentSize.Height * 1.5f;
@@ -126,6 +130,9 @@ namespace CocosSharpMathGame
             drawNode.DrawLine(CCPoint.Zero, new CCPoint (TakeoffNode.BoundingBoxTransformedToWorld.MaxX, 0), 8f, CCColor4B.White);
             TakeoffNode.ContentSize = new CCSize(TakeoffNode.ContentSize.Width, TakeoffNode.ContentSize.Height + 2 * 4f);
             TakeoffNode.PositionY += 8f;
+            AddChild(GOButton, 2); // place the go button a bit higher than the rest (in ZOrder)
+            GOButton.Visible = false;
+            GOButton.Position = GOButtonOutPosition;
             // let the hangar listen to the TakeoffCollectionNode
             TakeoffCollectionNode.CollectionRemovalEvent += HangarLayer.ReceiveAircraftFromCollection;
             // let the hangar listen to the Carousel for a change of the middle node
@@ -197,6 +204,8 @@ namespace CocosSharpMathGame
                                             selectedAircraft.Scale = Constants.STANDARD_SCALE;
                                             HangarLayer.PlaceAircraft(selectedAircraft, HangarLayer.GUICoordinatesToHangar(selectedAircraft.Position));
                                         }
+                                        if (TakeoffCollectionNode.Collection.Any())
+                                            GOButton.AddAction(HangarLayer.AddGOButton);
                                     }
                                     break;
                                 case HangarLayer.HangarState.MODIFY_AIRCRAFT:

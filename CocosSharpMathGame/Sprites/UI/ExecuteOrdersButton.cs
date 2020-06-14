@@ -7,49 +7,18 @@ using CocosSharp;
 
 namespace CocosSharpMathGame
 {
-    internal class ExecuteOrdersButton : UIElement
+    internal class ExecuteOrdersButton : Button
     {
-        internal ExecuteOrdersButton() : base("flightPathHead.png")
+        internal ExecuteOrdersButton() : base("flightPathHead.png", true)
         {
             Scale = 6f;
-            MakeClickable(OnTouchesBegan, onTouchesEnded: OnTouchesEnded, onTouchesCancelled:OnTouchesCancelled, touchMustEndOnIt:false, IsCircleButton: true);
         }
 
-        internal void OnTouchesBegan(List<CCTouch> touches, CCEvent touchEvent)
+        private protected override void ButtonEnded(CCTouch touch)
         {
-            touchEvent.StopPropogation();
-            if (touches.Count > 0)
-            {
-                // turn darker when pressed
-                Color = CCColor3B.Gray;
-            }
-        }
-
-        internal void OnTouchesEnded(List<CCTouch> touches, CCEvent touchEvent)
-        {
-            touchEvent.StopPropogation();
-            if (touches.Count > 0)
-            {
-                // turn back to original color when released
-                Color = CCColor3B.White;
-                var touch = touches[0];
-                if (TouchIsOnItCircle(touch))
-                {
-                    Visible = false;
-                    // execute orders
-                    (Layer as GUILayer).ExecuteOrders();
-                }
-            }
-        }
-
-        internal void OnTouchesCancelled(List<CCTouch> touches, CCEvent touchEvent)
-        {
-            touchEvent.StopPropogation();
-            if (touches.Count > 0)
-            {
-                // turn back to original color when released
-                Color = CCColor3B.White;
-            }
+            Visible = false;
+            // execute orders
+            (Layer as GUILayer).ExecuteOrders();
         }
     }
 }

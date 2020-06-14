@@ -10,9 +10,9 @@ namespace CocosSharpMathGame
 {
     /// <summary>
     /// Aircrafts are objects in the sky that are assembled from parts
-    /// which react to collision
+    /// which react to collision.
     /// </summary>
-    internal abstract class Aircraft : GameObjectNode, ICollidible, IDrawNodeUser
+    internal class Aircraft : GameObjectNode, ICollidible, IDrawNodeUser
     {
         internal float Health
         {
@@ -308,8 +308,11 @@ namespace CocosSharpMathGame
             ManeuverPolygonUntransformed = untransformedPolygon;
             UpdateManeuverPolygon();
             // draw it (DEBUG)
-            //maneuverPolygonDrawNode.Clear();
-            //maneuverPolygonDrawNode.DrawPolygon(untransformedPolygon.Points, untransformedPolygon.Points.Length, CCColor4B.Transparent ,2f, CCColor4B.White);
+            if (IsManeuverPolygonDrawn)
+            {
+                maneuverPolygonDrawNode.Clear();
+                maneuverPolygonDrawNode.DrawPolygon(untransformedPolygon.Points, untransformedPolygon.Points.Length, CCColor4B.Transparent ,2f, CCColor4B.White);
+            }
         }
 
         /// <summary>
@@ -825,6 +828,7 @@ namespace CocosSharpMathGame
         {
             FlightPathControlNode = new FlightPathControlNode(this);
             ControlledByPlayer = false;
+            PartsChanged();
             // DEBUG
             /*
             AddChild(maneuverPolygonDrawNode);
@@ -850,15 +854,19 @@ namespace CocosSharpMathGame
             // DrawNodes have no Size, therefore we need to position them correctly at the center of the node
             maneuverPolygonDrawNode.Position = new CCPoint(ContentSize.Width/2, ContentSize.Height / 2);
             // add the FlightPathControlNode as a brother below you
-            Parent.AddChild(FlightPathControlNode, ZOrder - 1);
+            if (Parent is PlayLayer pl)
+                pl.AddChild(FlightPathControlNode, ZOrder - 1);
         }
+        /// <summary>
+        /// Should only be called while the aircraft is actually still a child (i.e. before it has been removed)
+        /// </summary>
         internal void PrepareForRemoval()
         {
             // remove your brothers (FlightPathControlNode & CloudTailNode)
             Parent.RemoveChild(FlightPathControlNode);
-            if (HighNodeWhenDead.Parent == Parent)
+            if (HighNodeWhenDead?.Parent == Parent)
                 Parent.RemoveChild(HighNodeWhenDead);
-            if (LowNodeWhenDead.Parent == Parent)
+            if (LowNodeWhenDead?.Parent == Parent)
                 Parent.RemoveChild(LowNodeWhenDead);
             foreach (var part in TotalParts)
                 part.PrepareForRemoval();

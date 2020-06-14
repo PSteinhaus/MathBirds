@@ -12,7 +12,7 @@ namespace CocosSharpMathGame
     {
         internal TestAircraft(bool withWeapon=true) : base()
         {
-            IsManeuverPolygonDrawn = true;
+            //IsManeuverPolygonDrawn = true;
             Body = new TestBody();
             // mount the wings
             var wings = new TestDoubleWing();

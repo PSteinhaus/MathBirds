@@ -47,9 +47,9 @@ namespace CocosSharpMathGame.DX
             var hangarLayer = new HangarLayer();
 
             scene.AddChild(hangarLayer.GUILayer);
-            scene.AddChild(hangarLayer, zOrder:-1);
+            scene.AddChild(hangarLayer, zOrder:int.MinValue);
             //scene.AddChild(playLayer.GUILayer);
-            //scene.AddChild(playLayer, zOrder:-1);
+            //scene.AddChild(playLayer, zOrder:int.MinValue);
 
             mainWindow.RunWithScene(scene);
         }

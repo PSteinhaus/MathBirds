@@ -31,6 +31,9 @@ namespace CocosSharpMathGame
         internal List<Part> Parts = new List<Part>();
         public HangarLayer() : base(CCColor4B.Black)
         {
+            NewAircraftButton = new NewAircraftButton(this);
+            NewAircraftButton.Visible = false;
+            AddChild(NewAircraftButton);
             AddChild(LowDrawNode,  int.MinValue);
             LowDrawNode.BlendFunc = CCBlendFunc.NonPremultiplied;
             AddChild(HighDrawNode, int.MaxValue);
@@ -124,16 +127,24 @@ namespace CocosSharpMathGame
             AddCarousel         = new CCSequence(new CCCallFunc(() => { GUILayer.HangarOptionCarousel.Visible = true; }), new CCEaseIn(new CCMoveTo(TRANSITION_TIME, new CCPoint(0, GUILayer.VisibleBoundsWorldspace.MaxY)), easeRate*0.7f));
             RemovePartCarousel  = new CCSequence(new CCEaseIn(new CCMoveBy(TRANSITION_TIME, new CCPoint(0, GUILayer.PartCarousel.ContentSize.Height)), easeRate * 0.7f), new CCCallFunc(() => { GUILayer.PartCarousel.Visible = false; }));
             AddPartCarousel     = new CCSequence(new CCDelayTime(TRANSITION_TIME), new CCCallFunc(() => { GUILayer.PartCarousel.Visible = true; }), new CCEaseIn(new CCMoveTo(TRANSITION_TIME, new CCPoint(0, GUILayer.VisibleBoundsWorldspace.MaxY)), easeRate * 0.7f));
+            AddNewAircraftButton = new CCSequence(new CCCallFunc(() => { NewAircraftButton.Visible = true; }), FadeIn, new CCCallFunc(() => { NewAircraftButton.Pressable = true; }));
+            RemoveNewAircraftButton = new CCSequence(new CCCallFunc(() => { NewAircraftButton.Pressable = false; }), FadeOut, new CCCallFunc(() => { NewAircraftButton.Visible = false; }));
+            AddGOButton         = new CCSequence(new CCCallFunc(() => { GUILayer.GOButton.Visible = true; }), new CCEaseOut(new CCMoveTo(TRANSITION_TIME, GUILayer.GOButtonInPosition), 20f));
+            RemoveGOButton      = new CCSequence(new CCEaseIn(new CCMoveTo(TRANSITION_TIME, GUILayer.GOButtonOutPosition), 10f), new CCCallFunc(() => { GUILayer.GOButton.Visible = false; }));
         }
 
         internal float TimeInTransition = 0f;
 
+        internal CCAction AddGOButton;
+        internal CCAction RemoveGOButton;
+        private CCAction AddNewAircraftButton;
+        private CCAction RemoveNewAircraftButton;
         private CCAction AddPartCarousel;
         private CCAction RemovePartCarousel;
         private CCAction AddCarousel;
         private CCAction RemoveCarousel;
-        private CCAction FadeOut;
-        private CCAction FadeIn;
+        private CCFiniteTimeAction FadeOut;
+        private CCFiniteTimeAction FadeIn;
         private CCAction TransistionAction;
         private CCAction TakeoffNodeToHangar;
         private CCAction TakeoffNodeLeave;
@@ -180,9 +191,12 @@ namespace CocosSharpMathGame
         private Dictionary<Aircraft, CCPoint> HangarPositions = new Dictionary<Aircraft, CCPoint>();
         private Dictionary<Aircraft, float>   HangarRotations = new Dictionary<Aircraft, float>();
         private const float WorkshopBoxBorderY = 120f;
+        internal NewAircraftButton NewAircraftButton { get; private set; }
         private CCPoint WorkshopPosition(Aircraft aircraft)
         {
             CCPoint pos = CCPoint.Zero;
+            // the first position is taken by the button for creating a new aircraft
+            pos -= new CCPoint(0, NewAircraftButton.BoundingBoxTransformedToWorld.Size.Height + WorkshopBoxBorderY);
             Aircraft lastAircraft = null;
             foreach (var aircr in Aircrafts)
             {
@@ -222,12 +236,20 @@ namespace CocosSharpMathGame
             TransistionAction = new CCSequence(new CCDelayTime(TRANSITION_TIME), new CCCallFunc(() => FinalizeTransition(state)));
             if (state != HangarState.HANGAR)
             {
+                GUILayer.GOButton.AddAction(RemoveGOButton);
                 GUILayer.TakeoffNode.AddAction(TakeoffNodeLeave);
                 BGNode.AddAction(BGFadeOut);
+            }
+            if (state != HangarState.WORKSHOP)
+            {
+                NewAircraftButton.AddAction(RemoveNewAircraftButton);
             }
             if (state == HangarState.HANGAR)
             {
                 GUILayer.TakeoffNode.AddAction(TakeoffNodeToHangar);
+                // if the takeoffnode holds at least one aircraft add the GO-button
+                if (GUILayer.TakeoffCollectionNode.Collection.Any())
+                    GUILayer.GOButton.AddAction(AddGOButton);
                 BGNode.AddAction(BGFadeIn);
                 foreach (var aircraft in Aircrafts)
                 {
@@ -267,6 +289,10 @@ namespace CocosSharpMathGame
                     {
                         RemoveAircraft(ModifiedAircraft);
                     }
+                    // the aircraft has (probably) been modified, so it should run through the placement algorithm once more
+                    var currentPos = ModifiedAircraft.Position;
+                    PlaceAircraft(ModifiedAircraft, HangarPositions[ModifiedAircraft]);
+                    ModifiedAircraft.Position = currentPos;
                     // get the standard configuration positions
                     ModifiedAircraft.InWorkshopConfiguration = false;
                     var totalParts = ModifiedAircraft.TotalParts;
@@ -294,8 +320,8 @@ namespace CocosSharpMathGame
                     var rotateAction = new CCRotateTo(TRANSITION_TIME, 0f);
                     rotateAction.Tag = RotateAircraftTag;
                     aircraft.AddAction(rotateAction);
-                    // TODO: Add the button for creating a new aircraft
                 }
+                NewAircraftButton.AddAction(AddNewAircraftButton);
             }
             else if (state == HangarState.MODIFY_AIRCRAFT)
             {
@@ -315,13 +341,17 @@ namespace CocosSharpMathGame
                 var totalParts = ModifiedAircraft.TotalParts;
                 // and the workshop configutation size
                 float newCamWidth = ModifyAircraftWidth();
-                CCPoint[] workshopConfigurationsPositions = new CCPoint[totalParts.Count()];
-                for (int i = 0; i < totalParts.Count(); i++)
-                    workshopConfigurationsPositions[i] = totalParts.ElementAt(i).Position;
+                if (totalParts != null)
+                {
+                    CCPoint[] workshopConfigurationsPositions = new CCPoint[totalParts.Count()];
+                    for (int i = 0; i < totalParts.Count(); i++)
+                        workshopConfigurationsPositions[i] = totalParts.ElementAt(i).Position;
+                    ModifiedAircraft.InWorkshopConfiguration = false;
+                    // now move the parts slowly to these positions
+                    for (int i = 0; i < totalParts.Count(); i++)
+                        totalParts.ElementAt(i).AddAction(new CCSequence(new CCDelayTime(TRANSITION_TIME), new CCEaseIn(new CCMoveTo(TRANSITION_TIME, workshopConfigurationsPositions[i]), 2.6f)));
+                }
                 ModifiedAircraft.InWorkshopConfiguration = false;
-                // now move the parts slowly to these positions
-                for (int i = 0; i < totalParts.Count(); i++)
-                    totalParts.ElementAt(i).AddAction(new CCSequence(new CCDelayTime(TRANSITION_TIME), new CCEaseIn(new CCMoveTo(TRANSITION_TIME, workshopConfigurationsPositions[i]), 2.6f)));
                 ModifiedAircraft.AddAction(new CCSequence(new CCDelayTime(TRANSITION_TIME*2), new CCCallFunc(() => { ModifiedAircraft.InWorkshopConfiguration = true; })));
                 NextCameraSize = new CCSize(newCamWidth, CameraSize.Height * newCamWidth / CameraSize.Width);
                 // focus on the selected aircraft
@@ -355,13 +385,18 @@ namespace CocosSharpMathGame
             var totalParts = ModifiedAircraft.TotalParts;
             float xMin = float.PositiveInfinity;
             float xMax = float.NegativeInfinity;
-            foreach (var part in totalParts)
+            if (totalParts.Any())
             {
-                CCRect box = part.BoundingBoxTransformedToWorld;
-                if (box.MinX < xMin) xMin = box.MinX;
-                if (box.MaxX > xMax) xMax = box.MaxX;
+                foreach (var part in totalParts)
+                {
+                    CCRect box = part.BoundingBoxTransformedToWorld;
+                    if (box.MinX < xMin) xMin = box.MinX;
+                    if (box.MaxX > xMax) xMax = box.MaxX;
+                }
+                return Math.Max(Math.Abs(xMin), Math.Abs(xMax)) * 2 + 200f; // the last value is an additional border to the edge of the screen
             }
-            return Math.Max(Math.Abs(xMin), Math.Abs(xMax)) * 2 + 200f; // the last value is an additional border to the edge of the screen
+            else
+                return 300f;
         }
 
         internal Aircraft ModifiedAircraft { get; set; }
@@ -386,15 +421,18 @@ namespace CocosSharpMathGame
         {
             // stop all actions that could be happening right now
             if (TransistionAction != null) StopAction(TransistionAction.Tag);
-            //GUILayer.EnableTouchBegan();
             GUILayer.HangarOptionCarousel.StopAction(AddCarousel.Tag);
             GUILayer.HangarOptionCarousel.StopAction(RemoveCarousel.Tag);
             GUILayer.TakeoffNode.StopAction(TakeoffNodeToHangar.Tag);
             GUILayer.TakeoffNode.StopAction(TakeoffNodeLeave.Tag);
             GUILayer.PartCarousel.StopAction(AddPartCarousel.Tag);
             GUILayer.PartCarousel.StopAction(RemovePartCarousel.Tag);
+            GUILayer.GOButton.StopAction(AddGOButton.Tag);
+            GUILayer.GOButton.StopAction(RemoveGOButton.Tag);
             BGNode.StopAction(BGFadeOut.Tag);
             BGNode.StopAction(BGFadeIn.Tag);
+            NewAircraftButton.StopAction(AddNewAircraftButton.Tag);
+            NewAircraftButton.StopAction(RemoveNewAircraftButton.Tag);
             foreach (var aircraft in Aircrafts)
             {
                 aircraft.StopAction(MoveAircraftTag);
@@ -503,6 +541,9 @@ namespace CocosSharpMathGame
             aircraft.ResetAnchorPoint();
             aircraft.Position = e.TouchOnRemove.Location;
             GUILayer.DragAndDropObject = aircraft;
+            // check if the takeoffnode still holds any aircrafts
+            if (!GUILayer.TakeoffCollectionNode.Collection.Any())
+                GUILayer.GOButton.AddAction(RemoveGOButton);
         }
 
         internal void ReceivePartFromCollection(object sender, ScrollableCollectionNode.CollectionRemovalEventArgs e)
@@ -528,6 +569,7 @@ namespace CocosSharpMathGame
         internal void RemoveAircraft(Aircraft aircraft)
         {
             Aircrafts.Remove(aircraft);
+            aircraft.PrepareForRemoval();
             RemoveChild(aircraft);
         }
 
@@ -536,10 +578,20 @@ namespace CocosSharpMathGame
             AddChild(aircraft, (int)aircraft.Area);
         }
 
+        internal void ModifyNewAircraft()
+        {
+            Aircraft newAircraft = new Aircraft();
+            AddAircraft(newAircraft, CCPoint.Zero);
+            newAircraft.Position = CCPoint.Zero;
+            ModifiedAircraft = newAircraft;
+            StartTransition(HangarState.MODIFY_AIRCRAFT);
+        }
+
         internal void PlaceAircraft(Aircraft aircraft, CCPoint hangarPos)
         {
             const float SAFETY = 0.001f; // numeric safety
             aircraft.Position = hangarPos;
+            HangarPositions[aircraft] = aircraft.Position;
             var placementRect = PlacementRect(aircraft);
             if (RectAvailable(placementRect, out CCRect blockingRect, aircraft))
             {
@@ -565,6 +617,7 @@ namespace CocosSharpMathGame
                     else
                         movement = new CCPoint(0, blockingRect.MaxY - placementRect.MinY + SAFETY);
                 aircraft.Position += movement;
+                HangarPositions[aircraft] = aircraft.Position;
                 placementRect = PlacementRect(aircraft);
                 // check whether the new position is available
                 while (!RectAvailable(placementRect, out blockingRect, aircraft))
@@ -579,6 +632,7 @@ namespace CocosSharpMathGame
                                     new CCPoint(0, blockingRect.MinY - placementRect.MaxY - SAFETY) :
                                     new CCPoint(0, blockingRect.MaxY - placementRect.MinY + SAFETY);
                     aircraft.Position += movement;
+                    HangarPositions[aircraft] = aircraft.Position;
                     placementRect = PlacementRect(aircraft);
                 }
             }
@@ -652,8 +706,13 @@ namespace CocosSharpMathGame
 
         internal CCRect PlacementRect(Aircraft aircraft)
         {
+            // the aircraft has to be temporarily moved to its hangar position for this to work as intended
+            // it would be ideal to rotate it as well, but MyRotation sadly cannot account for rotations made with CCActions
+            CCPoint currentPos = aircraft.Position;
+            aircraft.Position = HangarPositions[aircraft];
             const float BORDER = 10f;
             var rect = aircraft.BoundingBoxTransformedToParent;
+            aircraft.Position = currentPos;
             return new CCRect(rect.MinX - BORDER, rect.MinY - BORDER, rect.Size.Width + BORDER * 2, rect.Size.Height + BORDER * 2);
         }
 
