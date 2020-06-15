@@ -14,6 +14,7 @@ namespace CocosSharpMathGame
         public const float TURN_DURATION = 3f;  // executing orders takes this long
         public const float PI = (float)Math.PI;
         public const float VERTEX_Z_GROUND = -10000f;
+        public const string SAVE_NAME = "save.sav";
 
         public static float DegreesToRadians(float degrees)
         {

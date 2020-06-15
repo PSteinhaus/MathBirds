@@ -298,9 +298,13 @@ namespace CocosSharpMathGame
 
         internal void MoveTo(CCPoint destination)
         {
+            Position = destination;
+            // use the latter instead if actually necessary for some purpose
+            /*
             float dx = destination.X - PositionX;
             float dy = destination.Y - PositionY;
             MoveBy(dx, dy);
+            */
         }
 
         internal void UpdateManeuverPolygonToThis(PolygonWithSplines untransformedPolygon)
@@ -860,16 +864,17 @@ namespace CocosSharpMathGame
         /// <summary>
         /// Should only be called while the aircraft is actually still a child (i.e. before it has been removed)
         /// </summary>
-        internal void PrepareForRemoval()
+        public override void PrepareForRemoval()
         {
             // remove your brothers (FlightPathControlNode & CloudTailNode)
-            Parent.RemoveChild(FlightPathControlNode);
-            if (HighNodeWhenDead?.Parent == Parent)
-                Parent.RemoveChild(HighNodeWhenDead);
-            if (LowNodeWhenDead?.Parent == Parent)
-                Parent.RemoveChild(LowNodeWhenDead);
-            foreach (var part in TotalParts)
-                part.PrepareForRemoval();
+            if (Parent != null)
+            {
+                Parent.RemoveChild(FlightPathControlNode);
+                if (HighNodeWhenDead?.Parent == Parent)
+                    Parent.RemoveChild(HighNodeWhenDead);
+                if (LowNodeWhenDead?.Parent == Parent)
+                    Parent.RemoveChild(LowNodeWhenDead);
+            }
         }
 
         /// <summary>

@@ -19,6 +19,7 @@ namespace CocosSharpMathGame
         float Area { get; }
         void RotateTowards(float angle, float maxRotationAngle);
         float GetScale();
+        float GetTotalScale();
         /// <summary>
         /// sets the scaling to fit a certain width in pixels
         /// </summary>
@@ -36,5 +37,9 @@ namespace CocosSharpMathGame
         /// </summary>
         /// <returns></returns>
         CCPoint[] DiamondCollisionPoints();
+        /// <summary>
+        /// called directly before this ccnode is removed from a parent;
+        /// </summary>
+        void PrepareForRemoval();
     }
 }

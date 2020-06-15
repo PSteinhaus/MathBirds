@@ -71,7 +71,7 @@ namespace CocosSharpMathGame
         {
             CCPoint anchor = ((CCNode)gameObject).AnchorPointInPoints;
             MoveBy(-anchor.X, -anchor.Y);
-            Scale(gameObject.GetScale());
+            Scale(gameObject.GetTotalScale());
             RotateBy(gameObject.TotalRotation);
             CCPoint pos = ((CCNode)gameObject).PositionWorldspace;
             MoveBy(pos.X, pos.Y);
@@ -83,6 +83,7 @@ namespace CocosSharpMathGame
         /// <param name="scale"></param>
         internal void Scale(float scale)
         {
+            if (scale == 1) return;
             for (int i=0; i<Points.Length; i++)
             {
                 // get the point as vector relative to the pivot point
@@ -200,22 +201,6 @@ namespace CocosSharpMathGame
                     c = !c;
             }
             return c;
-            /*
-            bool result = false;
-            int j = Points.Length - 1;
-            for (int i = 0; i < Points.Length; i++)
-            {
-                if (Points[i].Y < testPoint.Y && Points[j].Y >= testPoint.Y || Points[j].Y < testPoint.Y && Points[i].Y >= testPoint.Y)
-                {
-                    if (Points[i].X + (testPoint.Y - Points[i].Y) / (Points[j].Y - Points[i].Y) * (Points[j].X - Points[i].X) < testPoint.X)
-                    {
-                        result = !result;
-                    }
-                }
-                j = i;
-            }
-            return result;
-            */
         }
 
         /// <summary>

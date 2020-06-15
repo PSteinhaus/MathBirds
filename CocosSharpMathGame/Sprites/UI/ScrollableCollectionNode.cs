@@ -99,7 +99,7 @@ namespace CocosSharpMathGame
                     gameObject.FitToWidth(BoxSize.Width);
                 else
                     gameObject.FitToHeight(BoxSize.Height);
-                if (gameObject.GetScale() > MaxScale)
+                if (gameObject.GetTotalScale() > MaxScale)
                     ccNode.Scale = MaxScale;
                 MoveCollectionNode(CCPoint.Zero);
                 return true;

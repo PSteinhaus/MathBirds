@@ -248,7 +248,7 @@ namespace CocosSharpMathGame
                 dctNode.AutoAddClouds = false;
                 DamageCloudTailNodes.Add(dctNode);
             }
-            var destructionCircleCloud = new CircleCloud(PositionWorldspace, 0, CCColor4B.White, true, (ContentSize.Width + ContentSize.Height) * GetScale() + 100f, 5f);
+            var destructionCircleCloud = new CircleCloud(PositionWorldspace, 0, CCColor4B.White, true, (ContentSize.Width + ContentSize.Height) * GetTotalScale() + 100f, 5f);
             destructionCircleCloud.FollowTarget = this;
             DamageCloudTailNodes.First().AddCloud(destructionCircleCloud);
             // also kill all parts that are mounted to you
@@ -263,7 +263,7 @@ namespace CocosSharpMathGame
         internal void ReactToHit(float damage, CCPoint collisionPos)
         {
             const float MAX_DISTANCE_FROM_COLLISION = 200f;
-            float maxDistanceFromCollision = ((ContentSize.Width + ContentSize.Height) / 4) * GetScale();
+            float maxDistanceFromCollision = ((ContentSize.Width + ContentSize.Height) / 4) * GetTotalScale();
             if (maxDistanceFromCollision > MAX_DISTANCE_FROM_COLLISION) maxDistanceFromCollision = MAX_DISTANCE_FROM_COLLISION;
             // generate a random point near the collisionPos
             // and show an effect there
@@ -588,11 +588,6 @@ namespace CocosSharpMathGame
             for (int i = 0; i < massPoints.Length; i++)
                 massPoints[i] = new MassPoint(points[i].X, points[i].Y, massPerPoint);
             return massPoints;
-        }
-
-        internal void PrepareForRemoval()
-        {
-            
         }
 
         /// <summary>

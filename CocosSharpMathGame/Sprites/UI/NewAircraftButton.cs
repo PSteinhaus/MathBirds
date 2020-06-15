@@ -10,7 +10,7 @@ namespace CocosSharpMathGame
     internal class NewAircraftButton : Button
     {
         private HangarLayer HangarLayer { get; set; }
-        internal NewAircraftButton(HangarLayer hangarLayer) : base("flightPathHead.png", true)
+        internal NewAircraftButton(HangarLayer hangarLayer) : base("newAircraftButton.png", true)
         {
             HangarLayer = hangarLayer;
             RadiusFactor = 0.75f;

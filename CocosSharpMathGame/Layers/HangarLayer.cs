@@ -8,6 +8,11 @@ using CocosSharp;
 using Microsoft.Xna.Framework;
 using SkiaSharp;
 using Symbolism;
+using PCLStorage;
+using System.IO;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
+using CSharpMath.Atom.Atoms;
 
 namespace CocosSharpMathGame
 {
@@ -260,7 +265,7 @@ namespace CocosSharpMathGame
                     var scaleAction = new CCScaleTo(TRANSITION_TIME, Constants.STANDARD_SCALE);
                     scaleAction.Tag = ScaleAircraftTag;
                     aircraft.AddAction(scaleAction);
-                    var rotateAction = new CCRotateTo(TRANSITION_TIME, HangarRotations[aircraft]);
+                    var rotateAction = new CCMyRotateTo(TRANSITION_TIME, HangarRotations[aircraft]);
                     rotateAction.Tag = RotateAircraftTag;
                     aircraft.AddAction(rotateAction);
                 }
@@ -317,7 +322,7 @@ namespace CocosSharpMathGame
                     var scaleAction = new CCScaleTo(TRANSITION_TIME, WorkshopScale(aircraft));
                     scaleAction.Tag = ScaleAircraftTag;
                     aircraft.AddAction(scaleAction);
-                    var rotateAction = new CCRotateTo(TRANSITION_TIME, 0f);
+                    var rotateAction = new CCMyRotateTo(TRANSITION_TIME, 0f);
                     rotateAction.Tag = RotateAircraftTag;
                     aircraft.AddAction(rotateAction);
                 }
@@ -459,6 +464,13 @@ namespace CocosSharpMathGame
                 drawNode.DrawSolidCircle(pos, RADIUS + LINE_WIDTH, color);
                 drawNode.DrawSolidCircle(pos, RADIUS, CCColor4B.Black);
             }
+            void DrawBodyMount(CCPoint pos, CCColor4B color, CCDrawNode drawNode)
+            {
+                drawNode.DrawLine(pos - new CCPoint(RADIUS * 3, 0), pos + new CCPoint(RADIUS * 3, 0), LINE_WIDTH, color, CCLineCap.Square);
+                drawNode.DrawLine(pos - new CCPoint(0, RADIUS * 3), pos + new CCPoint(0, RADIUS * 3), LINE_WIDTH, color, CCLineCap.Square);
+                drawNode.DrawSolidCircle(pos, RADIUS * 2 + LINE_WIDTH, color);
+                drawNode.DrawSolidCircle(pos, RADIUS * 2, CCColor4B.Black);
+            }
             void DrawMountLine(CCPoint start, CCPoint end, CCColor4B color, CCDrawNode drawNode)
             {
                 // first draw the diagonal segment
@@ -499,13 +511,14 @@ namespace CocosSharpMathGame
             }
             if (!ModifiedAircraft.TotalParts.Any())
             {
+                // if the aircraft has no body...
                 CCColor4B color = LINE_COLOR;
                 if ((GUILayer.DragAndDropObject == null && ((PartCarouselNode)GUILayer.PartCarousel.MiddleNode).PartType == Part.Type.BODY) ||
                     (GUILayer.DragAndDropObject != null && ((Part)GUILayer.DragAndDropObject).Types.Contains(Part.Type.BODY)))
                     color = EMPTY_MOUNT_COLOR;
                 if (GUILayer.DragAndDropObject != null && ((Part)GUILayer.DragAndDropObject).Types.Contains(Part.Type.BODY) && CCPoint.IsNear(ModifiedAircraft.PositionWorldspace, GUICoordinatesToHangar(((Part)GUILayer.DragAndDropObject).PositionWorldspace), HangarGUILayer.MOUNT_DISTANCE))
                     color = CCColor4B.White;
-                DrawMountCircle(ModifiedAircraft.PositionWorldspace, color, HighDrawNode);
+                DrawBodyMount(ModifiedAircraft.PositionWorldspace, color, HighDrawNode);
             }
         }
         private void FinalizeTransition(HangarState state)
@@ -707,12 +720,15 @@ namespace CocosSharpMathGame
         internal CCRect PlacementRect(Aircraft aircraft)
         {
             // the aircraft has to be temporarily moved to its hangar position for this to work as intended
-            // it would be ideal to rotate it as well, but MyRotation sadly cannot account for rotations made with CCActions
+            // it also needs to be rotated correctly as well
             CCPoint currentPos = aircraft.Position;
+            float currentRot = aircraft.MyRotation;
             aircraft.Position = HangarPositions[aircraft];
+            aircraft.MyRotation = HangarRotations[aircraft];
             const float BORDER = 10f;
             var rect = aircraft.BoundingBoxTransformedToParent;
             aircraft.Position = currentPos;
+            aircraft.MyRotation = currentRot;
             return new CCRect(rect.MinX - BORDER, rect.MinY - BORDER, rect.Size.Width + BORDER * 2, rect.Size.Height + BORDER * 2);
         }
 
@@ -888,6 +904,60 @@ namespace CocosSharpMathGame
                     default:
                         break;
                 }
+        }
+
+        public async Task SaveToFile()
+        {
+            IFolder localFolder = FileSystem.Current.LocalStorage;
+            IFile saveFile = null;
+            // create a file, overwriting any existing file
+            while (saveFile == null)
+            {
+                try
+                {
+                    saveFile = await localFolder.CreateFileAsync(Constants.SAVE_NAME, CreationCollisionOption.ReplaceExisting);
+                }
+                catch (Exception)
+                { }
+            }
+            using (Stream stream = await saveFile.OpenAsync(PCLStorage.FileAccess.ReadAndWrite))
+            {
+                throw new NotImplementedException();
+                // TODO: direct serialization is sadly not working, as CocosSharp is not built for it;
+                // therefore I have to create a way for serializing just the data that actually has to be saved;
+                // that would (currently) be the aircrafts and parts;
+                // these are CCNodes though, so I have to do the same for aircrafts and especially parts (since all necessary aircraft data is probably contained in the parts);
+                IFormatter formatter = new BinaryFormatter();
+                formatter.Serialize(stream, this);
+            }
+        }
+
+        public static async Task<HangarLayer> CreateFromFile()
+        {
+            HangarLayer hangar = null;
+            IFolder localFolder = FileSystem.Current.LocalStorage;
+            if (await PCLHelper.IsFileExistAsync(Constants.SAVE_NAME, localFolder))
+            {
+                // a save exists, create the hangar from the save
+                IFormatter formatter = new BinaryFormatter();
+                try
+                {
+                    throw new NotImplementedException();
+                    // TODO: direct serialization is sadly not working, as CocosSharp is not built for it;
+                    // therefore I have to create a way to serialize (and then here deserialize) only that data that I actually need;
+                    hangar = formatter.Deserialize(await PCLHelper.ReadStreamAsync(Constants.SAVE_NAME, localFolder)) as HangarLayer;
+                }
+                catch (Exception)
+                {
+                    // something went wrong...
+                }
+            }
+            if (hangar == null)
+            {
+                // no save exists, simply create a new hangar
+                hangar = new HangarLayer();
+            }
+            return hangar;
         }
     }
 }

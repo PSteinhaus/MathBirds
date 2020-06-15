@@ -12,6 +12,7 @@ namespace CocosSharpMathGame
     /// has no moveable camera; is drawn last (on top of everything else);
     /// holds the GUI for the PlayScene
     /// </summary>
+    [Serializable]
     public class HangarGUILayer : MyLayer
     {
         internal Carousel HangarOptionCarousel { get; private protected set; }
@@ -39,7 +40,7 @@ namespace CocosSharpMathGame
                     {
                         if (((CCNode)dragAndDropObject).Layer == HangarLayer)
                         {
-                            ((CCNode)dragAndDropObject).Scale = HangarScaleToGUI() * dragAndDropObject.GetScale();
+                            ((CCNode)dragAndDropObject).Scale = HangarScaleToGUI() * dragAndDropObject.GetTotalScale();
                             ((CCNode)dragAndDropObject).Position = HangarCoordinatesToGUI(((CCNode)dragAndDropObject).PositionWorldspace);
                         }
                         ((CCNode)dragAndDropObject).Parent.RemoveChild((CCNode)dragAndDropObject);

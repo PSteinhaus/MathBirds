@@ -78,12 +78,15 @@ namespace CocosSharpMathGame
             else
                 MyRotation += maxRotationAngle * Math.Sign(difference);
         }
-
         public float GetScale()
+        {
+            return ScaledContentSize.Width / ContentSize.Width;
+        }
+        public float GetTotalScale()
         {
             float scale = ScaledContentSize.Width / ContentSize.Width;
             if (Parent != null && (Parent is IGameObject g))
-                scale *= g.GetScale();
+                scale *= g.GetTotalScale();
             return scale;
         }
         /// <summary>
@@ -117,6 +120,18 @@ namespace CocosSharpMathGame
         public CCPoint[] DiamondCollisionPoints()
         {
             return new CCPoint[] { new CCPoint(0, (ContentSize.Height / 2)), new CCPoint((ContentSize.Width / 2), ContentSize.Height), new CCPoint(ContentSize.Width, (ContentSize.Height / 2)), new CCPoint((ContentSize.Width / 2), 0) };
+        }
+
+        public virtual void PrepareForRemoval()
+        {
+            // override this function if you actually need to prepare for removal
+        }
+
+        public override void RemoveChild(CCNode child, bool cleanup = true)
+        {
+            if (child is IGameObject g)
+                g.PrepareForRemoval();
+            base.RemoveChild(child, cleanup);
         }
     }
 

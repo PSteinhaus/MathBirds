@@ -232,5 +232,12 @@ namespace CocosSharpMathGame
                     break;
             }
         }
+
+        public override void RemoveChild(CCNode child, bool cleanup = true)
+        {
+            if (child is IGameObject g)
+                g.PrepareForRemoval();
+            base.RemoveChild(child, cleanup);
+        }
     }
 }

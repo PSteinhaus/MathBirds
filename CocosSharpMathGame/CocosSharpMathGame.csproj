@@ -94,6 +94,12 @@
     <Reference Include="MonoGame.Framework, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\CocosSharp.1.7.1.0\lib\portable-net45+win+wpa81+wp81\MonoGame.Framework.dll</HintPath>
     </Reference>
+    <Reference Include="PCLStorage, Version=1.0.2.0, Culture=neutral, PublicKeyToken=286fe515a2c35b64, processorArchitecture=MSIL">
+      <HintPath>..\packages\PCLStorage.1.0.2\lib\net45\PCLStorage.dll</HintPath>
+    </Reference>
+    <Reference Include="PCLStorage.Abstractions, Version=1.0.2.0, Culture=neutral, PublicKeyToken=286fe515a2c35b64, processorArchitecture=MSIL">
+      <HintPath>..\packages\PCLStorage.1.0.2\lib\net45\PCLStorage.Abstractions.dll</HintPath>
+    </Reference>
     <Reference Include="SkiaSharp, Version=1.68.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <HintPath>..\packages\SkiaSharp.1.68.2-preview.60\lib\net462\SkiaSharp.dll</HintPath>
     </Reference>
@@ -137,6 +143,8 @@
   <ItemGroup>
     <Compile Include="Constants.cs" />
     <Compile Include="CocosSharpMathGame.cs" />
+    <Compile Include="CustomCCActions\CCMoveAircraftTo.cs" />
+    <Compile Include="CustomCCActions\CCMyRotateTo.cs" />
     <Compile Include="Interfaces\IAdvancable.cs" />
     <Compile Include="Interfaces\IDrawNodeUser.cs" />
     <Compile Include="Interfaces\IGameObject.cs" />
@@ -145,6 +153,7 @@
     <Compile Include="Internals\ArrayUtil.cs" />
     <Compile Include="Internals\Collisions.cs" />
     <Compile Include="Internals\CubicSpline.cs" />
+    <Compile Include="Internals\PCLStorageHelper.cs" />
     <Compile Include="Internals\Polygon.cs" />
     <Compile Include="Internals\PolygonWithSplines.cs" />
     <Compile Include="Internals\Scroller.cs" />
@@ -214,9 +223,11 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Data\sprites\flightPathHead.png" />
+    <Content Include="Data\sprites\goButton.png" />
     <Content Include="Data\sprites\hangarOptionEnd.png" />
     <Content Include="Data\sprites\hangarOptionMid.png" />
     <Content Include="Data\sprites\hangarOptionStart.png" />
+    <Content Include="Data\sprites\newAircraftButton.png" />
     <Content Include="Data\sprites\testBody.png" />
     <Content Include="Data\sprites\testDoubleWing.png" />
     <Content Include="Data\sprites\testEngine.png" />
