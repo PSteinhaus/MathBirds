@@ -26,9 +26,11 @@ namespace CocosSharpMathGame
 		// MainPage will be a singleton, so keep a reference to yourself at global scope
 		public static MainPage Instance;
 		CocosSharpView gameView;
+		private App myApp;
 
-		public MainPage()
+		public MainPage(App myApp)
 		{
+			this.myApp = myApp;
 			// set the global variable
 			Instance = this;
 			Console.WriteLine("YES???");
@@ -63,7 +65,8 @@ namespace CocosSharpMathGame
 				gameView.ContentManager.SearchPaths = new List<string>()
 				{
 					"sounds",
-					"hd/graphics"
+					"hd/graphics",
+					"hd/fonts"
 				};
 
 				// tell CCSprite to scale all textures by the factor 8, as standard behaviour
@@ -73,9 +76,11 @@ namespace CocosSharpMathGame
 				//gameScene = new GameScene(gameView);
 				var myScene = new CCScene(gameView);
 				//var playLayer = new PlayLayer();
-				var hangarLayer = new HangarLayer();
+				myApp.CurrentHangarLayer = new HangarLayer();
+				myApp.FinishedLoading = true;
 
-				myScene.AddChild(hangarLayer);
+				myScene.AddChild(myApp.CurrentHangarLayer.GUILayer);
+				myScene.AddChild(myApp.CurrentHangarLayer, zOrder: int.MinValue);
 				//myScene.AddChild(playLayer);
 				//myScene.AddChild(playLayer.GUILayer);
 

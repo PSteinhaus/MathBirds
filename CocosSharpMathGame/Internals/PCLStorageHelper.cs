@@ -1,6 +1,7 @@
 ﻿using PCLStorage;
 using System;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace CocosSharpMathGame
@@ -8,11 +9,20 @@ namespace CocosSharpMathGame
     public static class PCLHelper
     {
 
-        public async static Task<bool> IsFileExistAsync(this string fileName, IFolder rootFolder = null)
+        public async static Task<bool> IsFileExistAsync(this string fileName, IFolder rootFolder = null, CancellationToken ct = default)
         {
             // get hold of the file system  
             IFolder folder = rootFolder ?? FileSystem.Current.LocalStorage;
-            ExistenceCheckResult folderexist = await folder.CheckExistsAsync(fileName);
+            ExistenceCheckResult folderexist = ExistenceCheckResult.NotFound;
+            try
+            {
+                folderexist = await folder.CheckExistsAsync(fileName, ct).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+                // the operation was cancelled (took to long, or something else)
+                return false;
+            }
             // already run at least once, don't overwrite what's there  
             if (folderexist == ExistenceCheckResult.FileExists)
             {
@@ -67,15 +77,22 @@ namespace CocosSharpMathGame
             }
             return content;
         }
-        public async static Task<Stream> ReadStreamAsync(this string fileName, IFolder rootFolder = null)
+        public async static Task<Stream> ReadStreamAsync(this string fileName, IFolder rootFolder = null, CancellationToken ct = default)
         {
             Stream stream = new MemoryStream();
             IFolder folder = rootFolder ?? FileSystem.Current.LocalStorage;
-            bool exist = await fileName.IsFileExistAsync(folder);
-            if (exist == true)
+            try
             {
-                IFile file = await folder.GetFileAsync(fileName);
-                stream = await file.OpenAsync(PCLStorage.FileAccess.Read);
+                bool exist = await fileName.IsFileExistAsync(folder, ct).ConfigureAwait(false);
+                if (exist == true)
+                {
+                    IFile file = await folder.GetFileAsync(fileName, ct);
+                    stream = await file.OpenAsync(PCLStorage.FileAccess.Read, ct);
+                }
+            }
+            catch (Exception)
+            {
+                stream = new MemoryStream();
             }
             return stream;
         }

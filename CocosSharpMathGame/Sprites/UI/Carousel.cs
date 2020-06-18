@@ -32,7 +32,7 @@ namespace CocosSharpMathGame
         internal bool IsHorizontal { get; set; } = true;
         private protected Scroller Scroller { get; set; } = new Scroller();
         internal GameObjectNode CollectionNode { get; private protected set; } = new GameObjectNode();
-        internal Carousel(CCSize contentSize)
+        internal Carousel(CCSize contentSize, bool swallowTouches=true)
         {
             Schedule();
             ContentSize = contentSize;
@@ -44,7 +44,7 @@ namespace CocosSharpMathGame
             AnchorPoint = CCPoint.AnchorLowerLeft;
             Scale = 1f;
             Scroller.MoveFunction = MoveCollectionNode;
-            MakeClickable(OnTouchesBegan, OnTouchesMoved, OnTouchesEnded, null, touchMustEndOnIt: false);
+            MakeClickable(OnTouchesBegan, OnTouchesMoved, OnTouchesEnded, OnTouchesEnded, touchMustEndOnIt: false, swallowTouch: swallowTouches);
         }
         public override void Update(float dt)
         {
@@ -65,7 +65,7 @@ namespace CocosSharpMathGame
             var center = BoundingBoxTransformedToWorld.Center;
             CCPoint vector = center - MiddleNode.BoundingBoxTransformedToWorld.Center;
             if (vector.Length > 1f)
-                MoveCollectionNode(vector / 40);
+                MoveCollectionNode(vector / 10);
             else
             {
                 MoveCollectionNode(vector);
@@ -74,7 +74,6 @@ namespace CocosSharpMathGame
         }
         internal void MoveCollectionNode(CCPoint movement)
         {
-            CollectionNode.Position += movement;
             CollectionNode.PositionX = Constants.Clamp(CollectionNode.PositionX + movement.X, MinX, MaxX);
             CollectionNode.PositionY = Constants.Clamp(CollectionNode.PositionY + movement.Y, MinY, MaxY);
             if (IsHorizontal ? CollectionNode.PositionX == MaxX || CollectionNode.PositionX == MinX : CollectionNode.PositionY == MaxY || CollectionNode.PositionY == MinY)
@@ -176,12 +175,13 @@ namespace CocosSharpMathGame
 
         private protected void OnTouchesBegan(List<CCTouch> touches, CCEvent touchEvent)
         {
+            // stop all scrolling
+            Scroller.OnTouchesBegan(touches, touchEvent);
             switch (touches.Count)
             {
                 case 1:
                     {
-                        // stop all scrolling
-                        Scroller.OnTouchesBegan(touches, touchEvent);
+                        
                     }
                     break;
                 default:
@@ -205,12 +205,13 @@ namespace CocosSharpMathGame
 
         private protected void OnTouchesEnded(List<CCTouch> touches, CCEvent touchEvent)
         {
+            // start inert scrolling
+            Scroller.OnTouchesEnded(touches, touchEvent);
             switch (touches.Count)
             {
                 case 1:
                     {
-                        // start inert scrolling
-                        Scroller.OnTouchesEnded(touches, touchEvent);
+                        
                     }
                     break;
                 default:

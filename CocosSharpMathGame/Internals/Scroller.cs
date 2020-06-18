@@ -12,6 +12,8 @@ namespace CocosSharpMathGame
     /// </summary>
     internal class Scroller
     {
+        internal bool ListenForTouches { get; set; } = true;
+        private bool Pressed { get; set; } = false;
         internal CCPoint ScrollVelocity { get; set; }
         private float ScrollTime { get; set; }
         private float TotalScrollTime { get; set; }
@@ -46,6 +48,8 @@ namespace CocosSharpMathGame
 
         internal void OnTouchesBegan(List<CCTouch> touches, CCEvent touchEvent)
         {
+            if (!ListenForTouches) return;
+            Pressed = true;
             switch (touches.Count)
             {
                 case 1:
@@ -60,6 +64,7 @@ namespace CocosSharpMathGame
         }
         internal void OnTouchesMoved(List<CCTouch> touches, CCEvent touchEvent)
         {
+            if (!ListenForTouches || !Pressed) return;
             switch (touches.Count)
             {
                 case 1:
@@ -75,21 +80,27 @@ namespace CocosSharpMathGame
 
         internal void OnTouchesEnded(List<CCTouch> touches, CCEvent touchEvent)
         {
-            switch (touches.Count)
+            if (!ListenForTouches || !Pressed) return;
+            if (touches.Count > 0)
             {
-                case 1:
-                    {
-                        // start inert scrolling
-                        var touch = touches[0];
-                        CCPoint DiffOnScreen = touch.LocationOnScreen - touch.PreviousLocationOnScreen;
-                        ScrollVelocity = VelocityVectorFunction(touch);
-                        ScrollTime = 0;
-                        TotalScrollTime = TotalScrollTimeFunction(touch);
-                    }
-                    break;
-                default:
-                    break;
+                var touch = touches[0];
+                // start inert scrolling
+                CCPoint DiffOnScreen = touch.LocationOnScreen - touch.PreviousLocationOnScreen;
+                ScrollVelocity = VelocityVectorFunction(touch);
+                ScrollTime = 0;
+                TotalScrollTime = TotalScrollTimeFunction(touch);
+                switch (touches.Count)
+                {
+                    case 1:
+                        {
+                            
+                        }
+                        break;
+                    default:
+                        break;
+                }
             }
+            Pressed = false;
         }
 
         internal CCPoint DefaultVelocityVectorFunction(CCTouch touch)

@@ -47,7 +47,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Content\hd\fonts\" />
     <Folder Include="Content\sounds\" />
   </ItemGroup>
   <ItemGroup>
@@ -157,6 +156,14 @@
     <Content Include="Game.ico" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="..\CocosSharpMathGame\Content\hd\fonts\alphbeta-16.xnb">
+      <Link>Content\hd\fonts\alphbeta-16.xnb</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\CocosSharpMathGame\Content\hd\fonts\EarlyGameBoy-12.xnb">
+      <Link>Content\hd\fonts\EarlyGameBoy-12.xnb</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="..\CocosSharpMathGame\Content\hd\graphics\parts.plist">
       <Link>Content\hd\graphics\parts.plist</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

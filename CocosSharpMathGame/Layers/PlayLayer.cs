@@ -19,7 +19,7 @@ namespace CocosSharpMathGame
         internal List<Aircraft> Aircrafts { get; set; } = new List<Aircraft>();
         internal List<Projectile> Projectiles { get; } = new List<Projectile>();
         internal List<IDrawNodeUser> DrawNodeUsers { get; } = new List<IDrawNodeUser>();
-        private TestAircraft testAircraft;
+        private Aircraft testAircraft;
         internal CCDrawNode HighDrawNode { get; set; }
         internal CCDrawNode LowDrawNode { get; set; }
         public PlayLayer() : base(CCColor4B.Black)
@@ -60,6 +60,7 @@ namespace CocosSharpMathGame
             touchListener.OnTouchesBegan = OnTouchesBegan;
             touchListener.OnTouchesMoved = OnTouchesMovedMoveAndZoom;
             touchListener.OnTouchesEnded = OnTouchesEnded;
+            touchListener.OnTouchesCancelled = OnTouchesEnded;
             AddEventListener(touchListener, this);
 
             // add a mouse listener
@@ -73,7 +74,7 @@ namespace CocosSharpMathGame
             
             base.AddedToScene();
             var bounds = VisibleBoundsWorldspace;
-            testAircraft = new TestAircraft();
+            testAircraft = Aircraft.CreateTestAircraft();
             var playerTeam = new Team();
             testAircraft.Team = playerTeam;
             testAircraft.ControlledByPlayer = true;
@@ -82,7 +83,7 @@ namespace CocosSharpMathGame
             testAircraft.RotateBy(-90f);
             
             // add two other planes from different teams
-            var secondAircraft = new TestAircraft(withWeapon: true);
+            var secondAircraft = Aircraft.CreateTestAircraft();
             var secondTeam = new Team();
             secondAircraft.Team = secondTeam;
             var color = new CCColor3B(160, 160, 160);
@@ -94,7 +95,7 @@ namespace CocosSharpMathGame
             secondAircraft.RotateBy(-108f);
 
             // add two other planes from different teams
-            var thirdAircraft = new TestAircraft(withWeapon: true);
+            var thirdAircraft = Aircraft.CreateTestAircraft();
             thirdAircraft.Team = secondTeam;
             thirdAircraft.ChangeColor(color);
             thirdAircraft.AI = new StandardAI();
@@ -102,7 +103,7 @@ namespace CocosSharpMathGame
             thirdAircraft.MoveBy(bounds.Size.Width / 3, bounds.Size.Height * 1.4f);
             thirdAircraft.RotateBy(-100f);
 
-            var fourthAircraft = new TestAircraft();
+            var fourthAircraft = Aircraft.CreateTestAircraft();
             var thirdTeam = new Team();
             fourthAircraft.Team = thirdTeam;
             var colorTeam3 = new CCColor3B(200, 200, 200);
@@ -112,7 +113,7 @@ namespace CocosSharpMathGame
             fourthAircraft.MoveBy(bounds.Size.Width * 1.2f, bounds.Size.Height * 0.1f);
             fourthAircraft.RotateBy(-10f);
 
-            var fifthAircraft = new TestAircraft();
+            var fifthAircraft = Aircraft.CreateTestAircraft();
             fifthAircraft.Team = thirdTeam;
             fifthAircraft.ChangeColor(colorTeam3);
             fifthAircraft.AI = new StandardAI();

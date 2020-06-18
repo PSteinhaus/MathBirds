@@ -9,7 +9,7 @@ namespace CocosSharpMathGame
 {
     internal class TestRotor : Part
     {
-        internal TestRotor() : base("testRotor.png")
+        public TestRotor() : base("testRotor.png")
         {
             // set your types
             Types = new Type[] { Type.ROTOR };

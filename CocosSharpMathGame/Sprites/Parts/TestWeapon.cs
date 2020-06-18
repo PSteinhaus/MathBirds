@@ -9,7 +9,7 @@ namespace CocosSharpMathGame
 {
     internal class TestWeapon : Part
     {
-        internal TestWeapon() : base("testWeapon.png") // for now, as there is no gun sprite yet
+        public TestWeapon() : base("testWeapon.png") // for now, as there is no gun sprite yet
         {
             // set your types
             Types = new Type[] { Type.GUN };

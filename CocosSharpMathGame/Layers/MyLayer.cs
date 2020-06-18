@@ -14,11 +14,47 @@ namespace CocosSharpMathGame
     public class MyLayer : CCLayerColor
     {
         private protected Scroller Scroller { get; set; } = new Scroller();
-        public MyLayer(CCColor4B color) : base(color)
+        public MyLayer(CCColor4B color, bool countTouches=false) : base(color)
         {
             Schedule();
             Scroller.MoveFunction = (movePoint) => { CameraPosition -= movePoint; UpdateCamera(); };
+            if (countTouches)
+            {
+                var touchListener = new CCEventListenerTouchAllAtOnce();
+                touchListener.OnTouchesBegan = OnTouchesBeganDoAccounting;
+                touchListener.OnTouchesEnded = OnTouchesEndedDoAccounting;
+                touchListener.OnTouchesCancelled = OnTouchesEndedDoAccounting;
+                AddEventListener(touchListener, int.MinValue); // intercept everything
+            }
         }
+        private int TouchCount { get; set; }
+        private protected void OnTouchesBeganDoAccounting(List<CCTouch> touches, CCEvent touchEvent)
+        {
+            if (touches.Count > 0)
+            {
+                TouchCount += touches.Count;
+                Console.WriteLine("TouchCount: " + TouchCount);
+                // intercept all additional touches (don't allow a second touch)
+                if (TouchCount > 1)
+                {
+                    touchEvent.StopPropogation();
+                }
+            }
+        }
+        private protected void OnTouchesEndedDoAccounting(List<CCTouch> touches, CCEvent touchEvent)
+        {
+            if (touches.Count > 0)
+            {
+                TouchCount -= touches.Count;
+                Console.WriteLine("TouchCount: " + TouchCount);
+                // intercept the event if there are touches remaining (i.e. only the last release will be the "real" release)
+                if (TouchCount > 0)
+                {
+                    touchEvent.StopPropogation();
+                }
+            }
+        }
+
         private CCPoint ShakeAmount { get; set; }
         private protected CCPoint ScreenShakeVec { get; private set; } = CCPoint.Zero;
         internal CCRect CameraSpace { get; private protected set; } = new CCRect(float.NegativeInfinity, float.NegativeInfinity, float.PositiveInfinity, float.PositiveInfinity);
@@ -149,8 +185,10 @@ namespace CocosSharpMathGame
         internal event EventHandler<SingleTouchEventArgs> DoubleTapEvent;
         private DateTime TimeLastTap { get; set; } = DateTime.MinValue;
         internal float DoubleTapInterval { get; set; } = 0.25f;
+        internal bool Pressed { get; set; } = false;
         private protected void OnTouchesBegan(List<CCTouch> touches, CCEvent touchEvent)
         {
+            Pressed = true;
             switch (touches.Count)
             {
                 case 1:
@@ -171,6 +209,7 @@ namespace CocosSharpMathGame
 
         private protected void OnTouchesMovedMoveAndZoom(List<CCTouch> touches, CCEvent touchEvent)
         {
+            if (!Pressed) return;
             switch (touches.Count)
             {
                 case 1:
@@ -219,18 +258,21 @@ namespace CocosSharpMathGame
 
         private protected void OnTouchesEnded(List<CCTouch> touches, CCEvent touchEvent)
         {
+            if (!Pressed) return;
+            // start inert scrolling
+            if (Scroller != null)
+                Scroller.OnTouchesEnded(touches, touchEvent);
             switch (touches.Count)
             {
                 case 1:
                     {
-                        // start inert scrolling
-                        if (Scroller != null)
-                            Scroller.OnTouchesEnded(touches, touchEvent);
+                        
                     }
                     break;
                 default:
                     break;
             }
+            Pressed = false;
         }
 
         public override void RemoveChild(CCNode child, bool cleanup = true)

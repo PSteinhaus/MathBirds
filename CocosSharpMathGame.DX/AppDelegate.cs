@@ -8,8 +8,9 @@ namespace CocosSharpMathGame.DX
 {
     public class AppDelegate : CCApplicationDelegate
     {
+        private bool FinishedLoading = false;
         private HangarLayer CurrentHangarLayer { get; set; }
-        public async override void ApplicationDidFinishLaunching(CCApplication application, CCWindow mainWindow)
+        public override void ApplicationDidFinishLaunching(CCApplication application, CCWindow mainWindow)
         {
             application.ContentRootDirectory = "Content";
             var windowSize = mainWindow.WindowSizeInPixels;
@@ -37,7 +38,8 @@ namespace CocosSharpMathGame.DX
             application.ContentSearchPaths = new List<string>()
             {
                 "sounds",
-                "hd/graphics"
+                "hd/graphics",
+                "hd/fonts"
             };
             //CCSprite.DefaultTexelToContentSizeRatio = 1.0f;
             //CCSprite.DefaultTexelToContentSizeRatio = 0.125f;
@@ -45,6 +47,7 @@ namespace CocosSharpMathGame.DX
             var scene = new CCScene(mainWindow);
             //var playLayer = new PlayLayer();
             CurrentHangarLayer = new HangarLayer();
+            FinishedLoading = true;
             //CurrentHangarLayer = await HangarLayer.CreateFromFile();
 
             scene.AddChild(CurrentHangarLayer.GUILayer);
@@ -58,7 +61,8 @@ namespace CocosSharpMathGame.DX
         public async override void ApplicationDidEnterBackground(CCApplication application)
         {
             application.Paused = true;
-            //await CurrentHangarLayer.SaveToFile();
+            if (CurrentHangarLayer != null && FinishedLoading)
+                await CurrentHangarLayer.SaveToFile();
         }
 
         public override void ApplicationWillEnterForeground(CCApplication application)

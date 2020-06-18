@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,7 +12,7 @@ namespace CocosSharpMathGame
     /// Parts are what Aircrafts are made of.
     /// They are visible.
     /// </summary>
-    abstract internal class Part : GameObjectSprite, ICollidible
+    abstract internal class Part : GameObjectSprite, ICollidible, IStreamSaveable
     {
         internal bool Flipped { get; private protected set; } = false;
         internal float Health { get; private protected set; } = 10f; //float.PositiveInfinity; // standard behaviour is indestructability
@@ -617,6 +618,66 @@ namespace CocosSharpMathGame
                     partMount.UnmountPart();
                     break;
                 }
+        }
+
+        protected enum StreamEnum : byte
+        {
+            STOP = 0, NAME = 1, MOUNT = 2
+        }
+        public void WriteToStream(BinaryWriter writer)
+        {
+            // write the type name
+            writer.Write((byte)StreamEnum.NAME);
+            writer.Write(GetType().AssemblyQualifiedName);
+            // write down your mount children
+            for(int i=0; i<PartMounts.Length; i++)
+            {
+                var mountedPart = PartMounts[i].MountedPart;
+                if (mountedPart != null)
+                {
+                    writer.Write((byte)StreamEnum.MOUNT);
+                    writer.Write(i);    // save the mount index, so that the part can be correctly remounted later
+                    mountedPart.WriteToStream(writer);
+                }
+            }
+            writer.Write((byte)StreamEnum.STOP);
+        }
+
+        public static Part CreateFromStream(BinaryReader reader, Aircraft associatedAircraft=null, bool isBody=false)
+        {
+            Part createdPart = null;
+            bool reading = true;
+            while (reading)
+            {
+                StreamEnum nextEnum = (StreamEnum)reader.ReadByte();
+                switch (nextEnum)
+                {
+                    case StreamEnum.NAME:
+                        {
+                            // parse the type name
+                            createdPart = (Part)TypeHelper.CreateFromTypeName(reader.ReadString());
+                            // if this part is the body of an aircraft assign it right away
+                            if (associatedAircraft != null)
+                            {
+                                if (isBody) associatedAircraft.Body = createdPart;
+                                else        associatedAircraft.AddChild(createdPart);
+                            }
+                        }
+                        break;
+                    case StreamEnum.MOUNT:
+                        {
+                            // construct and mount a part
+                            int mountIndex = reader.ReadInt32();
+                            createdPart.MountPart(mountIndex, CreateFromStream(reader, associatedAircraft));
+                        }
+                        break;
+                    case StreamEnum.STOP:
+                    default:
+                        reading = false;
+                        break;
+                }
+            }
+            return createdPart;
         }
     }
 }

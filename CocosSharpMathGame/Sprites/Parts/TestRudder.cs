@@ -5,11 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 using CocosSharp;
 
-namespace CocosSharpMathGame.Sprites.Parts
+namespace CocosSharpMathGame
 {
     internal class TestRudder : Part
     {
-        internal TestRudder() : base("testRudder.png")
+        public TestRudder() : base("testRudder.png")
         {
             // set your types
             Types = new Type[] { Type.RUDDER };

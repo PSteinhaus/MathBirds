@@ -9,7 +9,7 @@ namespace CocosSharpMathGame
 {
     internal class TestBody : Part
     {
-        internal TestBody() : base("testBody.png")
+        public TestBody() : base("testBody.png")
         {
             NormalAnchorPoint = CCPoint.AnchorMiddle;
             //Position = new CCPoint((ContentSize.Width / 2), (ContentSize.Height / 2));

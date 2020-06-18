@@ -34,5 +34,10 @@ namespace CocosSharpMathGame
         {
             PartCollectionNode.AddToCollection(part);
         }
+
+        internal IEnumerable<Part> GetParts()
+        {
+            return PartCollectionNode.Collection.Cast<Part>();
+        }
     }
 }

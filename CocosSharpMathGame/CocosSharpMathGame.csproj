@@ -40,6 +40,12 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <Content Include="Content\hd\fonts\alphbeta-16.xnb">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Content\hd\fonts\EarlyGameBoy-12.xnb">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="Content\hd\graphics\parts.plist">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -148,6 +154,7 @@
     <Compile Include="Interfaces\IAdvancable.cs" />
     <Compile Include="Interfaces\IDrawNodeUser.cs" />
     <Compile Include="Interfaces\IGameObject.cs" />
+    <Compile Include="Interfaces\IStreamSaveable.cs" />
     <Compile Include="Internals\AI\AI.cs" />
     <Compile Include="Internals\AI\StandardAI.cs" />
     <Compile Include="Internals\ArrayUtil.cs" />
@@ -163,17 +170,18 @@
     <Compile Include="Layers\GUILayer.cs" />
     <Compile Include="Layers\HangarGUILayer.cs" />
     <Compile Include="Layers\HangarLayer.cs" />
+    <Compile Include="Layers\MyGUILayer.cs" />
     <Compile Include="Layers\MyLayer.cs" />
     <Compile Include="Layers\PlayLayer.cs" />
     <Compile Include="MathChallenges\AddChallenge.cs" />
     <Compile Include="MathChallenges\MathChallenge.cs" />
     <Compile Include="MathChallenges\MathToTexture.cs" />
-    <Compile Include="Nodes\GameObjectNodes\Aircrafts\Aircraft.cs" />
-    <Compile Include="Nodes\GameObjectNodes\Aircrafts\CloudTailNode.cs" />
-    <Compile Include="Nodes\GameObjectNodes\Aircrafts\DamageCloudTailNode.cs" />
-    <Compile Include="Nodes\GameObjectNodes\Aircrafts\FlightPathControlNode.cs" />
-    <Compile Include="Nodes\GameObjectNodes\Aircrafts\FlightPathNode.cs" />
-    <Compile Include="Nodes\GameObjectNodes\Aircrafts\TestAircraft.cs" />
+    <Compile Include="Nodes\GameObjectNodes\Aircraft\Aircraft.cs" />
+    <Compile Include="Nodes\GameObjectNodes\Aircraft\CloudTailNode.cs" />
+    <Compile Include="Nodes\GameObjectNodes\Aircraft\DamageCloudTailNode.cs" />
+    <Compile Include="Nodes\GameObjectNodes\Aircraft\FlightPathControlNode.cs" />
+    <Compile Include="Nodes\GameObjectNodes\Aircraft\FlightPathNode.cs" />
+    <Compile Include="Nodes\GameObjectNodes\Aircraft\AircraftCreation.cs" />
     <Compile Include="Nodes\GameObjectNodes\GameObjectNode.cs" />
     <Compile Include="Interfaces\ICollidible.cs" />
     <Compile Include="Pages\MainPage.cs" />
@@ -200,7 +208,9 @@
     <Compile Include="Sprites\UI\ExecuteOrdersButton.cs" />
     <Compile Include="Sprites\UI\FlightPathHead.cs" />
     <Compile Include="Sprites\UI\GOButton.cs" />
+    <Compile Include="Sprites\UI\HangarOptionHangar.cs" />
     <Compile Include="Sprites\UI\HangarOptionNode.cs" />
+    <Compile Include="Sprites\UI\HangarOptionWorkshop.cs" />
     <Compile Include="Sprites\UI\HorizontalScalingButton.cs" />
     <Compile Include="Sprites\UI\NewAircraftButton.cs" />
     <Compile Include="Sprites\UI\NonScalingCarousel.cs" />
@@ -212,7 +222,6 @@
     <Compile Include="Sprites\UI\VerticalScalingButton.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Content\hd\fonts\" />
     <Folder Include="Content\sounds\" />
   </ItemGroup>
   <ItemGroup>

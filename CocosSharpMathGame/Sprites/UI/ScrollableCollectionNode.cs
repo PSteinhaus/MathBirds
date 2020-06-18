@@ -72,7 +72,7 @@ namespace CocosSharpMathGame
             AnchorPoint = CCPoint.AnchorLowerLeft;
             Scale = 1f;
             Scroller.MoveFunction = MoveCollectionNode;
-            MakeClickable(OnTouchesBegan, OnTouchesMoved, OnTouchesEnded, null, touchMustEndOnIt: false);
+            MakeClickable(OnTouchesBegan, OnTouchesMoved, OnTouchesEnded, OnTouchesEnded, touchMustEndOnIt: false);
         }
 
         public override void Update(float dt)
@@ -267,12 +267,13 @@ namespace CocosSharpMathGame
 
         private protected void OnTouchesEnded(List<CCTouch> touches, CCEvent touchEvent)
         {
+            // start inert scrolling
+            Scroller.OnTouchesEnded(touches, touchEvent);
             switch (touches.Count)
             {
                 case 1:
                     {
-                        // start inert scrolling
-                        Scroller.OnTouchesEnded(touches, touchEvent);
+                        
                     }
                     break;
                 default:

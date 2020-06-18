@@ -20,7 +20,7 @@ namespace CocosSharpMathGame
             if (touches.Count > 0)
             {
                 // turn darker when pressed
-                Color = CCColor3B.Gray;
+                Color = CCColor3B.DarkGray;
             }
         }
 

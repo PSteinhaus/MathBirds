@@ -13,6 +13,8 @@ using System.IO;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using CSharpMath.Atom.Atoms;
+using System.Threading;
+using MathNet.Symbolics;
 
 namespace CocosSharpMathGame
 {
@@ -54,23 +56,21 @@ namespace CocosSharpMathGame
             DrawBG();
             BGNode.ZOrder = -20;
             //BGNode.Rotation = 45f;
-            // add some aircrafts
-            AddAircraft(new TestAircraft(), CCPoint.Zero);
-            AddAircraft(new TestAircraft(false), CCPoint.Zero);
-            AddAircraft(new TestAircraft(), CCPoint.Zero);
-            AddAircraft(new TestAircraft(), CCPoint.Zero);
-            AddAircraft(new TestAircraft(), CCPoint.Zero);
             // add a touch listener
             var touchListener = new CCEventListenerTouchAllAtOnce();
             touchListener.OnTouchesBegan = OnTouchesBegan;
             touchListener.OnTouchesMoved = OnTouchesMoved;
             touchListener.OnTouchesEnded = OnTouchesEnded;
+            touchListener.OnTouchesCancelled = OnTouchesEnded;
             AddEventListener(touchListener, this);
 
             // add a mouse listener
             var mouseListener = new CCEventListenerMouse();
             mouseListener.OnMouseScroll = OnMouseScrollZoom;
             AddEventListener(mouseListener, this);
+
+            // Load the saved state
+            LoadFromFile().Wait();
         }
 
         protected override void AddedToScene()
@@ -385,6 +385,19 @@ namespace CocosSharpMathGame
             }
         }
 
+        internal List<Part> GetParts()
+        {
+            // collect the parts
+            List<Part> parts = new List<Part>();
+            foreach (var node in GUILayer.PartCarousel.CollectionNode.Children)
+            {
+                var pNode = (PartCarouselNode)node;
+                foreach(var p in pNode.GetParts())
+                    parts.Add(p);
+            }
+            return parts;
+        }
+
         internal float ModifyAircraftWidth()
         {
             var totalParts = ModifiedAircraft.TotalParts;
@@ -567,11 +580,11 @@ namespace CocosSharpMathGame
             node.Scale = GUILayer.HangarScaleToGUI() * Constants.STANDARD_SCALE;
             GUILayer.DragAndDropObject = gameObject;
         }
-        internal void AddAircraft(Aircraft aircraft, CCPoint hangarPos)
+        internal void AddAircraft(Aircraft aircraft, CCPoint hangarPos, float hangarRot=0f)
         {
             Aircrafts.Add(aircraft);
             AddAircraftChild(aircraft);
-            HangarRotations[aircraft] = 0f;
+            HangarRotations[aircraft] = hangarRot;
             PlaceAircraft(aircraft, hangarPos);
         }
 
@@ -768,6 +781,11 @@ namespace CocosSharpMathGame
         new private protected void OnTouchesBegan(List<CCTouch> touches, CCEvent touchEvent)
         {
             base.OnTouchesBegan(touches, touchEvent);
+            if (GUILayer.DragAndDropObject != null)
+            {
+                touchEvent.StopPropogation();
+                return;
+            }
             switch (touches.Count)
             {
                 case 1:
@@ -781,9 +799,11 @@ namespace CocosSharpMathGame
                                     if (aircraft.Parent == this && aircraft.BoundingBoxTransformedToWorld.ContainsPoint(touch.StartLocation))
                                     {
                                         CCRect box = aircraft.BoundingBoxTransformedToWorld;
-                                        CCRect reducedBoundingBox = new CCRect(box.MinX + box.Size.Width / 4,
-                                                                               box.MinY + box.Size.Height / 4,
-                                                                               box.Size.Width / 2, box.Size.Height / 2);
+                                        float borderFactor = 0.15f;
+                                        CCRect reducedBoundingBox = new CCRect(box.MinX + box.Size.Width  * borderFactor,
+                                                                               box.MinY + box.Size.Height * borderFactor,
+                                                                               box.Size.Width  - box.Size.Width * borderFactor * 2,
+                                                                               box.Size.Height - box.Size.Width * borderFactor * 2);
                                         if (reducedBoundingBox.ContainsPoint(touch.StartLocation))
                                         {
                                             GUILayer.DragAndDropObject = aircraft;
@@ -884,6 +904,7 @@ namespace CocosSharpMathGame
 
         new private protected void OnTouchesEnded(List<CCTouch> touches, CCEvent touchEvent)
         {
+            Scroller.ListenForTouches = false;
             if (State != HangarState.TRANSITION)
                 switch (touches.Count)
                 {
@@ -898,66 +919,132 @@ namespace CocosSharpMathGame
                                 RotationSelectedNode = null;
                             }
                             else // else scroll with inertia
-                                base.OnTouchesEnded(touches, touchEvent);
+                                Scroller.ListenForTouches = true;
                         }
                         break;
                     default:
                         break;
                 }
+            base.OnTouchesEnded(touches, touchEvent);
+            Scroller.ListenForTouches = true;
         }
 
         public async Task SaveToFile()
         {
+            int tries = 0;
+            start:
+            Console.WriteLine("saving started");
             IFolder localFolder = FileSystem.Current.LocalStorage;
             IFile saveFile = null;
             // create a file, overwriting any existing file
-            while (saveFile == null)
+            try
             {
-                try
+                Console.WriteLine("overwriting");
+                saveFile = await localFolder.CreateFileAsync(Constants.SAVE_NAME, CreationCollisionOption.ReplaceExisting).ConfigureAwait(false);
+                Console.WriteLine("done overwriting");
+                using (Stream stream = await saveFile.OpenAsync(PCLStorage.FileAccess.ReadAndWrite).ConfigureAwait(false))
                 {
-                    saveFile = await localFolder.CreateFileAsync(Constants.SAVE_NAME, CreationCollisionOption.ReplaceExisting);
+                    Console.WriteLine("writing save!");
+                    BinaryWriter writer = new BinaryWriter(stream);
+                    // save how many aircrafts there are
+                    writer.Write(Aircrafts.Count);
+                    // save the aircrafts
+                    foreach (var aircraft in Aircrafts)
+                    {
+                        CCPoint hPos = HangarPositions[aircraft];
+                        writer.Write(hPos.X);
+                        writer.Write(hPos.Y);
+                        writer.Write(HangarRotations[aircraft]);
+                        aircraft.WriteToStream(writer);
+                    }
+                    // save the parts
+                    var parts = GetParts();
+                    writer.Write(parts.Count);
+                    foreach (var part in parts)
+                    {
+                        part.WriteToStream(writer);
+                    }
+                    Console.WriteLine("done writing");
                 }
-                catch (Exception)
-                { }
             }
-            using (Stream stream = await saveFile.OpenAsync(PCLStorage.FileAccess.ReadAndWrite))
+            catch (Exception)
             {
-                throw new NotImplementedException();
-                // TODO: direct serialization is sadly not working, as CocosSharp is not built for it;
-                // therefore I have to create a way for serializing just the data that actually has to be saved;
-                // that would (currently) be the aircrafts and parts;
-                // these are CCNodes though, so I have to do the same for aircrafts and especially parts (since all necessary aircraft data is probably contained in the parts);
-                IFormatter formatter = new BinaryFormatter();
-                formatter.Serialize(stream, this);
+                // try it again
+                if (tries++ < 30)
+                {
+                    Thread.Sleep(5);
+                    goto start;
+                }
             }
         }
 
-        public static async Task<HangarLayer> CreateFromFile()
+        public async Task LoadFromFile()
         {
-            HangarLayer hangar = null;
-            IFolder localFolder = FileSystem.Current.LocalStorage;
-            if (await PCLHelper.IsFileExistAsync(Constants.SAVE_NAME, localFolder))
+            bool init = true;
+            try
             {
-                // a save exists, create the hangar from the save
-                IFormatter formatter = new BinaryFormatter();
-                try
+                IFolder localFolder = FileSystem.Current.LocalStorage;
+                bool saveExists = false;
+                //CancellationTokenSource cts = new CancellationTokenSource();
+                //cts.CancelAfter(TimeSpan.FromSeconds(2));
+                //Task<bool> checkSaveTask = Task.Run(() => PCLHelper.IsFileExistAsync(Constants.SAVE_NAME, localFolder, cts.Token));
+                //saveExists = await checkSaveTask.ConfigureAwait(false);
+                saveExists = await PCLHelper.IsFileExistAsync(Constants.SAVE_NAME, localFolder).ConfigureAwait(false);
+                if (saveExists)
                 {
-                    throw new NotImplementedException();
-                    // TODO: direct serialization is sadly not working, as CocosSharp is not built for it;
-                    // therefore I have to create a way to serialize (and then here deserialize) only that data that I actually need;
-                    hangar = formatter.Deserialize(await PCLHelper.ReadStreamAsync(Constants.SAVE_NAME, localFolder)) as HangarLayer;
-                }
-                catch (Exception)
-                {
-                    // something went wrong...
+                    // a save exists, create the hangar from the save
+                    init = false;
+                    using (Stream stream = await PCLHelper.ReadStreamAsync(Constants.SAVE_NAME, localFolder).ConfigureAwait(false))
+                    {
+                        stream.Seek(0, SeekOrigin.Begin);
+                        BinaryReader reader = new BinaryReader(stream);
+                        // load the aircrafts
+                        int aircraftCount = reader.ReadInt32();
+                        for (int i = 0; i < aircraftCount; i++)
+                        {
+                            float hangarX = reader.ReadSingle();
+                            float hangarY = reader.ReadSingle();
+                            float hangarRot = reader.ReadSingle();
+                            Aircraft aircraft = Aircraft.CreateFromStream(reader);
+                            aircraft.MyRotation = hangarRot;    // because it starts in HANGAR-state
+                            AddAircraft(aircraft, new CCPoint(hangarX, hangarY), hangarRot);
+                        }
+                        // load the parts
+                        int partCount = reader.ReadInt32();
+                        for (int i = 0; i < partCount; i++)
+                        {
+                            Part part = Part.CreateFromStream(reader);
+                            AddPart(part);
+                        }
+                    }
                 }
             }
-            if (hangar == null)
+            catch (Exception)
             {
-                // no save exists, simply create a new hangar
-                hangar = new HangarLayer();
+                // something went wrong, simply initialize the hangar instead
+                Console.WriteLine("loading failed");
+                init = true;
             }
-            return hangar;
+            if (init) Init();
+        }
+
+        private void Init()
+        {
+            // add some aircrafts
+            AddAircraft(Aircraft.CreateTestAircraft(), CCPoint.Zero);
+            AddAircraft(Aircraft.CreateTestAircraft(false), CCPoint.Zero);
+            AddAircraft(Aircraft.CreateTestAircraft(), CCPoint.Zero);
+            AddAircraft(Aircraft.CreateTestAircraft(), CCPoint.Zero);
+            AddAircraft(Aircraft.CreateTestAircraft(), CCPoint.Zero);
+            // add some parts
+            for (int i = 0; i < 3; i++)
+            {
+                AddPart(new TestBody());
+                AddPart(new TestDoubleWing());
+                AddPart(new TestRotor());
+                AddPart(new TestWeapon());
+                AddPart(new TestRudder());
+            }
         }
     }
 }

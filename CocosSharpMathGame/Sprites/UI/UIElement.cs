@@ -36,13 +36,13 @@ namespace CocosSharpMathGame
             }
             // add a touch listener
             var touchListener = new CCEventListenerTouchAllAtOnce();
-            touchListener.OnTouchesBegan = (arg1, arg2) =>                             { if (Pressable && MyVisible && touchStartedOnIt(arg1[0]))                         { if (swallowTouch) arg2.StopPropogation(); Pressed = true;  onTouchesBegan(arg1, arg2); } };
-            if(onTouchesMoved!=null) touchListener.OnTouchesMoved = (arg1, arg2) =>    { if (MyVisible && Pressed)                                                        { if (swallowTouch) arg2.StopPropogation(); onTouchesMoved(arg1, arg2); } };
-            else touchListener.OnTouchesMoved = (arg1, arg2) =>                        { if (MyVisible && Pressed)                                                        { if (swallowTouch) arg2.StopPropogation(); } };
-            if (onTouchesEnded != null) touchListener.OnTouchesEnded = (arg1, arg2) => { if (MyVisible && touchMustEndOnIt ? touchIsOnIt(arg1[0]) : true && Pressed)      { if (swallowTouch) arg2.StopPropogation(); Pressed = false; onTouchesEnded(arg1, arg2); } };
-            else touchListener.OnTouchesEnded = (arg1, arg2) =>                        { if (MyVisible && Pressed)                                                        { if (swallowTouch) arg2.StopPropogation(); Pressed = false; } };
-            if (onTouchesCancelled != null) touchListener.OnTouchesCancelled = (arg1, arg2) => { if (MyVisible && Pressed)                                                { if (swallowTouch) arg2.StopPropogation(); Pressed = false; onTouchesCancelled(arg1, arg2); } };
-            else touchListener.OnTouchesCancelled = (arg1, arg2) =>                    { if (MyVisible && Pressed)                                                        { if (swallowTouch) arg2.StopPropogation(); Pressed = false; } };
+            touchListener.OnTouchesBegan = (arg1, arg2) =>                                      { if (Pressable && MyVisible && touchStartedOnIt(arg1[0]))                           { if (swallowTouch) arg2.StopPropogation(); Pressed = true;  onTouchesBegan(arg1, arg2); } };
+            if (onTouchesMoved!=null) touchListener.OnTouchesMoved = (arg1, arg2) =>            { if (MyVisible && Pressed)                                                          { if (false)/*DEBUG: if a touch-moved-event is also a touch-ended-event then the event would not reach onTouchesEnded*/ arg2.StopPropogation(); onTouchesMoved(arg1, arg2); } };
+            else touchListener.OnTouchesMoved = (arg1, arg2) =>                                 { if (MyVisible && Pressed)                                                          { if (false)/**/    arg2.StopPropogation(); } };
+            if (onTouchesEnded != null) touchListener.OnTouchesEnded = (arg1, arg2) =>          { if (MyVisible && (touchMustEndOnIt ? touchIsOnIt(arg1[0]) : true) && Pressed)      { if (swallowTouch) arg2.StopPropogation(); Pressed = false; onTouchesEnded(arg1, arg2); } };
+            else touchListener.OnTouchesEnded = (arg1, arg2) =>                                 { if (MyVisible && (touchMustEndOnIt ? touchIsOnIt(arg1[0]) : true) && Pressed)      { if (swallowTouch) arg2.StopPropogation(); Pressed = false; } };
+            if (onTouchesCancelled != null) touchListener.OnTouchesCancelled = (arg1, arg2) =>  { if (MyVisible && (touchMustEndOnIt ? touchIsOnIt(arg1[0]) : true) && Pressed)      { if (swallowTouch) arg2.StopPropogation(); Pressed = false; onTouchesCancelled(arg1, arg2); } };
+            else touchListener.OnTouchesCancelled = (arg1, arg2) =>                             { if (MyVisible && (touchMustEndOnIt ? touchIsOnIt(arg1[0]) : true) && Pressed)      { if (swallowTouch) arg2.StopPropogation(); Pressed = false; } };
             AddEventListener(touchListener, this);
         }
 

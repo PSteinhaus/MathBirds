@@ -11,11 +11,11 @@ namespace CocosSharpMathGame
     /// has no moveable camera; is drawn last (on top of everything else);
     /// holds the GUI for the PlayScene
     /// </summary>
-    public class GUILayer : CCLayerColor
+    public class GUILayer : MyLayer
     {
         internal ExecuteOrdersButton ExecuteOrdersButton { get; private set; } = new ExecuteOrdersButton();
         private PlayLayer PlayLayer { get; set; }
-        public GUILayer(PlayLayer playLayer) : base(CCColor4B.Transparent)
+        public GUILayer(PlayLayer playLayer) : base(CCColor4B.Transparent, countTouches: true)
         {
             PlayLayer = playLayer;
             AddChild(ExecuteOrdersButton);

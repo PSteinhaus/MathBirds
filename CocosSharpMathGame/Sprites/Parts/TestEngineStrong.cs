@@ -9,7 +9,7 @@ namespace CocosSharpMathGame
 {
     internal class TestEngineStrong : Part
     {
-        internal TestEngineStrong() : base("testEngine.png")
+        public TestEngineStrong() : base("testEngine.png")
         {
             // set your types
             Types = new Type[] { Type.ENGINE };

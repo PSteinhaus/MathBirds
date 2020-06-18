@@ -4,24 +4,24 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CocosSharp;
-using CocosSharpMathGame.Sprites.Parts;
 
 namespace CocosSharpMathGame
 {
-    internal class TestAircraft : Aircraft
+    internal partial class Aircraft
     {
-        internal TestAircraft(bool withWeapon=true) : base()
+        internal static Aircraft CreateTestAircraft(bool withWeapon=true)
         {
+            Aircraft aircraft = new Aircraft();
             //IsManeuverPolygonDrawn = true;
-            Body = new TestBody();
+            aircraft.Body = new TestBody();
             // mount the wings
             var wings = new TestDoubleWing();
-            Body.MountPart(wings);
+            aircraft.Body.MountPart(wings);
             // mount the rotor
-            Body.MountPart(new TestRotor());
+            aircraft.Body.MountPart(new TestRotor());
             // and the rudders
-            Body.MountPart(new TestRudder());
-            Body.MountPart(new TestRudder());
+            aircraft.Body.MountPart(new TestRudder());
+            aircraft.Body.MountPart(new TestRudder());
             //Body.MountPart(new TestEngineStrong());
             if (withWeapon)
             {
@@ -29,6 +29,7 @@ namespace CocosSharpMathGame
                 //wings.MountPart(new TestWeapon());
                 wings.MountPart(new TestWeapon());
             }
+            return aircraft;
             /*
             foreach (var part in TotalParts)
                 Console.WriteLine("Part bounding box: "+part.BoundingBoxTransformedToParent);

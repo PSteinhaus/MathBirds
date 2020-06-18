@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,7 +13,7 @@ namespace CocosSharpMathGame
     /// Aircrafts are objects in the sky that are assembled from parts
     /// which react to collision.
     /// </summary>
-    internal class Aircraft : GameObjectNode, ICollidible, IDrawNodeUser
+    internal partial class Aircraft : GameObjectNode, ICollidible, IDrawNodeUser, IStreamSaveable
     {
         internal float Health
         {
@@ -228,12 +229,12 @@ namespace CocosSharpMathGame
             Mass = 0;
             foreach (var part in TotalParts)
                 Mass += part.MassSingle;
-            Console.WriteLine("Mass: " + Mass);
+            //Console.WriteLine("Mass: " + Mass);
 
             CenterOfMass = Body != null ? Body.CenterOfMass : CCPoint.Zero;
-            Console.WriteLine("Height: " + ContentSize.Height);
-            Console.WriteLine("Width: " + ContentSize.Width);
-            Console.WriteLine("Center of mass: " + CenterOfMass);
+            //Console.WriteLine("Height: " + ContentSize.Height);
+            //Console.WriteLine("Width: " + ContentSize.Width);
+            //Console.WriteLine("Center of mass: " + CenterOfMass);
 
             MomentOfInertia = Body != null ? Body.MomentOfInertia : 0;
 
@@ -325,7 +326,7 @@ namespace CocosSharpMathGame
         /// </summary>
         internal void CalculateManeuverPolygon(bool deathPossible)
         {
-            Console.WriteLine("Calculation of maneuver polygon started.");
+            //Console.WriteLine("Calculation of maneuver polygon started.");
             const float PARTITIONS = 10; // defines how detailed each part is powered up (higher is more detailed)
             // first get all the relevant parts
             GetManeuverParts(out IEnumerable<Part> leftSideParts, out IEnumerable<Part> rightSideParts);
@@ -661,7 +662,7 @@ namespace CocosSharpMathGame
             }
             
 
-            Console.WriteLine("Algorithm found " + controlPoints.Count() + " points");
+            //Console.WriteLine("Algorithm found " + controlPoints.Count() + " points");
             //foreach (var point in controlPoints)
                 //Console.WriteLine(point);
             //Console.WriteLine(controlPoints);
@@ -904,6 +905,59 @@ namespace CocosSharpMathGame
                 return playLayer.Aircrafts;
             else
                 return null;
+        }
+        /// <summary>
+        /// Since it's very unlikely that I'll ever need more than 256 saving/loading commands I use a byte enum here.
+        /// </summary>
+        protected enum StreamEnum : byte
+        {
+            STOP = 0, AI = 1, BODY = 2
+        }
+        /// <summary>
+        /// Writes all data to the stream that is necessary for recreating this aircraft later.
+        /// </summary>
+        /// <param name="stream"></param>
+        public void WriteToStream(BinaryWriter writer)
+        {
+            // save the AI (is technically unnecessary as of now, but it gives me the flexibility to be able to save and load custom AIs later if wanted)
+            if (AI != null)
+            {
+                writer.Write((byte)StreamEnum.AI);
+                AI.WriteToStream(writer);
+            }
+            // save the body
+            // since this works by recursion all other parts (which are mounted) are saved as well
+            writer.Write((byte)StreamEnum.BODY);
+            Body.WriteToStream(writer);
+            writer.Write((byte)StreamEnum.STOP);
+        }
+
+        public static Aircraft CreateFromStream(BinaryReader reader)
+        {
+            Aircraft createdAircraft = new Aircraft();
+            bool reading = true;
+            while (reading)
+            {
+                StreamEnum nextEnum = (StreamEnum)reader.ReadByte();
+                switch(nextEnum)
+                {
+                    case StreamEnum.AI:
+                        {
+                            createdAircraft.AI = AI.CreateFromStream(reader);
+                        }
+                        break;
+                    case StreamEnum.BODY:
+                        {
+                            Part.CreateFromStream(reader, createdAircraft, isBody:true);
+                        }
+                        break;
+                    case StreamEnum.STOP:
+                    default:
+                        reading = false;
+                        break;
+                }
+            }
+            return createdAircraft;
         }
     }
 }

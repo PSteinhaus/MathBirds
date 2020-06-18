@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using CocosSharp;
-using CocosSharpMathGame.Sprites.Parts;
 
 namespace CocosSharpMathGame
 {
@@ -36,6 +36,8 @@ namespace CocosSharpMathGame
                 dragAndDropObject = value;
                 if (dragAndDropObject != null)
                 {
+                    // disable everything else while the drag and drop is in process
+                    DisableTouchBegan(disableCarousel:true);
                     if (((CCNode)dragAndDropObject).Parent != null)
                     {
                         if (((CCNode)dragAndDropObject).Layer == HangarLayer)
@@ -46,6 +48,11 @@ namespace CocosSharpMathGame
                         ((CCNode)dragAndDropObject).Parent.RemoveChild((CCNode)dragAndDropObject);
                     }
                     AddChild((CCNode)dragAndDropObject, 100);
+                }
+                else
+                {
+                    // reenable everything
+                    EnableTouchBegan(HangarLayer.State);
                 }
             }
         }
@@ -58,26 +65,15 @@ namespace CocosSharpMathGame
         {
             return VisibleBoundsWorldspace.Size.Width / HangarLayer.VisibleBoundsWorldspace.Size.Width;
         }
-        public HangarGUILayer(HangarLayer hangarLayer) : base(CCColor4B.Transparent)
+        public HangarGUILayer(HangarLayer hangarLayer) : base(CCColor4B.Transparent, countTouches:true)
         {
             HangarLayer = hangarLayer;
-            // add a touch listener
-            var touchListener = new CCEventListenerTouchAllAtOnce();
-            touchListener.OnTouchesMoved = OnTouchesMoved;
-            touchListener.OnTouchesEnded = OnTouchesEnded;
-            AddEventListener(touchListener, this);
-        }
-
-        protected override void AddedToScene()
-        {
-            base.AddedToScene();
-
-            var bounds = VisibleBoundsWorldspace;
-            PartCarousel = new NonScalingCarousel(new CCSize(bounds.Size.Width, bounds.Size.Height / 4));
+            Scroller = null;
+            PartCarousel = new NonScalingCarousel(new CCSize(Constants.COCOS_WORLD_WIDTH, Constants.COCOS_WORLD_HEIGHT / 4));
             PartCarousel.SpacingFactor = 0.3f;
             PartCarousel.MiddleChangedEvent += (sender, args) =>
             {
-                foreach(var node in PartCarousel.CollectionNode.Children)
+                foreach (var node in PartCarousel.CollectionNode.Children)
                 {
                     PartCarouselNode pNode = (PartCarouselNode)node;
                     pNode.PartCollectionNode.Pressable = false;
@@ -86,26 +82,31 @@ namespace CocosSharpMathGame
             };
             PartCarousel.IsHorizontal = false;
             PartCarousel.AnchorPoint = CCPoint.AnchorUpperLeft;
-            PartCarousel.Position = new CCPoint(0, bounds.MaxY);
+            PartCarousel.Position = new CCPoint(0, Constants.COCOS_WORLD_HEIGHT);
             foreach (Part.Type type in Enum.GetValues(typeof(Part.Type)))
             {
                 PartCarousel.AddToCollection(new PartCarouselNode(type));
             }
-            // TEST
-            for (int i=0; i<3; i++)
-            {
-                HangarLayer.AddPart(new TestBody());
-                HangarLayer.AddPart(new TestDoubleWing());
-                HangarLayer.AddPart(new TestRotor());
-                HangarLayer.AddPart(new TestWeapon());
-                HangarLayer.AddPart(new TestRudder());
-            }
             PartCarousel.Visible = false;
             AddChild(PartCarousel);
+            // add a touch listener
+            var touchListener = new CCEventListenerTouchAllAtOnce();
+            touchListener.OnTouchesBegan = base.OnTouchesBegan;
+            touchListener.OnTouchesMoved = OnTouchesMoved;
+            touchListener.OnTouchesEnded = OnTouchesEnded;
+            touchListener.OnTouchesCancelled = OnTouchesEnded;
+            AddEventListener(touchListener, this);
+        }
+
+        protected override void AddedToScene()
+        {
+            base.AddedToScene();
+
+            var bounds = VisibleBoundsWorldspace;
             // move the part carousel away as the hangar does not start there
             PartCarousel.PositionY += PartCarousel.ContentSize.Height * 1.5f;
-            HangarOptionHangar = new HangarOptionNode();
-            HangarOptionWorkshop = new HangarOptionNode();
+            HangarOptionHangar = new HangarOptionHangar();
+            HangarOptionWorkshop = new HangarOptionWorkshop();
             HangarOptionCarousel = new Carousel(new CCSize(bounds.Size.Width, HangarOptionHangar.BoundingBoxTransformedToWorld.Size.Height));
             HangarOptionCarousel.NodeAnchor = CCPoint.AnchorMiddleTop;
             AddChild(HangarOptionCarousel);
@@ -182,6 +183,7 @@ namespace CocosSharpMathGame
         internal const float MOUNT_DISTANCE = 64f;
         new private protected void OnTouchesEnded(List<CCTouch> touches, CCEvent touchEvent)
         {
+            base.OnTouchesEnded(touches, touchEvent);
             switch (touches.Count)
             {
                 case 1:
