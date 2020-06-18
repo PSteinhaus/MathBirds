@@ -14,7 +14,7 @@ namespace CocosSharpMathGame
             MakeClickable(OnTouchesBegan, onTouchesEnded: OnTouchesEnded, onTouchesCancelled: OnTouchesCancelled, touchMustEndOnIt: false, IsCircleButton: isCircleButton);
         }
 
-        internal void OnTouchesBegan(List<CCTouch> touches, CCEvent touchEvent)
+        internal virtual void OnTouchesBegan(List<CCTouch> touches, CCEvent touchEvent)
         {
             touchEvent.StopPropogation();
             if (touches.Count > 0)
@@ -24,7 +24,7 @@ namespace CocosSharpMathGame
             }
         }
 
-        internal void OnTouchesEnded(List<CCTouch> touches, CCEvent touchEvent)
+        internal virtual void OnTouchesEnded(List<CCTouch> touches, CCEvent touchEvent)
         {
             touchEvent.StopPropogation();
             if (touches.Count > 0)
@@ -39,7 +39,7 @@ namespace CocosSharpMathGame
             }
         }
 
-        internal void OnTouchesCancelled(List<CCTouch> touches, CCEvent touchEvent)
+        internal virtual void OnTouchesCancelled(List<CCTouch> touches, CCEvent touchEvent)
         {
             touchEvent.StopPropogation();
             if (touches.Count > 0)
