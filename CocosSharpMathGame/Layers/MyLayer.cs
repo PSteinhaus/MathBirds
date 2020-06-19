@@ -20,6 +20,7 @@ namespace CocosSharpMathGame
             Scroller.MoveFunction = (movePoint) => { CameraPosition -= movePoint; UpdateCamera(); };
             if (countTouches)
             {
+                TouchCount = 0; // for CountTouches
                 var touchListener = new CCEventListenerTouchAllAtOnce();
                 touchListener.OnTouchesBegan = OnTouchesBeganDoAccounting;
                 touchListener.OnTouchesEnded = OnTouchesEndedDoAccounting;
@@ -27,13 +28,13 @@ namespace CocosSharpMathGame
                 AddEventListener(touchListener, int.MinValue); // intercept everything
             }
         }
-        private int TouchCount { get; set; }
+        public bool CountsTouches { get { return TouchCount != -1; } }
+        public int TouchCount { get; private set; } = -1; // -1 means this layer does not count touches
         private protected void OnTouchesBeganDoAccounting(List<CCTouch> touches, CCEvent touchEvent)
         {
             if (touches.Count > 0)
             {
                 TouchCount += touches.Count;
-                Console.WriteLine("TouchCount: " + TouchCount);
                 // intercept all additional touches (don't allow a second touch)
                 if (TouchCount > 1)
                 {
@@ -46,7 +47,7 @@ namespace CocosSharpMathGame
             if (touches.Count > 0)
             {
                 TouchCount -= touches.Count;
-                Console.WriteLine("TouchCount: " + TouchCount);
+                touchEvent.IsStopped = false; // workaround for a bug that is created by the swallowing of a touchMoved-event in UIElement(Node)
                 // intercept the event if there are touches remaining (i.e. only the last release will be the "real" release)
                 if (TouchCount > 0)
                 {

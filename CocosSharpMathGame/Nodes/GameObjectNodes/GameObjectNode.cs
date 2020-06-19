@@ -127,6 +127,19 @@ namespace CocosSharpMathGame
             // override this function if you actually need to prepare for removal
         }
 
+        internal int TouchCount
+        {
+            get
+            {
+                foreach (var child in Scene.Children)
+                {
+                    if (child is MyLayer l && l.CountsTouches)
+                        return l.TouchCount;
+                }
+                return -1;
+            }
+        }
+
         public override void RemoveChild(CCNode child, bool cleanup = true)
         {
             if (child is IGameObject g)

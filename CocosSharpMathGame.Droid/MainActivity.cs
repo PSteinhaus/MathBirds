@@ -14,16 +14,19 @@ namespace CocosSharpMathGame.Droid
     [Activity(Label = "CocosSharpMathGame.Droid", Icon = "@drawable/icon", Theme = "@style/MainTheme", MainLauncher = true, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
     public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
 	{
+		private App app;
 		protected override void OnCreate(Bundle bundle)
 		{
 			base.OnCreate(bundle);
+			Constants.oS = Constants.OS.ANDROID;
 			global::Xamarin.Forms.Forms.Init(this, bundle);
-			LoadApplication(new App());
+			app = new App();
+			LoadApplication(app);
 		}
 
 		public override void OnBackPressed()
 		{
-			// do nothing (because a terrible bug happens for some reason if you quit the app this way...)
+			app.OnBackPressed();
 		}
 	}
 }

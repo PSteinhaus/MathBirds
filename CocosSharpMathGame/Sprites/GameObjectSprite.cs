@@ -120,6 +120,19 @@ namespace CocosSharpMathGame
             Init();
         }
 
+        internal int TouchCount
+        {
+            get
+            {
+                foreach (var child in Scene.Children)
+                {
+                    if (child is MyLayer l && l.CountsTouches)
+                        return l.TouchCount;
+                }
+                return -1;
+            }
+        }
+
         /// <summary>
         /// Returns a simple collision polygon, that is a diamond based on the ContentSize
         /// </summary>
@@ -132,6 +145,13 @@ namespace CocosSharpMathGame
         public virtual void PrepareForRemoval()
         {
             // override this function if you actually need to prepare for removal
+        }
+
+        public override void RemoveChild(CCNode child, bool cleanup = true)
+        {
+            if (child is IGameObject g)
+                g.PrepareForRemoval();
+            base.RemoveChild(child, cleanup);
         }
     }
 }

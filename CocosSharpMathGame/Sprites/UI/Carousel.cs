@@ -44,7 +44,7 @@ namespace CocosSharpMathGame
             AnchorPoint = CCPoint.AnchorLowerLeft;
             Scale = 1f;
             Scroller.MoveFunction = MoveCollectionNode;
-            MakeClickable(OnTouchesBegan, OnTouchesMoved, OnTouchesEnded, OnTouchesEnded, touchMustEndOnIt: false, swallowTouch: swallowTouches);
+            MakeClickable(touchMustEndOnIt: false, swallowTouch: swallowTouches);
         }
         public override void Update(float dt)
         {
@@ -173,7 +173,7 @@ namespace CocosSharpMathGame
             CollectionNode.ContentSize = boundingRect.Size;
         }
 
-        private protected void OnTouchesBegan(List<CCTouch> touches, CCEvent touchEvent)
+        private protected override void OnTouchesBeganUI(List<CCTouch> touches, CCEvent touchEvent)
         {
             // stop all scrolling
             Scroller.OnTouchesBegan(touches, touchEvent);
@@ -188,7 +188,7 @@ namespace CocosSharpMathGame
                     break;
             }
         }
-        private protected void OnTouchesMoved(List<CCTouch> touches, CCEvent touchEvent)
+        private protected override void OnTouchesMovedUI(List<CCTouch> touches, CCEvent touchEvent)
         {
             switch (touches.Count)
             {
@@ -203,7 +203,7 @@ namespace CocosSharpMathGame
             }
         }
 
-        private protected void OnTouchesEnded(List<CCTouch> touches, CCEvent touchEvent)
+        private protected override void OnTouchesEndedUI(List<CCTouch> touches, CCEvent touchEvent)
         {
             // start inert scrolling
             Scroller.OnTouchesEnded(touches, touchEvent);

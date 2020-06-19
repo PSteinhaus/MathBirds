@@ -15,6 +15,8 @@ using System.Runtime.Serialization.Formatters.Binary;
 using CSharpMath.Atom.Atoms;
 using System.Threading;
 using MathNet.Symbolics;
+using Xamarin.Essentials;
+using Xamarin.Forms;
 
 namespace CocosSharpMathGame
 {
@@ -310,7 +312,7 @@ namespace CocosSharpMathGame
                         totalParts.ElementAt(i).AddAction(new CCEaseIn(new CCMoveTo(TRANSITION_TIME, standardConfigurationsPositions[i]), 2.6f));
                     ModifiedAircraft.AddAction(new CCSequence(new CCDelayTime(TRANSITION_TIME), new CCCallFunc(() => { ModifiedAircraft.InWorkshopConfiguration = false; ModifiedAircraft = null; })));
                     // focus on the selected aircraft
-                    NextCameraPosition = new CCPoint(CameraPositionWorkshop.X, ModifiedAircraft.Position.Y - NextCameraSize.Height / 2);
+                    NextCameraPosition = new CCPoint(CameraPositionWorkshop.X, WorkshopPosition(ModifiedAircraft).Y - NextCameraSize.Height / 2);
                 }
                 foreach (var aircraft in Aircrafts)
                 {
@@ -380,7 +382,7 @@ namespace CocosSharpMathGame
                 if (part.Types.Contains(pNode.PartType))
                 {
                     pNode.AddPart(part);
-                    break;
+                    return;
                 }
             }
         }
@@ -462,6 +464,7 @@ namespace CocosSharpMathGame
             TimeInTransition = 0; // reset transition time
         }
 
+        private PartMount ClosestMount { get; set; } = null;
         internal void DrawInModifyAircraftState()
         {
             HighDrawNode.Clear();
@@ -469,9 +472,8 @@ namespace CocosSharpMathGame
             // draw the connections between mount points and mounted parts
             const float LINE_WIDTH = 4f;
             const float RADIUS = 5f;
-            CCColor4B LINE_COLOR = new CCColor4B(70, 70, 70);
+            CCColor4B LINE_COLOR = new CCColor4B(50, 50, 50);
             CCColor4B EMPTY_MOUNT_COLOR = new CCColor4B(150, 150, 150);
-            //CCColor4B EMPTY_MOUNT_COLOR = CCColor4B.White;
             void DrawMountCircle(CCPoint pos, CCColor4B color, CCDrawNode drawNode)
             {
                 drawNode.DrawSolidCircle(pos, RADIUS + LINE_WIDTH, color);
@@ -496,6 +498,32 @@ namespace CocosSharpMathGame
                 drawNode.DrawLine(start, middle, LINE_WIDTH, color, CCLineCap.Round);
                 drawNode.DrawLine(middle, end, LINE_WIDTH, color, CCLineCap.Round);
             }
+            var closestMountBefore = ClosestMount;
+            ClosestMount = null;
+            float minDistance = float.PositiveInfinity;
+            foreach (var part in ModifiedAircraft.TotalParts)
+            {
+                foreach (var mountPoint in part.PartMounts)
+                {
+                    var mountedPart = mountPoint.MountedPart;
+                    if (mountedPart != null)
+                    {
+                    }
+                    else if (mountPoint.Available)
+                    {
+                        // find the closest possible mount point
+                        if (GUILayer.DragAndDropObject != null && mountPoint.CanMount((Part)GUILayer.DragAndDropObject) && CCPoint.IsNear(mountPoint.PositionModifyAircraft, GUICoordinatesToHangar(((Part)GUILayer.DragAndDropObject).PositionWorldspace), HangarGUILayer.MOUNT_DISTANCE))
+                        {
+                            float distance = CCPoint.Distance(mountPoint.PositionModifyAircraft, GUICoordinatesToHangar(((Part)GUILayer.DragAndDropObject).PositionWorldspace));
+                            if (distance < minDistance)
+                            {
+                                minDistance = distance;
+                                ClosestMount = mountPoint;
+                            }
+                        }
+                    }
+                }
+            }
             foreach (var part in ModifiedAircraft.TotalParts)
             {
                 foreach (var mountPoint in part.PartMounts)
@@ -514,7 +542,7 @@ namespace CocosSharpMathGame
                         if ((GUILayer.DragAndDropObject == null && mountPoint.AllowedTypes.Contains(((PartCarouselNode)GUILayer.PartCarousel.MiddleNode).PartType)) ||
                             (GUILayer.DragAndDropObject != null && mountPoint.CanMount((Part)GUILayer.DragAndDropObject)))
                             color = EMPTY_MOUNT_COLOR;
-                        if (GUILayer.DragAndDropObject != null && mountPoint.CanMount((Part)GUILayer.DragAndDropObject) && CCPoint.IsNear(mountPoint.PositionModifyAircraft, GUICoordinatesToHangar(((Part)GUILayer.DragAndDropObject).PositionWorldspace), HangarGUILayer.MOUNT_DISTANCE))
+                        if (mountPoint == ClosestMount)
                             color = CCColor4B.White;
                         // draw a line to the where the mount point is visualized
                         DrawMountLine(mountPoint.PositionWorldspace, mountPoint.PositionModifyAircraft, color, LowDrawNode);
@@ -522,6 +550,8 @@ namespace CocosSharpMathGame
                     }
                 }
             }
+            if (ClosestMount != closestMountBefore && ClosestMount != null && Constants.oS != Constants.OS.WINDOWS)
+                Vibration.Vibrate(15);
             if (!ModifiedAircraft.TotalParts.Any())
             {
                 // if the aircraft has no body...
@@ -580,9 +610,12 @@ namespace CocosSharpMathGame
             node.Scale = GUILayer.HangarScaleToGUI() * Constants.STANDARD_SCALE;
             GUILayer.DragAndDropObject = gameObject;
         }
-        internal void AddAircraft(Aircraft aircraft, CCPoint hangarPos, float hangarRot=0f)
+        internal void AddAircraft(Aircraft aircraft, CCPoint hangarPos, float hangarRot=0f, int insertAt=0)
         {
-            Aircrafts.Add(aircraft);
+            if (insertAt == -1)
+                Aircrafts.Add(aircraft);
+            else
+                Aircrafts.Insert(insertAt, aircraft);
             AddAircraftChild(aircraft);
             HangarRotations[aircraft] = hangarRot;
             PlaceAircraft(aircraft, hangarPos);
@@ -806,7 +839,7 @@ namespace CocosSharpMathGame
                                                                                box.Size.Height - box.Size.Width * borderFactor * 2);
                                         if (reducedBoundingBox.ContainsPoint(touch.StartLocation))
                                         {
-                                            GUILayer.DragAndDropObject = aircraft;
+                                            GUILayer.SetDragAndDropObjectWithRelativeTouchPos(aircraft, touch);
                                         }
                                         else
                                         {
@@ -849,7 +882,7 @@ namespace CocosSharpMathGame
                                             if (flipped) part.Flip();
                                             part.Position = GUILayer.HangarCoordinatesToGUI(realPos);// + (flipped ? new CCPoint(0, (part.AnchorPoint.Y - 0.5f) * 8 * part.BoundingBoxTransformedToWorld.Size.Height) : CCPoint.Zero));
                                             part.Scale = GUILayer.HangarScaleToGUI() * Constants.STANDARD_SCALE;
-                                            GUILayer.DragAndDropObject = part;
+                                            GUILayer.SetDragAndDropObjectWithRelativeTouchPos(part, touch);
                                             ModifiedAircraft.InWorkshopConfiguration = true;
                                             DrawInModifyAircraftState();
                                             break;
@@ -934,7 +967,7 @@ namespace CocosSharpMathGame
             int tries = 0;
             start:
             Console.WriteLine("saving started");
-            IFolder localFolder = FileSystem.Current.LocalStorage;
+            IFolder localFolder = PCLStorage.FileSystem.Current.LocalStorage;
             IFile saveFile = null;
             // create a file, overwriting any existing file
             try
@@ -983,7 +1016,7 @@ namespace CocosSharpMathGame
             bool init = true;
             try
             {
-                IFolder localFolder = FileSystem.Current.LocalStorage;
+                IFolder localFolder = PCLStorage.FileSystem.Current.LocalStorage;
                 bool saveExists = false;
                 //CancellationTokenSource cts = new CancellationTokenSource();
                 //cts.CancelAfter(TimeSpan.FromSeconds(2));
@@ -1007,7 +1040,7 @@ namespace CocosSharpMathGame
                             float hangarRot = reader.ReadSingle();
                             Aircraft aircraft = Aircraft.CreateFromStream(reader);
                             aircraft.MyRotation = hangarRot;    // because it starts in HANGAR-state
-                            AddAircraft(aircraft, new CCPoint(hangarX, hangarY), hangarRot);
+                            AddAircraft(aircraft, new CCPoint(hangarX, hangarY), hangarRot, insertAt:-1);
                         }
                         // load the parts
                         int partCount = reader.ReadInt32();

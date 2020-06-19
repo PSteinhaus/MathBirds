@@ -11,10 +11,10 @@ namespace CocosSharpMathGame
     {
         internal Button(string textureName, bool isCircleButton) : base(textureName)
         {
-            MakeClickable(OnTouchesBegan, onTouchesEnded: OnTouchesEnded, onTouchesCancelled: OnTouchesCancelled, touchMustEndOnIt: false, IsCircleButton: isCircleButton);
+            MakeClickable(touchMustEndOnIt: false, IsCircleButton: isCircleButton);
         }
 
-        internal virtual void OnTouchesBegan(List<CCTouch> touches, CCEvent touchEvent)
+        private protected override void OnTouchesBeganUI(List<CCTouch> touches, CCEvent touchEvent)
         {
             touchEvent.StopPropogation();
             if (touches.Count > 0)
@@ -24,7 +24,7 @@ namespace CocosSharpMathGame
             }
         }
 
-        internal virtual void OnTouchesEnded(List<CCTouch> touches, CCEvent touchEvent)
+        private protected override void OnTouchesEndedUI(List<CCTouch> touches, CCEvent touchEvent)
         {
             touchEvent.StopPropogation();
             if (touches.Count > 0)
@@ -38,7 +38,7 @@ namespace CocosSharpMathGame
                 }
             }
         }
-
+        /*
         internal virtual void OnTouchesCancelled(List<CCTouch> touches, CCEvent touchEvent)
         {
             touchEvent.StopPropogation();
@@ -48,7 +48,7 @@ namespace CocosSharpMathGame
                 Color = CCColor3B.White;
             }
         }
-
+        */
         private protected abstract void ButtonEnded(CCTouch touch);
     }
 }

@@ -33,7 +33,6 @@ namespace CocosSharpMathGame
 			this.myApp = myApp;
 			// set the global variable
 			Instance = this;
-			Console.WriteLine("YES???");
 			gameView = new CocosSharpView()
 			{
 				// Notice it has the same properties as other XamarinForms Views
@@ -50,12 +49,10 @@ namespace CocosSharpMathGame
 		void HandleViewCreated(object sender, EventArgs e)
 		{
 			var gameView = sender as CCGameView;
-			Console.WriteLine("YES????");
 			if (gameView != null)
 			{
-				Console.WriteLine("YES");
 				// show the stats
-				//gameView.Stats.Enabled = true;
+				gameView.Stats.Enabled = true;
 
 				// This sets the game "world" resolution:
 				gameView.DesignResolution = new CCSizeI(Constants.COCOS_WORLD_WIDTH, Constants.COCOS_WORLD_HEIGHT);

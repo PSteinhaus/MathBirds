@@ -72,7 +72,7 @@ namespace CocosSharpMathGame
             AnchorPoint = CCPoint.AnchorLowerLeft;
             Scale = 1f;
             Scroller.MoveFunction = MoveCollectionNode;
-            MakeClickable(OnTouchesBegan, OnTouchesMoved, OnTouchesEnded, OnTouchesEnded, touchMustEndOnIt: false);
+            MakeClickable(touchMustEndOnIt: false);
         }
 
         public override void Update(float dt)
@@ -92,7 +92,6 @@ namespace CocosSharpMathGame
                 CollectionNode.AddChild(ccNode);
                 // place the node correctly
                 ccNode.AnchorPoint = CCPoint.AnchorMiddle;
-                ccNode.Position = PositionInCollection(Collection.Count() - 1);
                 float ratioWidth  = ccNode.ContentSize.Width  / BoxSize.Width;
                 float ratioHeight = ccNode.ContentSize.Height / BoxSize.Height;
                 if (ratioWidth > ratioHeight)
@@ -101,6 +100,7 @@ namespace CocosSharpMathGame
                     gameObject.FitToHeight(BoxSize.Height);
                 if (gameObject.GetTotalScale() > MaxScale)
                     ccNode.Scale = MaxScale;
+                UpdateCollectionPositions();
                 MoveCollectionNode(CCPoint.Zero);
                 return true;
             }
@@ -214,7 +214,7 @@ namespace CocosSharpMathGame
 
         internal event EventHandler<CollectionRemovalEventArgs> CollectionRemovalEvent;
 
-        private protected void OnTouchesBegan(List<CCTouch> touches, CCEvent touchEvent)
+        private protected override void OnTouchesBeganUI(List<CCTouch> touches, CCEvent touchEvent)
         {
             Console.WriteLine(Pressable);
             switch (touches.Count)
@@ -229,7 +229,7 @@ namespace CocosSharpMathGame
                     break;
             }
         }
-        private protected void OnTouchesMoved(List<CCTouch> touches, CCEvent touchEvent)
+        private protected override void OnTouchesMovedUI(List<CCTouch> touches, CCEvent touchEvent)
         {
             switch (touches.Count)
             {
@@ -275,7 +275,7 @@ namespace CocosSharpMathGame
             }
         }
 
-        private protected void OnTouchesEnded(List<CCTouch> touches, CCEvent touchEvent)
+        private protected override void OnTouchesEndedUI(List<CCTouch> touches, CCEvent touchEvent)
         {
             // start inert scrolling
             Scroller.OnTouchesEnded(touches, touchEvent);

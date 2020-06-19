@@ -136,6 +136,9 @@
     <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net47\System.ValueTuple.dll</HintPath>
     </Reference>
+    <Reference Include="Xamarin.Essentials, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Xamarin.Essentials.1.5.3.2\lib\netstandard2.0\Xamarin.Essentials.dll</HintPath>
+    </Reference>
     <Reference Include="Xamarin.Forms.Core, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Xamarin.Forms.4.5.0.657\lib\netstandard2.0\Xamarin.Forms.Core.dll</HintPath>
     </Reference>
@@ -170,7 +173,6 @@
     <Compile Include="Layers\GUILayer.cs" />
     <Compile Include="Layers\HangarGUILayer.cs" />
     <Compile Include="Layers\HangarLayer.cs" />
-    <Compile Include="Layers\MyGUILayer.cs" />
     <Compile Include="Layers\MyLayer.cs" />
     <Compile Include="Layers\PlayLayer.cs" />
     <Compile Include="MathChallenges\AddChallenge.cs" />

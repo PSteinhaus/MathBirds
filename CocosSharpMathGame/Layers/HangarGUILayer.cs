@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using CocosSharp;
+using CSharpMath.Atom.Atoms;
 
 namespace CocosSharpMathGame
 {
@@ -26,6 +27,7 @@ namespace CocosSharpMathGame
         internal GameObjectNode HangarOptionHangar { get; private protected set; }
         internal GameObjectNode HangarOptionWorkshop { get; private protected set; }
         private IGameObject dragAndDropObject;
+        private CCPoint dragAndDropRelativePos;
         internal IGameObject DragAndDropObject
         {
             get { return dragAndDropObject; }
@@ -53,8 +55,15 @@ namespace CocosSharpMathGame
                 {
                     // reenable everything
                     EnableTouchBegan(HangarLayer.State);
+                    // reset the relative position
+                    dragAndDropRelativePos = CCPoint.Zero;
                 }
             }
+        }
+        internal void SetDragAndDropObjectWithRelativeTouchPos(IGameObject g, CCTouch touch, bool changeTouchCoordToGUI=true)
+        {
+            DragAndDropObject = g;
+            dragAndDropRelativePos = ((CCNode)g).Position - (changeTouchCoordToGUI ? HangarCoordinatesToGUI(touch.Location) : touch.Location);
         }
         internal CCPoint HangarCoordinatesToGUI(CCPoint pointInHangarCoord)
         {
@@ -163,7 +172,7 @@ namespace CocosSharpMathGame
                         var touch = touches[0];
                         if (DragAndDropObject != null)
                         {
-                            ((CCNode)DragAndDropObject).Position += touch.Delta;
+                            ((CCNode)DragAndDropObject).Position = touch.Location + dragAndDropRelativePos;
                             switch (HangarLayer.State)
                             {
                                 case HangarLayer.HangarState.MODIFY_AIRCRAFT:
@@ -181,7 +190,7 @@ namespace CocosSharpMathGame
             }
         }
 
-        internal const float MOUNT_DISTANCE = 64f;
+        internal const float MOUNT_DISTANCE = 100f;
         new private protected void OnTouchesEnded(List<CCTouch> touches, CCEvent touchEvent)
         {
             base.OnTouchesEnded(touches, touchEvent);
@@ -231,35 +240,56 @@ namespace CocosSharpMathGame
                                             mounted = true;
                                         }
                                         // check if the part is currently at a mount point where it can be mounted
-                                        else
+                                        else if (!mounted)
+                                        {
+                                            var possibleMounts = new List<PartMount>();
                                             foreach (var modPart in HangarLayer.ModifiedAircraft.TotalParts)
                                             {
-                                                if (mounted) break;
                                                 foreach (var mountPoint in modPart.PartMounts)
                                                 {
                                                     if (mountPoint.Available && mountPoint.CanMount(part))
                                                         if (CCPoint.IsNear(HangarLayer.GUICoordinatesToHangar(part.PositionWorldspace), mountPoint.PositionModifyAircraft, MOUNT_DISTANCE))
                                                         {
-                                                            // better mount in non-workshop configuration
-                                                            HangarLayer.ModifiedAircraft.InWorkshopConfiguration = false;
-                                                            part.Scale = 1;
-                                                            modPart.MountPart(mountPoint, part);
-                                                            HangarLayer.ModifiedAircraft.InWorkshopConfiguration = true;
-                                                            HangarLayer.CalcBoundaries(); // the aircraft has probably changed size, so update the boundaries
-                                                            HangarLayer.DrawInModifyAircraftState();
-                                                            mounted = true;
-                                                            break;
+                                                            possibleMounts.Add(mountPoint);
                                                         }
                                                 }
                                             }
+                                            // mount at the closest possible mount point
+                                            float minDistance = float.PositiveInfinity;
+                                            PartMount closestMount = null;
+                                            foreach (var mountPoint in possibleMounts)
+                                            {
+                                                float distance = CCPoint.Distance(HangarLayer.GUICoordinatesToHangar(part.PositionWorldspace), mountPoint.PositionModifyAircraft);
+                                                if (distance < minDistance)
+                                                {
+                                                    minDistance = distance;
+                                                    closestMount = mountPoint;
+                                                }
+                                            }
+                                            if (closestMount != null)
+                                            {
+                                                // better mount in non-workshop configuration
+                                                HangarLayer.ModifiedAircraft.InWorkshopConfiguration = false;
+                                                part.Scale = 1;
+                                                closestMount.MyPart.MountPart(closestMount, part);
+                                                HangarLayer.ModifiedAircraft.InWorkshopConfiguration = true;
+                                                HangarLayer.CalcBoundaries(); // the aircraft has probably changed size, so update the boundaries
+                                                HangarLayer.DrawInModifyAircraftState();
+                                                mounted = true;
+                                            }
+                                        }
                                         // if the part has not been mounted the part is just dropped and added to the collection
                                         if (!mounted)
                                         {
                                             // first disassemble it though
+                                            // and flip it if it is flipped
                                             var totalParts = part.TotalParts;
                                             part.Disassemble();
                                             foreach (var singlePart in totalParts)
+                                            {
+                                                if (singlePart.Flipped) singlePart.Flip();
                                                 HangarLayer.AddPart(singlePart);
+                                            }
                                         }
                                     }
                                     break;

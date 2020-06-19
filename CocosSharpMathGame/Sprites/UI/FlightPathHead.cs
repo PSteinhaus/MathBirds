@@ -18,7 +18,7 @@ namespace CocosSharpMathGame
             Scale = Constants.STANDARD_SCALE;
             RadiusFactor = 1f;  // make the button a bit easier to hit
             // add a touch listener
-            MakeClickable(OnTouchesBegan, OnTouchesMoved, IsCircleButton: true);
+            MakeClickable(IsCircleButton: true);
         }
 
         internal void MoveTo(float x, float y)
@@ -27,7 +27,7 @@ namespace CocosSharpMathGame
             PositionY = y;
         }
 
-        internal void OnTouchesBegan(List<CCTouch> touches, CCEvent touchEvent)
+        private protected override void OnTouchesBeganUI(List<CCTouch> touches, CCEvent touchEvent)
         {
             touchEvent.StopPropogation();
             if (touches.Count > 0)
@@ -37,7 +37,7 @@ namespace CocosSharpMathGame
             }
         }
 
-        internal void OnTouchesMoved(List<CCTouch> touches, CCEvent touchEvent)
+        private protected override void OnTouchesMovedUI(List<CCTouch> touches, CCEvent touchEvent)
         {
             touchEvent.StopPropogation();
             if (touches.Count > 0)

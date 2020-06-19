@@ -15,6 +15,8 @@ namespace CocosSharpMathGame
         public const float PI = (float)Math.PI;
         public const float VERTEX_Z_GROUND = -10000f;
         public const string SAVE_NAME = "save.sav";
+        public enum OS { WINDOWS, ANDROID, IOS };
+        public static OS oS;    // holds a value indicating which platfrom the game is running on
 
         public static float DegreesToRadians(float degrees)
         {
