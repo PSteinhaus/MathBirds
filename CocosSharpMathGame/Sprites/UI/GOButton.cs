@@ -22,10 +22,10 @@ namespace CocosSharpMathGame
             Label.IsAntialiased = false;
             AddChild(Label);
         }
-        /*
+        
         private protected override void OnTouchesBeganUI(List<CCTouch> touches, CCEvent touchEvent)
         {
-            base.OnTouchesBegan(touches, touchEvent);
+            base.OnTouchesBeganUI(touches, touchEvent);
             if (touches.Count > 0)
             {
                 // turn darker when pressed
@@ -35,17 +35,18 @@ namespace CocosSharpMathGame
 
         private protected override void OnTouchesEndedUI(List<CCTouch> touches, CCEvent touchEvent)
         {
-            base.OnTouchesEnded(touches, touchEvent);
+            base.OnTouchesEndedUI(touches, touchEvent);
             if (touches.Count > 0)
             {
                 // turn back to original color when released
                 Label.Color = CCColor3B.White;
             }
         }
-        */
+        
         private protected override void ButtonEnded(CCTouch touch)
         {
-            // TODO: switch to the PlayLayer (i.e. start the game!)
+            // switch to the PlayLayer (i.e. start the game!)
+            ((HangarGUILayer)Layer).StartGame();
         }
     }
 }

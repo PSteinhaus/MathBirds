@@ -60,6 +60,7 @@ namespace CocosSharpMathGame
                 }
             }
         }
+        internal void StartGame() { HangarLayer.StartGame(); }
         internal void SetDragAndDropObjectWithRelativeTouchPos(IGameObject g, CCTouch touch, bool changeTouchCoordToGUI=true)
         {
             DragAndDropObject = g;
@@ -78,8 +79,8 @@ namespace CocosSharpMathGame
         {
             HangarLayer = hangarLayer;
             Scroller = null;
-            PartCarousel = new NonScalingCarousel(new CCSize(Constants.COCOS_WORLD_WIDTH, Constants.COCOS_WORLD_HEIGHT / 4));
-            PartCarousel.SpacingFactor = 0.3f;
+            PartCarousel = new NonScalingCarousel(new CCSize(Constants.COCOS_WORLD_WIDTH, Constants.COCOS_WORLD_HEIGHT / 3));
+            PartCarousel.SpacingFactor = 0.2f;
             PartCarousel.MiddleChangedEvent += (sender, args) =>
             {
                 foreach (var node in PartCarousel.CollectionNode.Children)

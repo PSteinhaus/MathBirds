@@ -225,8 +225,7 @@ namespace CocosSharpMathGame
             }
         }
 
-        // DEBUG: switch back to protected
-        internal PartMount[] PartMounts { get; set; } = new PartMount[0];
+        internal PartMount[] PartMounts { get; private protected set; } = new PartMount[0];
 
         internal void TakeDamage(float damage)
         {

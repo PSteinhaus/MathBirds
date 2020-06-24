@@ -15,6 +15,8 @@ namespace CocosSharpMathGame
 
         internal FlightPathControlNode(Aircraft aircraft)
         {
+            if (!aircraft.ControlledByPlayer)
+                Visible = false;
             Aircraft = aircraft;
             FlightPathNode = new FlightPathNode();
             FlightPathHead = new FlightPathHead();

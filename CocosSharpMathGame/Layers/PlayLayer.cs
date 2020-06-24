@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 using CocosSharp;
 using Microsoft.Xna.Framework;
+using System.Linq;
+using MathNet.Numerics.Random;
 
 namespace CocosSharpMathGame
 {
@@ -13,13 +15,13 @@ namespace CocosSharpMathGame
         {
             PLANNING, EXECUTING_ORDERS
         }
+        internal Team PlayerTeam { get; private protected set; } = new Team();
         internal GameState State { get; private set; } = GameState.PLANNING;
         public GUILayer GUILayer { get; set; }
         private CCDrawNode drawNode = new CCDrawNode();
         internal List<Aircraft> Aircrafts { get; set; } = new List<Aircraft>();
         internal List<Projectile> Projectiles { get; } = new List<Projectile>();
         internal List<IDrawNodeUser> DrawNodeUsers { get; } = new List<IDrawNodeUser>();
-        private Aircraft testAircraft;
         internal CCDrawNode HighDrawNode { get; set; }
         internal CCDrawNode LowDrawNode { get; set; }
         public PlayLayer() : base(CCColor4B.Black)
@@ -61,26 +63,119 @@ namespace CocosSharpMathGame
             touchListener.OnTouchesMoved = OnTouchesMovedMoveAndZoom;
             touchListener.OnTouchesEnded = OnTouchesEnded;
             touchListener.OnTouchesCancelled = OnTouchesEnded;
-            AddEventListener(touchListener, this);
+            AddEventListener(touchListener, int.MaxValue);
 
             // add a mouse listener
             var mouseListener = new CCEventListenerMouse();
             mouseListener.OnMouseScroll = OnMouseScrollZoom;
-            AddEventListener(mouseListener, this);
+            AddEventListener(mouseListener, int.MaxValue);
+        }
+
+        internal void InitPlayerAircrafts(List<Aircraft> playerAircrafts)
+        {
+            const float BORDER = 50f;
+            const float theta = (float)Math.PI / 8;
+            // add the aircrafts
+            foreach (var aircraft in playerAircrafts)
+            {
+                aircraft.Team = PlayerTeam;
+                aircraft.ControlledByPlayer = true;
+                AddAircraft(aircraft);
+            }
+            // place the aircrafts in "v"-formation
+            if (playerAircrafts.Count() % 2 == 1)
+            {
+                // v with pointy head (1 aircrafts)
+                var pos = CCPoint.Zero;
+                playerAircrafts[0].Position = pos;
+                float y = playerAircrafts[0].ScaledContentSize.Height / 2 + BORDER;
+                var upPos   = new CCPoint(-(float)Math.Sin(theta) * y, y);
+                var downPos = new CCPoint(upPos.X, -upPos.Y);
+                bool upside = new Random().NextBoolean();
+                for (int i=1; i<playerAircrafts.Count; i++)
+                {
+                    var aircraft = playerAircrafts[i];
+                    if (upside)
+                    {
+                        y = aircraft.ScaledContentSize.Height / 2;
+                        upPos += new CCPoint(-(float)Math.Sin(theta) * y, y);
+                        aircraft.Position = upPos;
+                        y += BORDER;
+                        upPos += new CCPoint(-(float)Math.Sin(theta) * y, y);
+                        if (upPos.X < downPos.X)
+                            upside = false;
+                    }
+                    else
+                    {
+                        y = aircraft.ScaledContentSize.Height / 2;
+                        downPos += new CCPoint(-(float)Math.Sin(theta) * y, -y);
+                        aircraft.Position = downPos;
+                        y += BORDER;
+                        downPos += new CCPoint(-(float)Math.Sin(theta) * y, -y);
+                        if (downPos.X < upPos.X)
+                            upside = true;
+                    }
+                }
+            }
+            else
+            {
+                // v with dull head (2 aircrafts)
+                float y = playerAircrafts[0].ScaledContentSize.Height / 2 + BORDER / 2;
+                var upPos   = new CCPoint(-(float)Math.Sin(theta) * y, y);
+                playerAircrafts[0].Position = upPos;
+                y      += playerAircrafts[0].ScaledContentSize.Height / 2 + BORDER;
+                upPos       = new CCPoint(-(float)Math.Sin(theta) * y, y);
+
+                y       = playerAircrafts[1].ScaledContentSize.Height / 2 + BORDER / 2;
+                var downPos = new CCPoint(-(float)Math.Sin(theta) * y, -y);
+                playerAircrafts[1].Position = downPos;
+                y      += playerAircrafts[1].ScaledContentSize.Height / 2 + BORDER;
+                downPos     = new CCPoint(-(float)Math.Sin(theta) * y, -y);
+
+                bool upside = new Random().NextBoolean();
+                for (int i = 2; i < playerAircrafts.Count; i++)
+                {
+                    var aircraft = playerAircrafts[i];
+                    if (upside)
+                    {
+                        y = aircraft.ScaledContentSize.Height / 2;
+                        upPos += new CCPoint(-(float)Math.Sin(theta) * y, y);
+                        aircraft.Position = upPos;
+                        y += BORDER;
+                        upPos += new CCPoint(-(float)Math.Sin(theta) * y, y);
+                        if (upPos.X < downPos.X)
+                            upside = false;
+                    }
+                    else
+                    {
+                        y = aircraft.ScaledContentSize.Height / 2;
+                        downPos += new CCPoint(-(float)Math.Sin(theta) * y, -y);
+                        aircraft.Position = downPos;
+                        y += BORDER;
+                        downPos += new CCPoint(-(float)Math.Sin(theta) * y, -y);
+                        if (downPos.X < upPos.X)
+                            upside = true;
+                    }
+                }
+            }
+            CameraPosition = -(CCPoint)CameraSize / 2;
+            UpdateCamera();
+            StartPlanningPhase();
         }
 
         protected override void AddedToScene()
         {
-            
             base.AddedToScene();
             var bounds = VisibleBoundsWorldspace;
-            testAircraft = Aircraft.CreateTestAircraft();
+            /*
+            var testAircraft = Aircraft.CreateTestAircraft();
             var playerTeam = new Team();
             testAircraft.Team = playerTeam;
             testAircraft.ControlledByPlayer = true;
             AddAircraft(testAircraft);
             testAircraft.MoveBy(bounds.Size.Width / 2, bounds.Size.Height / 4);
             testAircraft.RotateBy(-90f);
+            */
             
             // add two other planes from different teams
             var secondAircraft = Aircraft.CreateTestAircraft();
@@ -120,8 +215,6 @@ namespace CocosSharpMathGame
             AddAircraft(fifthAircraft);
             fifthAircraft.MoveBy(bounds.Size.Width * 1.3f, bounds.Size.Height * 0.2f);
             fifthAircraft.RotateBy(-20f);
-
-            StartPlanningPhase();
 
             //ExecuteOrdersButton.Position = new CCPoint(bounds.MinX+ExecuteOrdersButton.ScaledContentSize.Width, bounds.MaxY- ExecuteOrdersButton.ScaledContentSize.Height);
             //AddChild(ExecuteOrdersButton);

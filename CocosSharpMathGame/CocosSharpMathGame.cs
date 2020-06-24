@@ -29,10 +29,6 @@ namespace CocosSharpMathGame
 		protected override void OnResume ()
 		{
 			// Handle when your app resumes
-			// DEBUG: textures are lost when app is closed with back button
-			//		  thought this could fix it, but it doesn't
-			//UIElement.spriteSheet = new CCSpriteSheet("ui.plist");
-			//Part.spriteSheet = new CCSpriteSheet("parts.plist");
 		}
 
 		public void OnBackPressed()

@@ -17,6 +17,7 @@ using System.Threading;
 using MathNet.Symbolics;
 using Xamarin.Essentials;
 using Xamarin.Forms;
+using System.IO.Compression;
 
 namespace CocosSharpMathGame
 {
@@ -71,8 +72,43 @@ namespace CocosSharpMathGame
             mouseListener.OnMouseScroll = OnMouseScrollZoom;
             AddEventListener(mouseListener, this);
 
+            CameraSizeHangar = new CCSize(MaxCameraWidth, MaxCameraHeight) / 4;
+            CameraPositionHangar = new CCPoint(-CameraSizeHangar.Width / 2, -CameraSizeHangar.Height / 2);
+
             // Load the saved state
             LoadFromFile().Wait();
+
+            CameraSize = CameraSizeHangar;
+            CameraPosition = CameraPositionHangar;
+        }
+
+        internal List<Aircraft> TakeoffAircrafts
+        {
+            get
+            {
+                return GUILayer.TakeoffCollectionNode.Collection.Cast<Aircraft>().ToList();
+            }
+        }
+        /// <summary>
+        /// Saves and removes the HangarLayer and creates and adds the PlayLayer.
+        /// </summary>
+        internal void StartGame()
+        {
+            var playLayer = new PlayLayer();
+            var activeAircrafts = new List<Aircraft>(TakeoffAircrafts);
+            // remove the active aircrafts from the hangar
+            foreach (var aircraft in activeAircrafts)
+                RemoveAircraft(aircraft);
+
+            var parent = Parent;
+            Parent.RemoveChild(GUILayer);
+            Parent.RemoveChild(this);
+            // save the hangar (concurrently)
+            var saveTask = SaveToFile();
+            parent.AddChild(playLayer.GUILayer);
+            parent.AddChild(playLayer, zOrder: int.MinValue);
+            // place the aircrafts and add them as children
+            playLayer.InitPlayerAircrafts(activeAircrafts);
         }
 
         protected override void AddedToScene()
@@ -82,8 +118,7 @@ namespace CocosSharpMathGame
             {
                 CalcBoundaries();
             }
-            CameraSize = new CCSize(MaxCameraWidth, MaxCameraHeight) / 2;
-            CameraPosition = new CCPoint(-CameraSize.Width / 2, -CameraSize.Height / 2);
+            CameraPosition = CameraPosition;
             UpdateCamera();
             CreateActions();
         }
@@ -362,7 +397,8 @@ namespace CocosSharpMathGame
                 ModifiedAircraft.AddAction(new CCSequence(new CCDelayTime(TRANSITION_TIME*2), new CCCallFunc(() => { ModifiedAircraft.InWorkshopConfiguration = true; })));
                 NextCameraSize = new CCSize(newCamWidth, CameraSize.Height * newCamWidth / CameraSize.Width);
                 // focus on the selected aircraft
-                NextCameraPosition = ModifiedAircraft.Position - ((CCPoint)NextCameraSize / 2);
+                // (the last summand is there to take the space into account which is taken by the part carousel)
+                NextCameraPosition = ModifiedAircraft.Position - ((CCPoint)NextCameraSize / 2) + new CCPoint(0, NextCameraSize.Height / 6);
                 // this special transition takes twice the time
             }
             TransistionAction = new CCSequence(new CCDelayTime(TransitionTime), new CCCallFunc(() => FinalizeTransition(state)));
@@ -551,7 +587,7 @@ namespace CocosSharpMathGame
                 }
             }
             if (ClosestMount != closestMountBefore && ClosestMount != null && Constants.oS != Constants.OS.WINDOWS)
-                Vibration.Vibrate(15);
+                Vibration.Vibrate(20);
             if (!ModifiedAircraft.TotalParts.Any())
             {
                 // if the aircraft has no body...
@@ -621,15 +657,17 @@ namespace CocosSharpMathGame
             PlaceAircraft(aircraft, hangarPos);
         }
 
-        /// <summary>
-        /// WARNING: the following function assumes the aircraft is a child of the HangarLayer and that IT IS NOT CONTAINED ANYWHERE ELESE
-        /// </summary>
-        /// <param name="aircraft"></param>
         internal void RemoveAircraft(Aircraft aircraft)
         {
             Aircrafts.Remove(aircraft);
-            aircraft.PrepareForRemoval();
-            RemoveChild(aircraft);
+            if (aircraft.Parent == this)
+            {
+                RemoveChild(aircraft);
+            }
+            else if (aircraft.Parent == GUILayer.TakeoffCollectionNode)
+            {
+                GUILayer.TakeoffCollectionNode.RemoveFromCollection(aircraft);
+            }
         }
 
         internal void AddAircraftChild(Aircraft aircraft)
@@ -961,7 +999,11 @@ namespace CocosSharpMathGame
             base.OnTouchesEnded(touches, touchEvent);
             Scroller.ListenForTouches = true;
         }
-
+        
+        private enum StreamEnum : byte
+        {
+            STOP, AIRCRAFTS, PARTS, CAMINFO
+        }
         public async Task SaveToFile()
         {
             int tries = 0;
@@ -975,10 +1017,11 @@ namespace CocosSharpMathGame
                 Console.WriteLine("overwriting");
                 saveFile = await localFolder.CreateFileAsync(Constants.SAVE_NAME, CreationCollisionOption.ReplaceExisting).ConfigureAwait(false);
                 Console.WriteLine("done overwriting");
-                using (Stream stream = await saveFile.OpenAsync(PCLStorage.FileAccess.ReadAndWrite).ConfigureAwait(false))
+                using (MemoryStream mStream = new MemoryStream())
                 {
-                    Console.WriteLine("writing save!");
-                    BinaryWriter writer = new BinaryWriter(stream);
+                    BinaryWriter writer = new BinaryWriter(mStream);
+                    // start aircraft section
+                    writer.Write((byte)StreamEnum.AIRCRAFTS);
                     // save how many aircrafts there are
                     writer.Write(Aircrafts.Count);
                     // save the aircrafts
@@ -990,6 +1033,8 @@ namespace CocosSharpMathGame
                         writer.Write(HangarRotations[aircraft]);
                         aircraft.WriteToStream(writer);
                     }
+                    // start part section
+                    writer.Write((byte)StreamEnum.PARTS);
                     // save the parts
                     var parts = GetParts();
                     writer.Write(parts.Count);
@@ -997,7 +1042,35 @@ namespace CocosSharpMathGame
                     {
                         part.WriteToStream(writer);
                     }
-                    Console.WriteLine("done writing");
+                    // start cam info section
+                    writer.Write((byte)StreamEnum.CAMINFO);
+                    if (State == HangarState.HANGAR)
+                    {
+                        writer.Write(CameraPosition.X);
+                        writer.Write(CameraPosition.Y);
+                        writer.Write(CameraSize.Width);
+                        writer.Write(CameraSize.Height);
+                    }
+                    else
+                    {
+                        writer.Write(CameraPositionHangar.X);
+                        writer.Write(CameraPositionHangar.Y);
+                        writer.Write(CameraSizeHangar.Width);
+                        writer.Write(CameraSizeHangar.Height);
+                    }
+
+                    writer.Write((byte)StreamEnum.STOP);
+
+                    using (Stream stream = await saveFile.OpenAsync(PCLStorage.FileAccess.ReadAndWrite).ConfigureAwait(false))
+                    {
+                        Console.WriteLine("writing save!");
+                        using (GZipStream compressionStream = new GZipStream(stream, CompressionMode.Compress))
+                        {
+                            mStream.Seek(0, SeekOrigin.Begin);
+                            mStream.CopyTo(compressionStream);
+                        }
+                        Console.WriteLine("done writing");
+                    }
                 }
             }
             catch (Exception)
@@ -1018,41 +1091,75 @@ namespace CocosSharpMathGame
             {
                 IFolder localFolder = PCLStorage.FileSystem.Current.LocalStorage;
                 bool saveExists = false;
-                //CancellationTokenSource cts = new CancellationTokenSource();
-                //cts.CancelAfter(TimeSpan.FromSeconds(2));
-                //Task<bool> checkSaveTask = Task.Run(() => PCLHelper.IsFileExistAsync(Constants.SAVE_NAME, localFolder, cts.Token));
-                //saveExists = await checkSaveTask.ConfigureAwait(false);
                 saveExists = await PCLHelper.IsFileExistAsync(Constants.SAVE_NAME, localFolder).ConfigureAwait(false);
                 if (saveExists)
                 {
                     // a save exists, create the hangar from the save
                     init = false;
-                    using (Stream stream = await PCLHelper.ReadStreamAsync(Constants.SAVE_NAME, localFolder).ConfigureAwait(false))
+                    using (MemoryStream decompressedStream = new MemoryStream())
                     {
-                        stream.Seek(0, SeekOrigin.Begin);
-                        BinaryReader reader = new BinaryReader(stream);
-                        // load the aircrafts
-                        int aircraftCount = reader.ReadInt32();
-                        for (int i = 0; i < aircraftCount; i++)
+                        using (Stream stream = await PCLHelper.ReadStreamAsync(Constants.SAVE_NAME, localFolder).ConfigureAwait(false))
                         {
-                            float hangarX = reader.ReadSingle();
-                            float hangarY = reader.ReadSingle();
-                            float hangarRot = reader.ReadSingle();
-                            Aircraft aircraft = Aircraft.CreateFromStream(reader);
-                            aircraft.MyRotation = hangarRot;    // because it starts in HANGAR-state
-                            AddAircraft(aircraft, new CCPoint(hangarX, hangarY), hangarRot, insertAt:-1);
+                            using (GZipStream decompressionStream = new GZipStream(stream, CompressionMode.Decompress))
+                            {
+                                decompressionStream.CopyTo(decompressedStream);
+                            }
                         }
-                        // load the parts
-                        int partCount = reader.ReadInt32();
-                        for (int i = 0; i < partCount; i++)
+                        decompressedStream.Seek(0, SeekOrigin.Begin);
+                        BinaryReader reader = new BinaryReader(decompressedStream);
+                        bool reading = true;
+                        while (reading)
                         {
-                            Part part = Part.CreateFromStream(reader);
-                            AddPart(part);
+                            StreamEnum nextEnum = (StreamEnum)reader.ReadByte();
+                            switch(nextEnum)
+                            {
+                                case StreamEnum.AIRCRAFTS:
+                                    {
+                                        // load the aircrafts
+                                        int aircraftCount = reader.ReadInt32();
+                                        for (int i = 0; i < aircraftCount; i++)
+                                        {
+                                            float hangarX = reader.ReadSingle();
+                                            float hangarY = reader.ReadSingle();
+                                            float hangarRot = reader.ReadSingle();
+                                            Aircraft aircraft = Aircraft.CreateFromStream(reader);
+                                            aircraft.MyRotation = hangarRot;    // because it starts in HANGAR-state
+                                            AddAircraft(aircraft, new CCPoint(hangarX, hangarY), hangarRot, insertAt: -1);
+                                        }
+                                    }
+                                    break;
+                                case StreamEnum.PARTS:
+                                    {
+                                        // load the parts
+                                        int partCount = reader.ReadInt32();
+                                        for (int i = 0; i < partCount; i++)
+                                        {
+                                            Part part = Part.CreateFromStream(reader);
+                                            AddPart(part);
+                                        }
+                                    }
+                                    break;
+                                case StreamEnum.CAMINFO:
+                                    {
+                                        // load the hangar camera
+                                        float camX = reader.ReadSingle();
+                                        float camY = reader.ReadSingle();
+                                        CameraPositionHangar = new CCPoint(camX, camY);
+                                        float camWidth  = reader.ReadSingle();
+                                        float camHeight = reader.ReadSingle();
+                                        CameraSizeHangar = new CCSize(camWidth, camHeight);
+                                    }
+                                    break;
+                                default:
+                                case StreamEnum.STOP:
+                                    reading = false;
+                                    break;
+                            }
                         }
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 // something went wrong, simply initialize the hangar instead
                 Console.WriteLine("loading failed");
@@ -1078,6 +1185,9 @@ namespace CocosSharpMathGame
                 AddPart(new TestWeapon());
                 AddPart(new TestRudder());
             }
+            // update the camera
+            CalcBoundaries();
+            UpdateCamera();
         }
     }
 }

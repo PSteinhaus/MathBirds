@@ -176,7 +176,7 @@ namespace CocosSharpMathGame
             CollectionNode.PositionY = Constants.Clamp(CollectionNode.PositionY + movement.Y, MinY, MaxY);
         }
 
-        protected void RemoveFromCollection(IGameObject gameObject, CCTouch touchOnRemove=null)
+        internal void RemoveFromCollection(IGameObject gameObject)
         {
             var node = (CCNode)gameObject;
             Collection.Remove(gameObject);
@@ -185,6 +185,12 @@ namespace CocosSharpMathGame
             node.Scale = Constants.STANDARD_SCALE;
             // reset the anchor
             node.AnchorPoint = gameObject.NormalAnchorPoint;
+            MoveCollectionNode(CCPoint.Zero);
+        }
+        protected void RemoveFromCollection(IGameObject gameObject, CCTouch touchOnRemove=null)
+        {
+            RemoveFromCollection(gameObject);
+            var node = (CCNode)gameObject;
             // raise an event
             var handler = CollectionRemovalEvent;
             if (handler != null)
@@ -194,7 +200,6 @@ namespace CocosSharpMathGame
                 args.TouchOnRemove = touchOnRemove;
                 handler(this, args);
             }
-            MoveCollectionNode(CCPoint.Zero);
         }
 
         private void UpdateCollectionPositions()

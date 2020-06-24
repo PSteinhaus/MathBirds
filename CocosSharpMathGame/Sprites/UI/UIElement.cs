@@ -77,9 +77,9 @@ namespace CocosSharpMathGame
             if (MyVisible && (TouchMustEndOnIt ? TouchIsOnIt(touches[0]) : true) && Pressed)
             {
                 if (SwallowTouch) touchEvent.StopPropogation();
-                Pressed = false;
                 OnTouchesEndedUI(touches, touchEvent);
             }
+            Pressed = false;
         }
         /// <summary>
         /// Override this to do work when pressed and released

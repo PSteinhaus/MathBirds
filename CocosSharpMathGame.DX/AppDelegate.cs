@@ -61,7 +61,7 @@ namespace CocosSharpMathGame.DX
         public async override void ApplicationDidEnterBackground(CCApplication application)
         {
             application.Paused = true;
-            if (CurrentHangarLayer != null && FinishedLoading)
+            if (CurrentHangarLayer != null && CurrentHangarLayer.Parent != null && FinishedLoading)
                 await CurrentHangarLayer.SaveToFile();
         }
 

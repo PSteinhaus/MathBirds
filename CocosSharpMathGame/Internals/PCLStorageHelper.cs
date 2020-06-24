@@ -18,9 +18,9 @@ namespace CocosSharpMathGame
             {
                 folderexist = await folder.CheckExistsAsync(fileName, ct).ConfigureAwait(false);
             }
-            catch (OperationCanceledException)
+            catch (Exception)
             {
-                // the operation was cancelled (took to long, or something else)
+                // the operation was cancelled (took too long, or something else)
                 return false;
             }
             // already run at least once, don't overwrite what's there  

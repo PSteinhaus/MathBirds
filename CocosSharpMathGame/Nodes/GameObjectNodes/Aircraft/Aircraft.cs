@@ -76,7 +76,7 @@ namespace CocosSharpMathGame
             set
             {
                 controlledByPlayer = value;
-                if (!controlledByPlayer)
+                if (!controlledByPlayer && FlightPathControlNode!=null)
                     FlightPathControlNode.Visible = false;
             }
         }
@@ -831,7 +831,6 @@ namespace CocosSharpMathGame
 
         internal Aircraft() : base()
         {
-            FlightPathControlNode = new FlightPathControlNode(this);
             ControlledByPlayer = false;
             PartsChanged();
             // DEBUG
@@ -847,6 +846,13 @@ namespace CocosSharpMathGame
             FlightPathControlNode.MoveHeadToClosestPointInsideManeuverPolygon(position);
         }
 
+        internal void ResetFlightPathNode()
+        {
+            FlightPathControlNode.ResetHeadPosition();
+            // DEBUG
+            Console.WriteLine("ZOrder: " + FlightPathControlNode.ZOrder);
+        }
+
         internal void ChangeColor(CCColor3B newColor)
         {
             foreach (var part in TotalParts)
@@ -859,6 +865,7 @@ namespace CocosSharpMathGame
             // DrawNodes have no Size, therefore we need to position them correctly at the center of the node
             maneuverPolygonDrawNode.Position = new CCPoint(ContentSize.Width/2, ContentSize.Height / 2);
             // add the FlightPathControlNode as a brother below you
+            FlightPathControlNode = new FlightPathControlNode(this);
             if (Parent is PlayLayer pl)
                 pl.AddChild(FlightPathControlNode, ZOrder - 1);
         }
@@ -868,7 +875,7 @@ namespace CocosSharpMathGame
         public override void PrepareForRemoval()
         {
             // remove your brothers (FlightPathControlNode & CloudTailNode)
-            if (Parent != null)
+            if (Parent != null && Parent is PlayLayer)
             {
                 Parent.RemoveChild(FlightPathControlNode);
                 if (HighNodeWhenDead?.Parent == Parent)
