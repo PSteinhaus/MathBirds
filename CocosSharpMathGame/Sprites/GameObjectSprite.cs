@@ -108,6 +108,14 @@ namespace CocosSharpMathGame
             get { return BoundingBoxTransformedToWorld.Size.Width * BoundingBoxTransformedToWorld.Size.Height; }
         }
 
+        public void FitToBox(CCSize box)
+        {
+            if (ContentSize.Width / box.Width > ContentSize.Height / box.Height)
+                FitToWidth(box.Width);
+            else
+                FitToHeight(box.Height);
+        }
+
         private void Init()
         {
             IsAntialiased = false;

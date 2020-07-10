@@ -24,6 +24,14 @@ namespace CocosSharpMathGame
                 }
             }
         }
+
+        internal void ClearCollection()
+        {
+            CollectionNode.RemoveAllChildren();
+            Collection.Clear();
+            UpdatePositionsInCollection();
+        }
+
         internal List<IGameObject> Collection { get; private protected set; } = new List<IGameObject>();
         internal CCPoint NodeAnchor { get; set; } = CCPoint.AnchorMiddle;
         internal float ScaleFactor = Constants.STANDARD_SCALE;
@@ -45,6 +53,14 @@ namespace CocosSharpMathGame
             Scale = 1f;
             Scroller.MoveFunction = MoveCollectionNode;
             MakeClickable(touchMustEndOnIt: false, swallowTouch: swallowTouches);
+            // DEBUG:
+            DrawNode = new CCDrawNode();
+        }
+        CCDrawNode DrawNode;
+        protected override void AddedToScene()
+        {
+            base.AddedToScene();
+            //Parent.AddChild(DrawNode, 99999999);
         }
         public override void Update(float dt)
         {
@@ -64,6 +80,8 @@ namespace CocosSharpMathGame
             // move so that the distance decreases
             var center = BoundingBoxTransformedToWorld.Center;
             CCPoint vector = center - MiddleNode.BoundingBoxTransformedToWorld.Center;
+            //DrawNode.Clear();
+            //DrawNode.DrawSolidCircle(MiddleNode.BoundingBoxTransformedToWorld.Center, 10f, CCColor4B.Green);
             if (vector.Length > 1f)
                 MoveCollectionNode(vector / 10);
             else
@@ -115,18 +133,19 @@ namespace CocosSharpMathGame
             }
         }
 
+        internal float MinYMod = 0f;
         internal float MinY
         {
             get
             {
-                return IsHorizontal ? ContentSize.Height : ContentSize.Height / 2;
+                return (IsHorizontal ? ContentSize.Height : ContentSize.Height / 2) + MinYMod;
             }
         }
         internal float MaxY
         {
             get
             {
-                return IsHorizontal ? MinY : ContentSize.Height / 2 + CollectionNode.ContentSize.Height;
+                return IsHorizontal ? MinY : MinY + CollectionNode.ContentSize.Height;
             }
         }
 
@@ -142,18 +161,20 @@ namespace CocosSharpMathGame
                 MiddleNode = ccNode;
         }
 
-        protected void RemoveFromCollection(IGameObject gameObject)
+        internal CCPoint RemoveFromCollection(IGameObject gameObject)
         {
             CollectionNode.RemoveChild((CCNode)gameObject);
             Collection.Remove(gameObject);
-            UpdatePositionsInCollection();
+            return UpdatePositionsInCollection();
         }
 
         internal event EventHandler MiddleChangedEvent;
 
-        internal void UpdatePositionsInCollection()
+        internal CCPoint UpdatePositionsInCollection()
         {
-            if (!Collection.Any()) return;
+            CCPoint referencePoint;
+            if (!Collection.Any()) return CCPoint.Zero;
+            else referencePoint = ((CCNode)Collection.First()).Position;
             CCPoint position = CCPoint.Zero;
             foreach (var gameObject in Collection)
             {
@@ -171,6 +192,8 @@ namespace CocosSharpMathGame
                 node.Position -= boundingRect.LowerLeft;
             }
             CollectionNode.ContentSize = boundingRect.Size;
+            // return the change
+            return ((CCNode)Collection.First()).Position - referencePoint;
         }
 
         private protected override void OnTouchesBeganUI(List<CCTouch> touches, CCEvent touchEvent)

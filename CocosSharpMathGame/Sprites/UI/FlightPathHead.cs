@@ -13,6 +13,7 @@ namespace CocosSharpMathGame
     /// </summary>
     internal class FlightPathHead : UIElement
     {
+        internal const float MAX_DISTANCE_FROM_CENTER = 10000;
         internal FlightPathHead() : base("flightPathHead.png")
         {
             Scale = Constants.STANDARD_SCALE;
@@ -34,6 +35,42 @@ namespace CocosSharpMathGame
             {
                 var touch = touches[0];
                 // TODO: show alternative orders (super-speed, shield, ...)
+            }
+        }
+        /// <summary>
+        /// Returns the geometrical center of mass of all the flight path heads of the player
+        /// </summary>
+        /// <returns></returns>
+        internal CCPoint PlayerHeadCenter()
+        {
+            var center = CCPoint.Zero;
+            if (Layer is PlayLayer pl)
+            {
+                foreach (var aircraft in pl.PlayerAircrafts)
+                {
+                    center += aircraft.FlightPathHeadPos;
+                }
+                center /= pl.PlayerAircrafts.Count;
+            }
+            return center;
+        }
+
+        internal void EnsureProximityToOtherPlayerHeads()
+        {
+            bool testing = true;
+            while (testing)
+            {
+                // additionally calc the geometrical center of mass (of all player flightPathHeads)
+                CCPoint headCenter = PlayerHeadCenter();
+                // and make sure that you're close enough to it
+                CCPoint vecToCenter = headCenter - Position;
+                float delta = vecToCenter.Length - MAX_DISTANCE_FROM_CENTER;
+                if (delta > 0)
+                {
+                    Position += CCPoint.Normalize(vecToCenter) * (delta + 5f);
+                }
+                else
+                    testing = false;
             }
         }
 

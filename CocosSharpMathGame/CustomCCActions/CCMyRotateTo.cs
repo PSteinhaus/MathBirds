@@ -48,11 +48,11 @@ namespace CocosSharpMathGame
             DiffAngle = Constants.AngleFromToDeg(StartAngle, FinalAngle);
         }
 
-        public override void Update(float deltaTime)
+        public override void Update(float progress)
         {
             if (Target != null)
             {
-                var elapsedRotation = DiffAngle * Math.Min(Elapsed/Duration, 1);
+                var elapsedRotation = DiffAngle * Math.Min(progress, 1);
                 ((IGameObject)Target).MyRotation = StartAngle + elapsedRotation;
             }
         }

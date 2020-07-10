@@ -1,4 +1,5 @@
 ﻿using CocosSharp;
+using MathNet.Numerics.Random;
 using System;
 
 namespace CocosSharpMathGame
@@ -154,7 +155,12 @@ namespace CocosSharpMathGame
         public static CCPoint RandomPointBoxnear(CCPoint point, float range)
         {
             var rng = new Random();
-            return point + new CCPoint((float)rng.NextDouble() * range, (float)rng.NextDouble() * range);
+            return point + new CCPoint(rng.NextBoolean() ? 1 : -1 * (float)rng.NextDouble() * range, rng.NextBoolean() ? 1 : -1 * (float)rng.NextDouble() * range);
+        }
+
+        public static CCPoint RandomPointBoxnear(CCPoint point, float range, Random rng)
+        {
+            return point + new CCPoint((rng.NextBoolean() ? 1 : -1) * (float)rng.NextDouble() * range, (rng.NextBoolean() ? 1 : -1) * (float)rng.NextDouble() * range);
         }
     }
 }

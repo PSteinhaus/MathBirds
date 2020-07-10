@@ -359,7 +359,7 @@ namespace CocosSharpMathGame
         /// <summary>
         /// searches recursively and returns all parts that are mounted on this part including itself
         /// </summary>
-        internal IEnumerable<Part> TotalParts
+        internal List<Part> TotalParts
         {
             get
             {

@@ -12,9 +12,9 @@ namespace CocosSharpMathGame
     {
         internal TestProjectile()
         {
-            Velocity = 1000f;
-            LifeTime = 1.5f;
-            Damage = 1f;
+            Velocity = 2000f;
+            LifeTime = 1.0f;
+            Damage = 2f;
         }
 
         internal override void CollideWithAircraft(Aircraft aircraft)

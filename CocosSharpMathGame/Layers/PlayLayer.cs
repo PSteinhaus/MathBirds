@@ -19,7 +19,9 @@ namespace CocosSharpMathGame
         internal GameState State { get; private set; } = GameState.PLANNING;
         public GUILayer GUILayer { get; set; }
         private CCDrawNode drawNode = new CCDrawNode();
-        internal List<Aircraft> Aircrafts { get; set; } = new List<Aircraft>();
+        internal List<Aircraft> Aircrafts { get; private protected set; } = new List<Aircraft>();
+        internal List<Aircraft> PlayerAircrafts { get; private protected set; }
+        internal List<Aircraft> DownedAircrafts { get; private protected set; } = new List<Aircraft>();
         internal List<Projectile> Projectiles { get; } = new List<Projectile>();
         internal List<IDrawNodeUser> DrawNodeUsers { get; } = new List<IDrawNodeUser>();
         internal CCDrawNode HighDrawNode { get; set; }
@@ -82,6 +84,7 @@ namespace CocosSharpMathGame
                 aircraft.ControlledByPlayer = true;
                 AddAircraft(aircraft);
             }
+            PlayerAircrafts = playerAircrafts;
             // place the aircrafts in "v"-formation
             if (playerAircrafts.Count() % 2 == 1)
             {
@@ -242,7 +245,17 @@ namespace CocosSharpMathGame
         internal void RemoveAircraft(Aircraft aircraft)
         {
             Aircrafts.Remove(aircraft);
-            aircraft.PrepareForRemoval();
+            aircraft.VertexZ = 0f;  // reset vertexZ
+            if (PlayerAircrafts.Contains(aircraft))
+            {
+                PlayerAircrafts.Remove(aircraft);
+                // check if the player now has lost all his aircrafts
+                if (!PlayerAircrafts.Any())
+                {
+                    // and if true stop the PlayLayer and enter the WreckageLayer
+                    EnterWreckageLayer();
+                }
+            }
             RemoveChild(aircraft);
         }
 
@@ -266,14 +279,50 @@ namespace CocosSharpMathGame
             State = GameState.EXECUTING_ORDERS;
             TimeLeftExecutingOrders = Constants.TURN_DURATION;
         }
+        internal bool PlayerIsAlive
+        {
+            get
+            {
+                bool alive = false;
+                foreach (var aircraft in PlayerAircrafts)
+                    if (aircraft.MyState.Equals(Aircraft.State.ACTIVE))
+                    {
+                        alive = true;
+                        break;
+                    }
+                return alive;
+            }
+        }
         internal void StartPlanningPhase()
         {
             State = GameState.PLANNING;
             // prepare the aircrafts
             foreach (var aircraft in Aircrafts)
                 aircraft.PrepareForPlanningPhase();
-            // make the ExecuteOrderButton visible again
-            GUILayer.ExecuteOrdersButton.Visible = true;
+            // only go back to normal if the player is still alive
+            if (PlayerIsAlive)
+            {
+                // make the ExecuteOrderButton visible again
+                GUILayer.ExecuteOrdersButton.Visible = true;
+            }
+            else
+            {
+                State = GameState.EXECUTING_ORDERS;
+            }
+        }
+
+        private protected void EnterWreckageLayer()
+        {
+            var wreckageLayer = new WreckageLayer();
+            var parent = Parent;
+            RemoveAllListeners();
+            GUILayer.RemoveAllListeners();
+            Parent.RemoveChild(GUILayer);
+            Parent.RemoveChild(this);
+            parent.AddChild(wreckageLayer.GUILayer);
+            parent.AddChild(wreckageLayer, zOrder: int.MinValue);
+            // place the aircrafts and add them as children
+            wreckageLayer.InitWreckage(DownedAircrafts);
         }
 
         public override void Update(float dt)
@@ -297,7 +346,10 @@ namespace CocosSharpMathGame
                         }
                         // remove aircrafts that have to be removed
                         foreach (var aircraft in aircraftToBeRemoved)
+                        {
+                            DownedAircrafts.Add(aircraft);
                             RemoveAircraft(aircraft);
+                        }
                         // go through all projectiles and let them advance
                         // check whether a projectile needs to be removed
                         List<Projectile> projectilesToBeRemoved = new List<Projectile>();

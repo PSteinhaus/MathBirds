@@ -60,6 +60,26 @@ namespace CocosSharpMathGame
         internal const float V_MIN = 150f;
         protected FlightPathControlNode FlightPathControlNode { get; set; }
         internal Team Team { get; set; }
+        private protected List<Tuple<int,MathChallenge>> WeightedChallenges { get; set; }
+        internal MathChallenge GetChallenge()
+        {
+            // get the weight sum
+            int sum = 0;
+            foreach (var tuple in WeightedChallenges)
+            {
+                sum += tuple.Item1;
+            }
+            // choose
+            int choice = new Random().Next(sum);
+            sum = 0;
+            foreach (var tuple in WeightedChallenges)
+            {
+                if (choice <= sum)
+                    return tuple.Item2.CreateFromSelf();
+                sum += tuple.Item1;
+            }
+            return null;
+        }
         private AI ai;
         internal AI AI {
             get { return ai; }
@@ -68,6 +88,13 @@ namespace CocosSharpMathGame
                 ai = value;
                 if (ai != null)
                     ai.Aircraft = this;
+            }
+        }
+        internal CCPoint FlightPathHeadPos
+        {
+            get
+            {
+                return FlightPathControlNode.FlightPathHeadPos;
             }
         }
         private bool controlledByPlayer = false;
@@ -825,7 +852,7 @@ namespace CocosSharpMathGame
         /// </summary>
         protected void TouchTheGround()
         {
-            // for now all that happens is that the aircraft is removed
+            // for now all that happens is that the aircraft is to be removed
             ToBeRemoved = true;
         }
 
@@ -889,7 +916,7 @@ namespace CocosSharpMathGame
         /// searches and returns all parts that this aircraft is made of
         /// starting at the body and then searching recursively
         /// </summary>
-        internal IEnumerable<Part> TotalParts { get; set; }
+        internal List<Part> TotalParts { get; set; }
         internal bool ToBeRemoved { get; private set; } = false;
 
         /// <summary>
@@ -900,7 +927,11 @@ namespace CocosSharpMathGame
             UpdateManeuverPolygon();
             FlightPathControlNode.ResetHeadPosition();
             if (AI != null && MyState != State.SHOT_DOWN)
-                AI.ActInPlanningPhase(AircraftsInLevel());
+            {
+                var aircraftsInLevel = AircraftsInLevel();
+                if (aircraftsInLevel != null)
+                    AI.ActInPlanningPhase(aircraftsInLevel);
+            }
             if (ControlledByPlayer && MyState != State.SHOT_DOWN)
                 FlightPathControlNode.Visible = true;
         }

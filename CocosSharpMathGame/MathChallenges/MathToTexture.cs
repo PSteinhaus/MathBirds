@@ -9,6 +9,7 @@ using CSharpMath;
 using SkiaSharp;
 using System.IO;
 using MathNet.Symbolics;
+using CSharpMath.Rendering.FrontEnd;
 
 namespace CocosSharpMathGame
 {
@@ -23,11 +24,11 @@ namespace CocosSharpMathGame
         }
         private static MathPainter CreatePainterWithInfix(string infix)
         {
-            return new MathPainter { LaTeX = InfixToLatex(infix) };
+            return new MathPainter { TextColor = SKColor.FromHsl(0, 0, 100), FontSize = 8, LaTeX = InfixToLatex(infix) };
         }
         private static MathPainter CreatePainterWithLatex(string latex)
         {
-            return new MathPainter { LaTeX = latex };
+            return new MathPainter { TextColor = SKColor.FromHsl(0, 0, 100), FontSize = 100, LaTeX = latex };
         }
         /// <summary>
         /// Creates a CCTexture2D from a string containing a math expression in infix (or LaTeX) notation
@@ -51,7 +52,7 @@ namespace CocosSharpMathGame
         /// Creates a CCTexture2D from a string containing a math expression in infix (or LaTeX) notation
         /// and adds it to the shared texture cache
         /// </summary>
-        internal static void CreateAndAddTexture(string math, string texName, bool isLatex = false)
+        internal static void CreateAndAddTexture(string math, string texName, bool isLatex = true)
         {
             using (var png = (isLatex ? CreatePainterWithLatex(math) : CreatePainterWithInfix(math)).DrawAsStream(format: SkiaSharp.SKEncodedImageFormat.Png))
             {

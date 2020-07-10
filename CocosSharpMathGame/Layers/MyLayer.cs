@@ -14,6 +14,7 @@ namespace CocosSharpMathGame
     public class MyLayer : CCLayerColor
     {
         private protected Scroller Scroller { get; set; } = new Scroller();
+        private protected CCEventListenerTouchAllAtOnce FirstTouchListener { get; set; }
         public MyLayer(CCColor4B color, bool countTouches=false) : base(color)
         {
             Schedule();
@@ -21,11 +22,11 @@ namespace CocosSharpMathGame
             if (countTouches)
             {
                 TouchCount = 0; // for CountTouches
-                var touchListener = new CCEventListenerTouchAllAtOnce();
-                touchListener.OnTouchesBegan = OnTouchesBeganDoAccounting;
-                touchListener.OnTouchesEnded = OnTouchesEndedDoAccounting;
-                touchListener.OnTouchesCancelled = OnTouchesEndedDoAccounting;
-                AddEventListener(touchListener, int.MinValue); // intercept everything
+                FirstTouchListener = new CCEventListenerTouchAllAtOnce();
+                FirstTouchListener.OnTouchesBegan = OnTouchesBeganDoAccounting;
+                FirstTouchListener.OnTouchesEnded = OnTouchesEndedDoAccounting;
+                FirstTouchListener.OnTouchesCancelled = OnTouchesEndedDoAccounting;
+                AddEventListener(FirstTouchListener, int.MinValue); // intercept everything
             }
         }
         public bool CountsTouches { get { return TouchCount != -1; } }

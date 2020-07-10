@@ -23,6 +23,7 @@ namespace CocosSharpMathGame
 {
     public class HangarLayer : MyLayer
     {
+        public static HangarLayer GlobalHangarLayer { get; private set; }
         const float TRANSITION_TIME = 0.5f;
         internal enum HangarState
         {
@@ -41,6 +42,7 @@ namespace CocosSharpMathGame
         internal List<Part> Parts = new List<Part>();
         public HangarLayer() : base(CCColor4B.Black)
         {
+            GlobalHangarLayer = this;
             NewAircraftButton = new NewAircraftButton(this);
             NewAircraftButton.Visible = false;
             AddChild(NewAircraftButton);
@@ -101,6 +103,8 @@ namespace CocosSharpMathGame
                 RemoveAircraft(aircraft);
 
             var parent = Parent;
+            RemoveAllListeners();
+            GUILayer.RemoveAllListeners();
             Parent.RemoveChild(GUILayer);
             Parent.RemoveChild(this);
             // save the hangar (concurrently)
@@ -418,9 +422,10 @@ namespace CocosSharpMathGame
                 if (part.Types.Contains(pNode.PartType))
                 {
                     pNode.AddPart(part);
-                    return;
+                    break;
                 }
             }
+            Console.WriteLine("Parts: " + GetParts().Count);
         }
 
         internal List<Part> GetParts()
@@ -1023,10 +1028,19 @@ namespace CocosSharpMathGame
                     // start aircraft section
                     writer.Write((byte)StreamEnum.AIRCRAFTS);
                     // save how many aircrafts there are
-                    writer.Write(Aircrafts.Count);
+                    // first filter out any possible defect (or at least unusable) aircrafts
+                    int aCount = Aircrafts.Count;
+                    foreach (var aircraft in Aircrafts)
+                    {
+                        if (aircraft.Body == null)
+                            aCount--;
+                    }
+                    writer.Write(aCount);
                     // save the aircrafts
                     foreach (var aircraft in Aircrafts)
                     {
+                        if (aircraft.Body == null)
+                            continue;
                         CCPoint hPos = HangarPositions[aircraft];
                         writer.Write(hPos.X);
                         writer.Write(hPos.Y);
@@ -1132,6 +1146,7 @@ namespace CocosSharpMathGame
                                     {
                                         // load the parts
                                         int partCount = reader.ReadInt32();
+                                        Console.WriteLine("partCount: " + partCount);
                                         for (int i = 0; i < partCount; i++)
                                         {
                                             Part part = Part.CreateFromStream(reader);

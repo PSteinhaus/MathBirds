@@ -8,26 +8,63 @@ using CocosSharp;
 namespace CocosSharpMathGame
 {
     /// <summary>
-    /// For now, a test class, turning math into a drawable sprite
+    /// a class, turning math into a drawable sprite
     /// </summary>
-    class MathSprite : GameObjectSprite
+    internal class MathSprite : CCSprite
     {
-        public MathSprite(string _infix) : base(UIElement.spriteSheet.Frames.Find(_ => _.TextureFilename.Equals("testRotor.png"))) // just a placeholder
+        internal string MathInfix { get; set; }
+        internal MathSprite(string infix, string latex) : base()
         {
+            MathInfix = infix;
             // create and set the texture
-            MathToTexture.CreateAndAddTexture(_infix, _infix);
-            if (CCTextureCache.SharedTextureCache.Contains(_infix))
-                ReplaceTexture(CCTextureCache.SharedTextureCache[_infix], new CCRect(0,0,CCTextureCache.SharedTextureCache[_infix].ContentSizeInPixels.Width, CCTextureCache.SharedTextureCache[_infix].ContentSizeInPixels.Height));
+            MathToTexture.CreateAndAddTexture(latex, latex);
+            if (CCTextureCache.SharedTextureCache.Contains(latex))
+            {
+                var texture = CCTextureCache.SharedTextureCache[latex];
+                ReplaceTexture(texture, new CCRect(0, 0, texture.ContentSizeInPixels.Width, texture.ContentSizeInPixels.Height));
+            }
             //var texture = MathToTexture.CreateTexture(_infix);
             //ReplaceTexture(texture, new CCRect(0,0,texture.ContentSizeInPixels.Width, texture.ContentSizeInPixels.Height) );
             //for now manages directly in the base constructor
 
             // manage size
-            ContentSize = Texture.ContentSizeInPixels;
+            //ContentSize = Texture.ContentSizeInPixels;
+            Scale = 1f;
             Console.WriteLine(ContentSize);
-            //IsAntialiased = false;
+            IsAntialiased = false;
             // set the anchor
             AnchorPoint = CCPoint.AnchorMiddle;
+        }
+
+        /// <summary>
+        /// sets the scaling to fit a certain width in pixels
+        /// </summary>
+        /// <param name="width">how wide the sprite shall be (in world pixels)</param>
+        public void FitToWidth(float desiredWidth)
+        {
+            Scale = desiredWidth / ContentSize.Width;
+        }
+
+        /// <summary>
+        /// sets the scaling to fit a certain height in pixels
+        /// </summary>
+        /// <param name="height">how high the sprite shall be (in world pixels)</param>
+        public void FitToHeight(float desiredHeight)
+        {
+            Scale = desiredHeight / ContentSize.Height;
+        }
+
+        public float Area
+        {
+            get { return BoundingBoxTransformedToWorld.Size.Width * BoundingBoxTransformedToWorld.Size.Height; }
+        }
+
+        public void FitToBox(CCSize box)
+        {
+            if (ContentSize.Width / box.Width > ContentSize.Height / box.Height)
+                FitToWidth(box.Width);
+            else
+                FitToHeight(box.Height);
         }
     }
 }

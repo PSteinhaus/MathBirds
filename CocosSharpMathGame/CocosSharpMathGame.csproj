@@ -152,6 +152,7 @@
   <ItemGroup>
     <Compile Include="Constants.cs" />
     <Compile Include="CocosSharpMathGame.cs" />
+    <Compile Include="CustomCCActions\CCCallFiniteTimeFunc.cs" />
     <Compile Include="CustomCCActions\CCMoveAircraftTo.cs" />
     <Compile Include="CustomCCActions\CCMyRotateTo.cs" />
     <Compile Include="Interfaces\IAdvancable.cs" />
@@ -175,6 +176,8 @@
     <Compile Include="Layers\HangarLayer.cs" />
     <Compile Include="Layers\MyLayer.cs" />
     <Compile Include="Layers\PlayLayer.cs" />
+    <Compile Include="Layers\WreckageGUILayer.cs" />
+    <Compile Include="Layers\WreckageLayer.cs" />
     <Compile Include="MathChallenges\AddChallenge.cs" />
     <Compile Include="MathChallenges\MathChallenge.cs" />
     <Compile Include="MathChallenges\MathToTexture.cs" />
@@ -214,6 +217,8 @@
     <Compile Include="Sprites\UI\HangarOptionNode.cs" />
     <Compile Include="Sprites\UI\HangarOptionWorkshop.cs" />
     <Compile Include="Sprites\UI\HorizontalScalingButton.cs" />
+    <Compile Include="Sprites\UI\MathChallengeNode.cs" />
+    <Compile Include="Sprites\UI\MathNode.cs" />
     <Compile Include="Sprites\UI\NewAircraftButton.cs" />
     <Compile Include="Sprites\UI\NonScalingCarousel.cs" />
     <Compile Include="Sprites\UI\PartCarouselNode.cs" />
@@ -222,6 +227,7 @@
     <Compile Include="Sprites\UI\UIElement.cs" />
     <Compile Include="Sprites\UI\UIElementNode.cs" />
     <Compile Include="Sprites\UI\VerticalScalingButton.cs" />
+    <Compile Include="Sprites\UI\WreckageHint.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Content\sounds\" />
@@ -233,6 +239,8 @@
     <Content Include="Content\hd\graphics\ui.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Data\sprites\arrow.png" />
+    <Content Include="Data\sprites\arrow2.png" />
     <Content Include="Data\sprites\flightPathHead.png" />
     <Content Include="Data\sprites\goButton.png" />
     <Content Include="Data\sprites\hangarOptionEnd.png" />

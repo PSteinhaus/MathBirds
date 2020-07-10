@@ -26,9 +26,11 @@ namespace CocosSharpMathGame
             if (withWeapon)
             {
                 // give both wings guns
-                //wings.MountPart(new TestWeapon());
+                wings.MountPart(new TestWeapon());
                 wings.MountPart(new TestWeapon());
             }
+            // set the math challenges
+            aircraft.WeightedChallenges = new List<Tuple<int, MathChallenge>> { new Tuple<int, MathChallenge>(1, new AddChallenge(4, 2)) };
             return aircraft;
             /*
             foreach (var part in TotalParts)

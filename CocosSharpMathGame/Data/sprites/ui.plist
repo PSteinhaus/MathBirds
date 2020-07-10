@@ -4,10 +4,38 @@
 	<dict>
 		<key>frames</key>
 		<dict>
+			<key>arrow.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{33,56},{14,18}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false/>
+				<key>sourceColorRect</key>
+				<string>{{0,0},{14,18}}</string>
+				<key>sourceSize</key>
+				<string>{14,18}</string>
+			</dict>
+
+			<key>arrow2.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{32,83},{18,22}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false/>
+				<key>sourceColorRect</key>
+				<string>{{0,0},{18,22}}</string>
+				<key>sourceSize</key>
+				<string>{18,22}</string>
+			</dict>
+
 			<key>flightPathHead.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{56,27},{31,31}}</string>
+				<string>{{0,83},{31,31}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -18,10 +46,24 @@
 				<string>{31,31}</string>
 			</dict>
 
+			<key>flightPathHeadOLD.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{32,106},{15,15}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false/>
+				<key>sourceColorRect</key>
+				<string>{{0,0},{15,15}}</string>
+				<key>sourceSize</key>
+				<string>{15,15}</string>
+			</dict>
+
 			<key>goButton.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{56,0},{32,26}}</string>
+				<string>{{0,56},{32,26}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -35,7 +77,7 @@
 			<key>hangarOptionEnd.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{107,0},{17,50}}</string>
+				<string>{{56,0},{17,50}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -49,7 +91,7 @@
 			<key>hangarOptionMid.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{125,0},{1,50}}</string>
+				<string>{{69,51},{1,50}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -63,7 +105,7 @@
 			<key>hangarOptionStart.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{89,0},{17,50}}</string>
+				<string>{{51,56},{17,50}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -95,7 +137,7 @@
 			<key>format</key>
 			<integer>2</integer>
 			<key>size</key>
-			<string>{128,64}</string>
+			<string>{128,128}</string>
 			<key>textureFileName</key>
 			<string>ui.png</string>
 			</dict>

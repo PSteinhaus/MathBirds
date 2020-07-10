@@ -12,7 +12,13 @@ namespace CocosSharpMathGame
         private FlightPathNode FlightPathNode { get; set; }
         private FlightPathHead FlightPathHead { get; set; }
         private Aircraft Aircraft { get; set; }
-
+        internal CCPoint FlightPathHeadPos
+        {
+            get
+            {
+                return FlightPathHead.Position;
+            }
+        }
         internal FlightPathControlNode(Aircraft aircraft)
         {
             if (!aircraft.ControlledByPlayer)
@@ -53,6 +59,9 @@ namespace CocosSharpMathGame
         {
             // move the head
             FlightPathHead.MoveTo(x, y);
+            // if its a player aircraft make sure it doesn't move too far away from the others
+            if (Layer is PlayLayer pl && pl.PlayerAircrafts != null && pl.PlayerAircrafts.Contains(Aircraft))
+                FlightPathHead.EnsureProximityToOtherPlayerHeads();
             // recalculate the flight path
             Constants.CCDegreesToDxDy(Aircraft.MyRotation, out float dx, out float dy);
             FlightPathNode.CalculatePath(Aircraft.Position, dx, dy, FlightPathHead.Position);

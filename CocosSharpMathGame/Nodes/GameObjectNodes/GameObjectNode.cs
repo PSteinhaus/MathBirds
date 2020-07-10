@@ -106,6 +106,15 @@ namespace CocosSharpMathGame
         {
             Scale = desiredHeight / ContentSize.Height;
         }
+
+        public void FitToBox(CCSize box)
+        {
+            if (ContentSize.Width / box.Width > ContentSize.Height / box.Height)
+                FitToWidth(box.Width);
+            else
+                FitToHeight(box.Height);
+        }
+
         internal GameObjectNode()
         {
             AnchorPoint = CCPoint.AnchorMiddle;

@@ -33,6 +33,12 @@ namespace CocosSharpMathGame
         void FitToHeight(float desiredHeight);
 
         /// <summary>
+        /// scales the object so that it fits inside the box
+        /// </summary>
+        /// <param name="">the box to fit in</param>
+        void FitToBox(CCSize box);
+
+        /// <summary>
         /// Returns a simple collision polygon, that is a diamond based on the ContentSize
         /// </summary>
         /// <returns></returns>

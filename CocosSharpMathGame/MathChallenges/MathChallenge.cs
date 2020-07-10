@@ -15,15 +15,22 @@ namespace CocosSharpMathGame
     internal abstract class MathChallenge
     {
         internal string ChallengeLaTeX { get; private protected set; }
+        internal string ChallengeInfix { get; private protected set; }
         internal string[] AnswersLaTeX { get; private protected set; }
         internal string[] AnswersInfix { get; private protected set; }
         internal string SolutionLaTeX { get; private protected set; }
         internal string SolutionInfix { get; private protected set; }
 
+        /// <summary>
+        /// Returns a MathChallenge that is generated based on the parameters of the calling MathChallenge.
+        /// </summary>
+        /// <returns></returns>
+        internal abstract MathChallenge CreateFromSelf();
+
         internal void CreateAnswerArrays(int answerCount)
         {
-            AnswersInfix = new string[answerCount > 0 ? answerCount : 1];
-            AnswersLaTeX = new string[answerCount > 0 ? answerCount : 1];
+            AnswersInfix = new string[answerCount];
+            AnswersLaTeX = new string[answerCount];
         }
 
         internal bool IsSolution(string answerInfix)
