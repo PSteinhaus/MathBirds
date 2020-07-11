@@ -102,17 +102,19 @@ namespace CocosSharpMathGame
             foreach (var aircraft in activeAircrafts)
                 RemoveAircraft(aircraft);
 
-            var parent = Parent;
-            RemoveAllListeners();
-            GUILayer.RemoveAllListeners();
-            Parent.RemoveChild(GUILayer);
-            Parent.RemoveChild(this);
+            HangarLayer.GlobalHangarLayer = null;
+            TransitionFadingFromTo(this.GUILayer, playLayer.GUILayer, this, playLayer, 2f);
+            //var parent = Parent;
+            //RemoveAllListeners();
+            //GUILayer.RemoveAllListeners();
+            //Parent.RemoveChild(GUILayer);
+            //Parent.RemoveChild(this);
             // save the hangar (concurrently)
-            var saveTask = SaveToFile();
-            parent.AddChild(playLayer.GUILayer);
-            parent.AddChild(playLayer, zOrder: int.MinValue);
+            //var saveTask = SaveToFile();
+            //parent.AddChild(playLayer.GUILayer);
+            //parent.AddChild(playLayer, zOrder: int.MinValue);
             // place the aircrafts and add them as children
-            playLayer.InitPlayerAircrafts(activeAircrafts);
+            playLayer.AddAction(new CCCallFunc(() => playLayer.InitPlayerAircrafts(activeAircrafts)));
         }
 
         protected override void AddedToScene()

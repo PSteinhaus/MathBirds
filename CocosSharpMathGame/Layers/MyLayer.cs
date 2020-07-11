@@ -57,6 +57,43 @@ namespace CocosSharpMathGame
             }
         }
 
+        /// <summary>
+        /// Since layer (and scene) opacity is broken this implements a workaround for a creating a fading transition.
+        /// </summary>
+        /// <param name="guiLayer1"></param>
+        /// <param name="guiLayer2"></param>
+        public static void TransitionFadingFromTo(MyLayer guiLayer1, MyLayer guiLayer2, MyLayer layer1, MyLayer layer2, float duration)
+        {
+            var fadeNode = new CCDrawNode();
+            var bigRect = new CCRect(-100000000, -100000000, 1000000000, 1000000000);
+            fadeNode.BlendFunc = CCBlendFunc.NonPremultiplied;
+            fadeNode.DrawRect(bigRect, CCColor4B.Transparent);
+            guiLayer1.AddChild(fadeNode, int.MaxValue);
+            void FadeIn(float prog, float du)
+            {
+                Console.WriteLine("progress: " + prog); fadeNode.Clear(); fadeNode.DrawRect(bigRect, new CCColor4B(0f, 0f, 0f, prog));
+            }
+            void FadeOut(float prog, float du)
+            {
+                Console.WriteLine("progress: " + prog); fadeNode.Clear(); fadeNode.DrawRect(bigRect, new CCColor4B(0f, 0f, 0f, 1 - prog));
+            }
+            fadeNode.AddAction(new CCSequence(new CCCallFiniteTimeFunc(duration / 2, FadeIn),
+                                              new CCCallFunc(() =>
+                                              {
+                                                  layer1.RemoveAllListeners();
+                                                  guiLayer1.RemoveAllListeners();
+                                                  var parent = layer1.Parent;
+                                                  layer1.RemoveFromParent();
+                                                  guiLayer1.RemoveFromParent();
+                                                  parent.AddChild(guiLayer2);
+                                                  parent.AddChild(layer2, int.MinValue);
+                                                  fadeNode.RemoveFromParent();
+                                                  guiLayer2.AddChild(fadeNode, int.MaxValue);
+                                                  fadeNode.AddAction(new CCSequence(new CCCallFiniteTimeFunc(duration / 2, FadeOut),
+                                                                     new CCRemoveSelf()));
+                                              })));
+        }
+
         private CCPoint ShakeAmount { get; set; }
         private protected CCPoint ScreenShakeVec { get; private set; } = CCPoint.Zero;
         internal CCRect CameraSpace { get; private protected set; } = new CCRect(float.NegativeInfinity, float.NegativeInfinity, float.PositiveInfinity, float.PositiveInfinity);

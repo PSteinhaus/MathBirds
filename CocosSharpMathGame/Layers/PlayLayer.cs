@@ -314,6 +314,8 @@ namespace CocosSharpMathGame
         private protected void EnterWreckageLayer()
         {
             var wreckageLayer = new WreckageLayer();
+            TransitionFadingFromTo(this.GUILayer, wreckageLayer.GUILayer, this, wreckageLayer, 0.8f);
+            /*
             var parent = Parent;
             RemoveAllListeners();
             GUILayer.RemoveAllListeners();
@@ -321,8 +323,9 @@ namespace CocosSharpMathGame
             Parent.RemoveChild(this);
             parent.AddChild(wreckageLayer.GUILayer);
             parent.AddChild(wreckageLayer, zOrder: int.MinValue);
+            */
             // place the aircrafts and add them as children
-            wreckageLayer.InitWreckage(DownedAircrafts);
+            wreckageLayer.AddAction(new CCCallFunc(() => wreckageLayer.InitWreckage(DownedAircrafts)));
         }
 
         public override void Update(float dt)
@@ -347,7 +350,8 @@ namespace CocosSharpMathGame
                         // remove aircrafts that have to be removed
                         foreach (var aircraft in aircraftToBeRemoved)
                         {
-                            DownedAircrafts.Add(aircraft);
+                            if (!PlayerAircrafts.Contains(aircraft))
+                                DownedAircrafts.Add(aircraft);
                             RemoveAircraft(aircraft);
                         }
                         // go through all projectiles and let them advance

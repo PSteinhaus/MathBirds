@@ -24,6 +24,7 @@ namespace CocosSharpMathGame
             private protected set
             {
                 WreckCarousel.Pressable = false;
+                WreckCarousel.Pressed = false;
                 Console.WriteLine(value);
                 switch (value)
                 {
@@ -54,8 +55,15 @@ namespace CocosSharpMathGame
             }
         }
 
+
+
         private void ReturnToHangar()
         {
+            var hangarLayer = new HangarLayer();
+            foreach (var part in TotalSalvagedParts)
+                hangarLayer.AddPart(part);
+            TransitionFadingFromTo(this.GUILayer, hangarLayer.GUILayer, this, hangarLayer, 2f);
+            /*
             var parent = Parent;
             RemoveAllListeners();
             GUILayer.RemoveAllListeners();
@@ -63,6 +71,7 @@ namespace CocosSharpMathGame
             Parent.RemoveChild(this);
             parent.AddChild(HangarLayer.GlobalHangarLayer.GUILayer);
             parent.AddChild(HangarLayer.GlobalHangarLayer, zOrder: int.MinValue);
+            */
         }
 
         public WreckageGUILayer GUILayer { get; private protected set; }
@@ -127,8 +136,9 @@ namespace CocosSharpMathGame
                 // stop the endless rotation
                 part.StopAction(RotationTag);
                 part.AddAction(new CCSequence(new CCEaseIn(new CCMoveTo(1f, outPoint), 2f),
-                                              new CCCallFunc(() => { RemoveChild(part); HangarLayer.GlobalHangarLayer.AddPart(part); })));
+                                              new CCCallFunc(() => { RemoveChild(part); })));
             }
+            TotalSalvagedParts.AddRange(SalvagedParts);
             SalvagedParts.Clear();
             if (WreckCarousel.Collection.Any())
                 State = WreckageState.CAROUSEL;
@@ -168,7 +178,8 @@ namespace CocosSharpMathGame
                 }
         }
         internal Dictionary<Aircraft, float> WreckMaxPercentile { get; private protected set; } = new Dictionary<Aircraft, float>();
-        internal List<Part> SalvagedParts;
+        internal List<Part> SalvagedParts = new List<Part>();
+        internal List<Part> TotalSalvagedParts = new List<Part>();
         internal Carousel WreckCarousel { get; private protected set; }
         internal Aircraft MiddleAircraft
         {
@@ -229,7 +240,7 @@ namespace CocosSharpMathGame
             AddChild(WreckCarousel);
 
             if (DEBUG)
-                InitWreckage(new List<Aircraft>() { Aircraft.CreateTestAircraft(), Aircraft.CreateTestAircraft(), Aircraft.CreateTestAircraft(), Aircraft.CreateTestAircraft() });
+                InitWreckage(new List<Aircraft>() { Aircraft.CreateTestAircraft(), Aircraft.CreateTestAircraft() });
         }
 
         internal void InitWreckage(List<Aircraft> downedAircrafts)

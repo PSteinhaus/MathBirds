@@ -12,7 +12,7 @@ namespace CocosSharpMathGame
         internal bool IsCircleButton { get; set; } = false;
         internal bool SwallowTouch { get; set; } = true;
         internal bool TouchMustEndOnIt { get; set; }
-        protected bool Pressed { get; set; } = false;
+        internal bool Pressed { get; set; } = false;
         internal bool Pressable { get; set; } = true;
         internal float RadiusFactor { get; set; } = 0.5f;
         internal void MakeClickable(bool touchMustEndOnIt = true, bool IsCircleButton = false, bool swallowTouch = true)

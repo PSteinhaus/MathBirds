@@ -33,16 +33,12 @@ namespace CocosSharpMathGame
     public class CCCallFiniteTimeFuncState : CCFiniteTimeActionState
     {
         protected Action<float,float> MyFunction;
-        /// <summary>
-        /// dirty bug fix (for some reason "Elapsed" doesn't work here)
-        /// </summary>
-        protected float MyElapsed = 0f;
         public CCCallFiniteTimeFuncState(CCCallFiniteTimeFunc action, CCNode target) : base(action, target)
         {
             MyFunction = action.MyFunction;
         }
 
-        public override void Update(float progress) // for some reason it's progress now...
+        public override void Update(float progress)
         {
             if (Target != null)
             {
