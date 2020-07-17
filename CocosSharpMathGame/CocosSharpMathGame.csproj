@@ -178,6 +178,7 @@
     <Compile Include="Layers\PlayLayer.cs" />
     <Compile Include="Layers\WreckageGUILayer.cs" />
     <Compile Include="Layers\WreckageLayer.cs" />
+    <Compile Include="MathChallenges\SubChallenge.cs" />
     <Compile Include="MathChallenges\AddChallenge.cs" />
     <Compile Include="MathChallenges\MathChallenge.cs" />
     <Compile Include="MathChallenges\MathToTexture.cs" />
@@ -215,6 +216,7 @@
     <Compile Include="Sprites\UI\GOButton.cs" />
     <Compile Include="Sprites\UI\HangarOptionHangar.cs" />
     <Compile Include="Sprites\UI\HangarOptionNode.cs" />
+    <Compile Include="Sprites\UI\HangarOptionScrapyard.cs" />
     <Compile Include="Sprites\UI\HangarOptionWorkshop.cs" />
     <Compile Include="Sprites\UI\HorizontalScalingButton.cs" />
     <Compile Include="Sprites\UI\MathChallengeNode.cs" />
@@ -223,6 +225,7 @@
     <Compile Include="Sprites\UI\NonScalingCarousel.cs" />
     <Compile Include="Sprites\UI\PartCarouselNode.cs" />
     <Compile Include="Sprites\UI\PartCollectionBG.cs" />
+    <Compile Include="Sprites\UI\ScrapyardButton.cs" />
     <Compile Include="Sprites\UI\ScrollableCollectionNode.cs" />
     <Compile Include="Sprites\UI\UIElement.cs" />
     <Compile Include="Sprites\UI\UIElementNode.cs" />
@@ -247,6 +250,9 @@
     <Content Include="Data\sprites\hangarOptionMid.png" />
     <Content Include="Data\sprites\hangarOptionStart.png" />
     <Content Include="Data\sprites\newAircraftButton.png" />
+    <Content Include="Data\sprites\scrapyardAdd.png" />
+    <Content Include="Data\sprites\scrapyardLocked.png" />
+    <Content Include="Data\sprites\scrapyardLockedv2.png" />
     <Content Include="Data\sprites\testBody.png" />
     <Content Include="Data\sprites\testDoubleWing.png" />
     <Content Include="Data\sprites\testEngine.png" />

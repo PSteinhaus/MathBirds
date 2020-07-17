@@ -20,12 +20,27 @@ namespace CocosSharpMathGame
         internal ScrollableCollectionNode TakeoffCollectionNode { get; private protected set; }
         internal NonScalingCarousel PartCarousel { get; private protected set; }
         internal CCNode TakeoffNode { get; private protected set; } = new CCNode();
+        private MathChallengeNode challengeNode;
+        internal MathChallengeNode ChallengeNode
+        {
+            get { return challengeNode; }
+            set
+            {
+                // if there is an old node remove it first
+                if (challengeNode != null && challengeNode.Parent == this)
+                    RemoveChild(challengeNode);
+                challengeNode = value;
+                if (challengeNode != null)
+                    AddChild(challengeNode);
+            }
+        }
         internal GOButton GOButton { get; private protected set; }
         internal readonly CCPoint GOButtonOutPosition = new CCPoint(Constants.COCOS_WORLD_WIDTH / 2, Constants.COCOS_WORLD_HEIGHT * 1.5f);
         internal readonly CCPoint GOButtonInPosition  = new CCPoint(Constants.COCOS_WORLD_WIDTH / 2, Constants.COCOS_WORLD_HEIGHT * 0.87f);
         private HangarLayer HangarLayer { get; set; }
         internal GameObjectNode HangarOptionHangar { get; private protected set; }
         internal GameObjectNode HangarOptionWorkshop { get; private protected set; }
+        internal GameObjectNode HangarOptionScrapyard { get; private protected set; }
         private IGameObject dragAndDropObject;
         private CCPoint dragAndDropRelativePos;
         internal IGameObject DragAndDropObject
@@ -117,6 +132,7 @@ namespace CocosSharpMathGame
             PartCarousel.PositionY += PartCarousel.ContentSize.Height * 1.5f;
             HangarOptionHangar = new HangarOptionHangar();
             HangarOptionWorkshop = new HangarOptionWorkshop();
+            HangarOptionScrapyard = new HangarOptionScrapyard();
             HangarOptionCarousel = new Carousel(new CCSize(bounds.Size.Width, HangarOptionHangar.BoundingBoxTransformedToWorld.Size.Height));
             HangarOptionCarousel.NodeAnchor = CCPoint.AnchorMiddleTop;
             AddChild(HangarOptionCarousel);
@@ -124,6 +140,7 @@ namespace CocosSharpMathGame
             HangarOptionCarousel.Position = new CCPoint(0, bounds.MaxY);
             HangarOptionCarousel.AddToCollection(HangarOptionHangar);
             HangarOptionCarousel.AddToCollection(HangarOptionWorkshop);
+            HangarOptionCarousel.AddToCollection(HangarOptionScrapyard);
             TakeoffCollectionNode = new ScrollableCollectionNode(new CCSize(bounds.Size.Width, bounds.Size.Height / 7));
             float borderToCollection = 15f;
             TakeoffNode.Position = CCPoint.Zero;
@@ -315,7 +332,7 @@ namespace CocosSharpMathGame
         {
             if (state == HangarLayer.HangarState.HANGAR)
                 TakeoffCollectionNode.Pressable = true;
-            if (state != HangarLayer.HangarState.MODIFY_AIRCRAFT)
+            if (state != HangarLayer.HangarState.MODIFY_AIRCRAFT && state != HangarLayer.HangarState.SCRAPYARD_CHALLENGE)
                 HangarOptionCarousel.Pressable = true;
         }
     }

@@ -46,17 +46,17 @@ namespace CocosSharpMathGame.DX
             //CCSprite.DefaultTexelToContentSizeRatio = 0.0625f;
             var scene = new CCScene(mainWindow);
             //var playLayer = new PlayLayer();
-            var wreckLayer = new WreckageLayer();
-            wreckLayer.DEBUG = true;
+            //var wreckLayer = new WreckageLayer();
+            //wreckLayer.DEBUG = true;
             CurrentHangarLayer = new HangarLayer();
             FinishedLoading = true;
 
-            //scene.AddChild(CurrentHangarLayer.GUILayer);
-            //scene.AddChild(CurrentHangarLayer, zOrder:int.MinValue);
+            scene.AddChild(CurrentHangarLayer.GUILayer);
+            scene.AddChild(CurrentHangarLayer, zOrder:int.MinValue);
             //scene.AddChild(playLayer.GUILayer);
             //scene.AddChild(playLayer, zOrder:int.MinValue);
-            scene.AddChild(wreckLayer.GUILayer);
-            scene.AddChild(wreckLayer, zOrder:int.MinValue);
+            //scene.AddChild(wreckLayer.GUILayer);
+            //scene.AddChild(wreckLayer, zOrder:int.MinValue);
 
             mainWindow.RunWithScene(scene);
         }

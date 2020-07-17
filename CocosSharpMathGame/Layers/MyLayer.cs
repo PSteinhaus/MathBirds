@@ -71,11 +71,11 @@ namespace CocosSharpMathGame
             guiLayer1.AddChild(fadeNode, int.MaxValue);
             void FadeIn(float prog, float du)
             {
-                Console.WriteLine("progress: " + prog); fadeNode.Clear(); fadeNode.DrawRect(bigRect, new CCColor4B(0f, 0f, 0f, prog));
+                fadeNode.Clear(); fadeNode.DrawRect(bigRect, new CCColor4B(0f, 0f, 0f, prog));
             }
             void FadeOut(float prog, float du)
             {
-                Console.WriteLine("progress: " + prog); fadeNode.Clear(); fadeNode.DrawRect(bigRect, new CCColor4B(0f, 0f, 0f, 1 - prog));
+                fadeNode.Clear(); fadeNode.DrawRect(bigRect, new CCColor4B(0f, 0f, 0f, 1 - prog));
             }
             fadeNode.AddAction(new CCSequence(new CCCallFiniteTimeFunc(duration / 2, FadeIn),
                                               new CCCallFunc(() =>

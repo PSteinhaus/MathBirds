@@ -33,10 +33,12 @@ namespace CocosSharpMathGame
 
 		public void OnBackPressed()
 		{
-			// currently there is only one case where the back button can be used:
-			// to return from the MODIFY_AIRCRAFT state (which would also be possible by double tapping)
+			// return from the MODIFY_AIRCRAFT state (which would also be possible by double tapping)
 			if (CurrentHangarLayer != null && CurrentHangarLayer.Parent != null && CurrentHangarLayer.State == HangarLayer.HangarState.MODIFY_AIRCRAFT)
 				CurrentHangarLayer.StartTransition(HangarLayer.HangarState.WORKSHOP);
+			// or return from the SCRAPYARD_CHALLENGE state (which would also be possible by tapping)
+			else if (CurrentHangarLayer != null && CurrentHangarLayer.Parent != null && CurrentHangarLayer.State == HangarLayer.HangarState.SCRAPYARD_CHALLENGE)
+				CurrentHangarLayer.StartTransition(HangarLayer.HangarState.SCRAPYARD);
 		}
 	}
 }

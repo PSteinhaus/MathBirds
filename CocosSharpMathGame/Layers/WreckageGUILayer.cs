@@ -55,7 +55,7 @@ namespace CocosSharpMathGame
         {
             if (touches.Count == 1)
             {
-                if (WreckageLayer.State == WreckageLayer.WreckageState.CAROUSEL)
+                if (WreckageLayer.State == WreckageLayer.WreckageState.CAROUSEL && WreckageLayer.WreckCarousel.MiddleNode != null)
                 {
                     var touch = touches[0];
                     if (SwipeIsUndecided)
@@ -68,7 +68,7 @@ namespace CocosSharpMathGame
                         // disable the carousel when swiping up/down
                         if (SwipingUpDown)
                             WreckageLayer.WreckCarousel.Pressable = false;
-                        if (SwipingUpDown && (WreckageLayer.MiddleAircraft.GetActionState(ActionTag) == null || WreckageLayer.MiddleAircraft.GetActionState(ActionTag).IsDone))
+                        if (SwipingUpDown && WreckageLayer.MiddleAircraft != null && (WreckageLayer.MiddleAircraft.GetActionState(ActionTag) == null || WreckageLayer.MiddleAircraft.GetActionState(ActionTag).IsDone))
                             WreckPositionOriginal = WreckageLayer.MiddleAircraft.Position;
                     }
                     if (SwipingUpDown)
@@ -95,27 +95,31 @@ namespace CocosSharpMathGame
                 if (SwipingUpDown)
                 {
                     touchEvent.StopPropogation();
+                    // since the event is stopped here the WreckCarousel has to be informed manually
+                    WreckageLayer.WreckCarousel.Pressed = false;
                     const float actionRate = 2f;
                     const float actionTime = 0.25f;
                     CCAction action;
-                    var reenableCarousel = new CCCallFunc(() => { WreckageLayer.WreckCarousel.Pressable = true; });
+                    var reenableCarousel = new CCCallFunc(() => { if(WreckageLayer.State == WreckageLayer.WreckageState.CAROUSEL) WreckageLayer.WreckCarousel.Pressable = true; });
                     var bounds = WreckageLayer.VisibleBoundsWorldspace;
                     // release the wreck
                     var wreck = WreckageLayer.MiddleAircraft;
                     if (wreck.PositionWorldspace.Y > bounds.Center.Y + bounds.Size.Height*0.25f)
                     {
                         // salvage
+                        WreckageLayer.WreckCarousel.Pressable = false;
                         action = new CCSequence(new CCEaseOut(new CCMoveTo(actionTime, WreckPositionOriginal + new CCPoint(0, VisibleBoundsWorldspace.Size.Height)), actionRate),
-                                                new CCCallFunc(WreckageLayer.Salvage),
-                                                reenableCarousel);
+                                                new CCCallFunc(WreckageLayer.Salvage)/*,
+                                                reenableCarousel*/);
                     }
                     else if (wreck.PositionWorldspace.Y < bounds.Center.Y - bounds.Size.Height * 0.25f &&
                              WreckageLayer.GetWreckPercentile(WreckageLayer.MiddleAircraft) < WreckageLayer.GetWreckMaxPercentile(WreckageLayer.MiddleAircraft))
                     {
                         // repair
+                        WreckageLayer.WreckCarousel.Pressable = false;
                         action = new CCSequence(new CCEaseOut(new CCMoveTo(actionTime, WreckPositionOriginal), actionRate),
-                                                new CCCallFunc(WreckageLayer.StartRepair),
-                                                reenableCarousel);
+                                                new CCCallFunc(WreckageLayer.StartRepair)/*,
+                                                reenableCarousel*/);
                     }
                     else
                     {

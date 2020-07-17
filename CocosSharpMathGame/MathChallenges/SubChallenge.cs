@@ -7,9 +7,10 @@ using MathNet.Symbolics;
 
 namespace CocosSharpMathGame
 {
-    internal class AddChallenge : MathChallenge
+    // TODO: turn this class from a placeholder to an actual subtraction challenge
+    internal class SubChallenge : MathChallenge
     {
-        private static bool locked = false;
+        private static bool locked = true;
         internal override bool Locked
         {
             get { return locked; }
@@ -20,7 +21,7 @@ namespace CocosSharpMathGame
         private protected int SummandCount { get; set; }
         private protected int MinNum { get; set; }
         private protected int MaxNum { get; set; }
-        internal AddChallenge(int answerCount = 4, int summandCount = 2, int minNum = STD_MIN_NUM, int maxNum = STD_MAX_NUM)
+        internal SubChallenge(int answerCount = 4, int summandCount = 2, int minNum = STD_MIN_NUM, int maxNum = STD_MAX_NUM)
         {
             CreateAnswerArrays(answerCount);
             SummandCount = summandCount;
@@ -33,7 +34,7 @@ namespace CocosSharpMathGame
             // create the challenge
             // the challenge consists of adding 'summandCount' many summands together
             int[] summands = new int[summandCount];
-            for (int i = 0; i < summands.Length; i++)
+            for (int i=0; i<summands.Length; i++)
                 summands[i] = rng.Next(minNum, maxNum);
             ChallengeLaTeX = summands[0].ToString();
             for (int i = 1; i < summands.Length; i++)
@@ -49,12 +50,12 @@ namespace CocosSharpMathGame
             AnswersLaTeX[solutionIndex] = SolutionLaTeX;
 
             // generate the false answers
-            for (int i = 0; i < answerCount; i++)
+            for (int i=0; i<answerCount; i++)
             {
                 // don't overwrite the solution
                 if (i == solutionIndex) continue;
                 // choose a random algorithm to create the next answer
-                AnswersInfix[i] = WrongAnswer(rng, summands).ToString();
+                AnswersInfix[i] = WrongAnswer(rng.Next(0, 2)).ToString();
                 AnswersLaTeX[i] = AnswersInfix[i];
             }
         }
@@ -64,13 +65,12 @@ namespace CocosSharpMathGame
             return new AddChallenge(AnswersInfix.Length, SummandCount, MinNum, MaxNum);
         }
 
-        private int WrongAnswer(Random rng, int[] summands)
+        private int WrongAnswer(int algorithm)
         {
             int wrongAnswer = 0;
             int solution = (int)((SymbolicExpression)Infix.ParseOrThrow(SolutionInfix)).RealNumberValue;
-        start:
-            int algorithm = rng.Next(0, 3);
-            switch (algorithm)
+            start:
+            switch(algorithm)
             {
                 case 0:
                     // take the solution and add or substract 1 or 2
@@ -95,10 +95,9 @@ namespace CocosSharpMathGame
             // check if the answer is actually a solution
             if (IsSolution(wrongAnswer.ToString()))
                 goto start;
-            // check if the answer is larger than each summand (it would be too simple if else)
-            for (int i=0; i<summands.Length; i++)
-                if (wrongAnswer <= summands[i])
-                    goto start;
+            // check if the answer is positive (negative or 0 doesn't make much sense)
+            if (wrongAnswer<=1)
+                goto start;
             return wrongAnswer;
         }
 

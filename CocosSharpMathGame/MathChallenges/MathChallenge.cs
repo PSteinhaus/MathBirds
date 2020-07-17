@@ -14,6 +14,7 @@ namespace CocosSharpMathGame
     /// </summary>
     internal abstract class MathChallenge
     {
+        internal abstract bool Locked { get; set; }
         internal string ChallengeLaTeX { get; private protected set; }
         internal string ChallengeInfix { get; private protected set; }
         internal string[] AnswersLaTeX { get; private protected set; }
@@ -39,5 +40,13 @@ namespace CocosSharpMathGame
             if (answerExpr.IsUndefined) return false;
             else return answerExpr.Equals(Infix.ParseOrThrow(SolutionInfix));
         }
+
+        internal static MathChallenge[] GetAllChallengeModels()
+        {
+            // keep this list updated when adding new major challenge types
+            return new MathChallenge[] { new AddChallenge(), new SubChallenge() };
+        }
+
+        internal abstract ScrapyardButton CreateScrapyardButton();
     }
 }

@@ -25,10 +25,11 @@ namespace CocosSharpMathGame
     {
         public static HangarLayer GlobalHangarLayer { get; private set; }
         const float TRANSITION_TIME = 0.5f;
+
         internal enum HangarState
         {
             TRANSITION, HANGAR, WORKSHOP, SCRAPYARD,
-            MODIFY_AIRCRAFT
+            MODIFY_AIRCRAFT, SCRAPYARD_CHALLENGE
         }
         internal HangarState State = HangarState.HANGAR;
         internal CCDrawNode HighDrawNode { get; private protected set; } = new CCDrawNode();
@@ -43,6 +44,16 @@ namespace CocosSharpMathGame
         public HangarLayer() : base(CCColor4B.Black)
         {
             GlobalHangarLayer = this;
+            var challengeModels = MathChallenge.GetAllChallengeModels();
+            ScrapyardButtons = new ScrapyardButton[challengeModels.Length];
+            for (int i=0; i<challengeModels.Length; i++)
+            {
+                var button = challengeModels[i].CreateScrapyardButton();
+                ScrapyardButtons[i] = button;
+                button.Position = GetScrapyardButtonPosition(i);
+                button.Visible = false;
+                AddChild(button, 2);
+            }
             NewAircraftButton = new NewAircraftButton(this);
             NewAircraftButton.Visible = false;
             AddChild(NewAircraftButton);
@@ -82,6 +93,14 @@ namespace CocosSharpMathGame
 
             CameraSize = CameraSizeHangar;
             CameraPosition = CameraPositionHangar;
+        }
+
+        private CCPoint GetScrapyardButtonPosition(int i)
+        {
+            float bSize = ScrapyardButton.ButtonSize.Width;
+            float totalSpacing = (Constants.COCOS_WORLD_WIDTH - 2 * bSize) / 3;
+            float spacing = (totalSpacing + bSize) / 2;
+            return new CCPoint(i % 2 == 0 ? -spacing : spacing, -((i / 2) * spacing));
         }
 
         internal List<Aircraft> TakeoffAircrafts
@@ -162,6 +181,42 @@ namespace CocosSharpMathGame
             }
         }
 
+        private CCAction CreateUIFadeOutAndDisableAction(ScrapyardButton scrapyardButton)
+        {
+            var action = new CCSequence(new CCCallFunc(() => { scrapyardButton.Pressable = false; }), FadeOut, new CCCallFunc(() => { scrapyardButton.Visible = false; }));
+            action.Tag = FadeActionTag;
+            return action;
+        }
+        private CCAction CreateUIFadeInAndEnableAction(ScrapyardButton scrapyardButton)
+        {
+            var action = new CCSequence(new CCCallFunc(() => { scrapyardButton.Visible = true; }), FadeIn, new CCCallFunc(() => { if (!scrapyardButton.ChallengeModel.Locked) scrapyardButton.Pressable = true; }));
+            action.Tag = FadeActionTag;
+            return action;
+        }
+        private CCAction CreateUIFadeOutAndDisableAction(UIElement uIElement)
+        {
+            var action = new CCSequence(new CCCallFunc(() => { uIElement.Pressable = false; }), FadeOut, new CCCallFunc(() => { uIElement.Visible = false; }));
+            action.Tag = FadeActionTag;
+            return action;
+        }
+        private CCAction CreateUIFadeInAndEnableAction(UIElement uIElement)
+        {
+            var action = new CCSequence(new CCCallFunc(() => { uIElement.Visible = true; }), FadeIn, new CCCallFunc(() => { uIElement.Pressable = true; }));
+            action.Tag = FadeActionTag;
+            return action;
+        }
+        private CCAction CreateUIFadeOutAndDisableAction(UIElementNode uIElement)
+        {
+            var action = new CCSequence(new CCCallFunc(() => { uIElement.Pressable = false; }), FadeOut, new CCCallFunc(() => { uIElement.Visible = false; }));
+            action.Tag = FadeActionTag;
+            return action;
+        }
+        private CCAction CreateUIFadeInAndEnableAction(UIElementNode uIElement)
+        {
+            var action = new CCSequence(new CCCallFunc(() => { uIElement.Visible = true; }), FadeIn, new CCCallFunc(() => { uIElement.Pressable = true; }));
+            action.Tag = FadeActionTag;
+            return action;
+        }
         private void CreateActions()
         {
             const float easeRate = 0.6f;
@@ -198,9 +253,11 @@ namespace CocosSharpMathGame
         private CCAction TakeoffNodeLeave;
         private CCAction BGFadeOut;
         private CCAction BGFadeIn;
-        private const int MoveAircraftTag  = 73828192;
-        private const int ScaleAircraftTag = 73828193;
-        private const int RotateAircraftTag = 73828193;
+        private const int MoveAircraftTag   = 73828192;
+        private const int ScaleAircraftTag  = 73828193;
+        private const int RotateAircraftTag = 73828194;
+        private const int MoveActionTag = 99764356;
+        private const int FadeActionTag = 99764357;
 
         private CCPoint CameraPositionHangar;
         private CCSize  CameraSizeHangar;
@@ -233,6 +290,10 @@ namespace CocosSharpMathGame
             {
                 state = HangarState.WORKSHOP;
             }
+            else if (middle == GUILayer.HangarOptionScrapyard)
+            {
+                state = HangarState.SCRAPYARD;
+            }
             StartTransition(state);
         }
 
@@ -261,7 +322,8 @@ namespace CocosSharpMathGame
             }
             return CCPoint.Zero;
         }
-        private readonly CCPoint CameraPositionWorkshop = new CCPoint(-Constants.COCOS_WORLD_WIDTH / 2, -Constants.COCOS_WORLD_HEIGHT * 0.75f);
+        private readonly CCPoint CameraPositionWorkshop  = new CCPoint(-Constants.COCOS_WORLD_WIDTH / 2, -Constants.COCOS_WORLD_HEIGHT * 0.75f);
+        private readonly CCPoint CameraPositionScrapyard = new CCPoint(-Constants.COCOS_WORLD_WIDTH / 2, -Constants.COCOS_WORLD_HEIGHT * 0.75f);
         internal void StartTransition(HangarState state)
         {
             var oldState = State;
@@ -279,9 +341,8 @@ namespace CocosSharpMathGame
             // stop all current transition actions
             StopAllTransitionActions();
             // disable the touchBegan listeners for all gui elements (exept the carousel usually)
-            GUILayer.DisableTouchBegan(state == HangarState.MODIFY_AIRCRAFT || oldState == HangarState.MODIFY_AIRCRAFT);
-            // start transition actions
-            TransistionAction = new CCSequence(new CCDelayTime(TRANSITION_TIME), new CCCallFunc(() => FinalizeTransition(state)));
+            GUILayer.DisableTouchBegan(state == HangarState.MODIFY_AIRCRAFT || oldState == HangarState.MODIFY_AIRCRAFT || state == HangarState.SCRAPYARD_CHALLENGE || oldState == HangarState.SCRAPYARD_CHALLENGE);
+            // state leave actions
             if (state != HangarState.HANGAR)
             {
                 GUILayer.GOButton.AddAction(RemoveGOButton);
@@ -292,6 +353,15 @@ namespace CocosSharpMathGame
             {
                 NewAircraftButton.AddAction(RemoveNewAircraftButton);
             }
+            if (state != HangarState.SCRAPYARD)
+            {
+                // fade out scrapyard buttons and make them invisible
+                foreach (var button in ScrapyardButtons)
+                {
+                    button.AddAction(CreateUIFadeOutAndDisableAction(button));
+                }
+            }
+            // state enter actions
             if (state == HangarState.HANGAR)
             {
                 GUILayer.TakeoffNode.AddAction(TakeoffNodeToHangar);
@@ -407,8 +477,86 @@ namespace CocosSharpMathGame
                 NextCameraPosition = ModifiedAircraft.Position - ((CCPoint)NextCameraSize / 2) + new CCPoint(0, NextCameraSize.Height / 6);
                 // this special transition takes twice the time
             }
+            else if (state == HangarState.SCRAPYARD)
+            {
+                NextCameraPosition = CameraPositionScrapyard;
+                NextCameraSize = new CCSize(Constants.COCOS_WORLD_WIDTH, Constants.COCOS_WORLD_HEIGHT);
+                // move all aircrafts away
+                foreach (var aircraft in Aircrafts)
+                {
+                    MoveAircraftOutOfView(aircraft, TransitionTime);
+                }
+                // make visible and fade in the scrapyard buttons
+                foreach (var button in ScrapyardButtons)
+                {
+                    button.AddAction(CreateUIFadeInAndEnableAction(button));
+                }
+                if (oldState == HangarState.SCRAPYARD_CHALLENGE)
+                {
+                    // the transition starts off at SCRAPYARD_CHALLENGE, so do some more
+                    // the carousel was removed so add it again
+                    GUILayer.HangarOptionCarousel.AddAction(AddCarousel);
+                    // remove the challenge node
+                    //GUILayer.ChallengeNode.Pressable = false;
+                    var challenge = GUILayer.ChallengeNode;
+                    var moveAction = new CCEaseIn(new CCMoveTo(TransitionTime, new CCPoint(0, -GUILayer.ChallengeNode.BoundingBoxTransformedToWorld.Size.Height - 1f)), 0.6f);
+                    GUILayer.ChallengeNode.AddAction(moveAction);
+                    // at the end of the transition make the current button pressable again
+                    var button = CurrentScrapyardButton;
+                    button.AddAction(new CCSequence(new CCDelayTime(TransitionTime), new CCCallFunc(() => { button.Pressable = true; })));
+                }
+            }
+            else if (state == HangarState.SCRAPYARD_CHALLENGE)
+            {
+                // disable and remove the carousel
+                GUILayer.HangarOptionCarousel.AddAction(RemoveCarousel);
+                // camera
+                var nextRect = ScrapyardButtonCameraRect(CurrentScrapyardButton);
+                Console.WriteLine("nextRect: " + nextRect);
+                NextCameraPosition = nextRect.Origin;
+                NextCameraSize = nextRect.Size;
+                // stop the current button from going invisible
+                CurrentScrapyardButton.StopAction(FadeActionTag);
+                // also make it unpressable since there is no reason to press it again right now
+                CurrentScrapyardButton.Pressable = false;
+                // get and show the math challenge
+                if (CurrentScrapyardButton.CurrentMathChallengeNode == null)
+                {
+                    CurrentScrapyardButton.CreateNextChallenge();
+                    CurrentScrapyardButton.CurrentMathChallengeNode.AnswerChosenEvent += ScrapyardChallengeCallback;
+                }
+                GUILayer.ChallengeNode = CurrentScrapyardButton.CurrentMathChallengeNode;
+                GUILayer.ChallengeNode.Pressable = true;
+                GUILayer.ChallengeNode.Position = new CCPoint(0, -GUILayer.ChallengeNode.BoundingBoxTransformedToWorld.Size.Height - 1f);
+                var moveAction = new CCEaseIn(new CCMoveTo(TransitionTime, CCPoint.Zero), 0.6f);
+                GUILayer.ChallengeNode.AddAction(moveAction);
+            }
+            // start transition actions
             TransistionAction = new CCSequence(new CCDelayTime(TransitionTime), new CCCallFunc(() => FinalizeTransition(state)));
             AddAction(TransistionAction);
+        }
+
+        private void ScrapyardChallengeCallback(object sender, bool isSolution)
+        {
+            // generate and show the next challenge
+            CurrentScrapyardButton.CreateNextChallenge();
+            GUILayer.ChallengeNode = CurrentScrapyardButton.CurrentMathChallengeNode;
+            GUILayer.ChallengeNode.AnswerChosenEvent += ScrapyardChallengeCallback;
+        }
+
+        private void MoveAircraftOutOfView(Aircraft aircraft, float duration)
+        {
+            var bounds = VisibleBoundsWorldspace;
+            var vec = aircraft.PositionWorldspace - bounds.Center;
+            if (vec.Equals(CCPoint.Zero)) vec = new CCPoint(0, 1);
+            vec = CCPoint.Normalize(vec);
+            vec = vec * bounds.Size.Height;
+            // move it
+            var moveAction = new CCMoveBy(duration, aircraft.Position + vec);
+            moveAction.Tag = MoveAircraftTag;
+            // just to be sure stop any current move action
+            aircraft.StopAction(MoveAircraftTag);
+            aircraft.AddAction(moveAction);
         }
 
         /// <summary>
@@ -427,7 +575,6 @@ namespace CocosSharpMathGame
                     break;
                 }
             }
-            Console.WriteLine("Parts: " + GetParts().Count);
         }
 
         internal List<Part> GetParts()
@@ -503,6 +650,10 @@ namespace CocosSharpMathGame
                 aircraft.StopAction(RotateAircraftTag);
                 aircraft.StopAction(FadeOut.Tag);
                 aircraft.StopAction(FadeIn.Tag);
+            }
+            foreach (var scrapyardButton in ScrapyardButtons)
+            {
+                scrapyardButton.StopAction(FadeActionTag);
             }
             TimeInTransition = 0; // reset transition time
         }
@@ -681,6 +832,14 @@ namespace CocosSharpMathGame
         {
             AddChild(aircraft, (int)aircraft.Area);
         }
+        internal ScrapyardButton[] ScrapyardButtons { get; private protected set; }
+        internal ScrapyardButton CurrentScrapyardButton { get; private protected set; }
+        internal void EnterScrapyardChallengeState(ScrapyardButton scrapyardButton)
+        {
+            if (State != HangarState.SCRAPYARD) return;
+            CurrentScrapyardButton = scrapyardButton;
+            StartTransition(HangarState.SCRAPYARD_CHALLENGE);
+        }
 
         internal void ModifyNewAircraft()
         {
@@ -804,8 +963,35 @@ namespace CocosSharpMathGame
                         CameraSpace = new CCRect(-width * 2, ModifiedAircraft.Position.Y - width * 2 * ratio, width * 4, width * 4 * ratio);
                     }
                     break;
+                case HangarState.SCRAPYARD:
+                    {
+                        float cameraMinY = CameraPositionScrapyard.Y - ScrapyardHeight() + Constants.COCOS_WORLD_HEIGHT * 0.25f;
+                        if (cameraMinY > CameraPositionScrapyard.Y) cameraMinY = CameraPositionScrapyard.Y;
+                        CameraSpace = new CCRect(CameraPositionScrapyard.X, cameraMinY, Constants.COCOS_WORLD_WIDTH, Constants.COCOS_WORLD_HEIGHT + Math.Abs(CameraPositionScrapyard.Y - cameraMinY) + Constants.COCOS_WORLD_HEIGHT * 0.25f);
+                        MaxCameraWidth = Constants.COCOS_WORLD_WIDTH;
+                        MaxCameraHeight = Constants.COCOS_WORLD_HEIGHT;
+                    }
+                    break;
+                case HangarState.SCRAPYARD_CHALLENGE:
+                    {
+                        CameraSpace = ScrapyardButtonCameraRect(CurrentScrapyardButton);
+                    }
+                    break;
             }
             
+        }
+
+        private float ScrapyardHeight()
+        {
+            return Math.Abs(ScrapyardButtons.First().Position.Y - ScrapyardButtons.Last().Position.Y) + ScrapyardButton.ButtonSize.Height;
+        }
+        private CCRect ScrapyardButtonCameraRect(ScrapyardButton scrapyardButton)
+        {
+            var pos = scrapyardButton.PositionWorldspace;
+            const float FACTOR = 2f;
+            var size = ScrapyardButton.ButtonSize * FACTOR;
+            size.Height = size.Width * Constants.COCOS_WORLD_HEIGHT / Constants.COCOS_WORLD_WIDTH;
+            return new CCRect(pos.X - size.Width / 2, pos.Y - size.Height / 2 - size.Height * 0.2f, size.Width, size.Height);
         }
 
         internal CCRect PlacementRect(Aircraft aircraft)
@@ -932,6 +1118,13 @@ namespace CocosSharpMathGame
                                             DrawInModifyAircraftState();
                                             break;
                                         }
+                                }
+                                break;
+                            case HangarState.SCRAPYARD_CHALLENGE:
+                                {
+                                    // return to the scrapyard
+                                    if (!GUILayer.ChallengeNode.BoundingBoxTransformedToWorld.ContainsPoint(GUILayer.HangarCoordinatesToGUI(touch.Location)))
+                                        StartTransition(HangarState.SCRAPYARD);
                                 }
                                 break;
                         }

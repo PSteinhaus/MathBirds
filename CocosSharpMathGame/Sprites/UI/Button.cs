@@ -38,17 +38,7 @@ namespace CocosSharpMathGame
                 }
             }
         }
-        /*
-        internal virtual void OnTouchesCancelled(List<CCTouch> touches, CCEvent touchEvent)
-        {
-            touchEvent.StopPropogation();
-            if (touches.Count > 0)
-            {
-                // turn back to original color when released
-                Color = CCColor3B.White;
-            }
-        }
-        */
+
         private protected abstract void ButtonEnded(CCTouch touch);
     }
 }

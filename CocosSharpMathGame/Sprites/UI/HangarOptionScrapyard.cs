@@ -7,12 +7,13 @@ using CocosSharp;
 
 namespace CocosSharpMathGame
 {
-    internal class HangarOptionWorkshop : HangarOptionNode
+    internal class HangarOptionScrapyard : HangarOptionNode
     {
-        internal HangarOptionWorkshop() : base()
+        internal HangarOptionScrapyard() : base()
         {
+            FitToWidth(220f);
             // add text
-            var label = new CCLabel("Assembly", "EarlyGameBoy", 12, CCLabelFormat.SpriteFont);
+            var label = new CCLabel("Scrapyard", "EarlyGameBoy", 12, CCLabelFormat.SpriteFont);
             label.Position = (CCPoint)ContentSize / 2;
             label.Color = CCColor3B.White;
             label.Scale = 1.125f;
