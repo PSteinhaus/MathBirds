@@ -183,13 +183,15 @@ namespace CocosSharpMathGame
 
         private CCAction CreateUIFadeOutAndDisableAction(ScrapyardButton scrapyardButton)
         {
-            var action = new CCSequence(new CCCallFunc(() => { scrapyardButton.Pressable = false; }), FadeOut, new CCCallFunc(() => { scrapyardButton.Visible = false; }));
+            var action = new CCSpawn( new CCSequence(new CCCallFunc(() => { scrapyardButton.Pressable = false; }), FadeOut, new CCCallFunc(() => { scrapyardButton.Visible = false; })),
+                                      new CCCallFiniteTimeFunc(TRANSITION_TIME, (prog, duration) => { scrapyardButton.DrawNodeAlpha = 1 - prog; scrapyardButton.UpdateDrawNode(); }));
             action.Tag = FadeActionTag;
             return action;
         }
         private CCAction CreateUIFadeInAndEnableAction(ScrapyardButton scrapyardButton)
         {
-            var action = new CCSequence(new CCCallFunc(() => { scrapyardButton.Visible = true; }), FadeIn, new CCCallFunc(() => { if (!scrapyardButton.ChallengeModel.Locked) scrapyardButton.Pressable = true; }));
+            var action = new CCSpawn( new CCSequence(new CCCallFunc(() => { scrapyardButton.Visible = true; }), FadeIn, new CCCallFunc(() => { if (!scrapyardButton.ChallengeModel.Locked) scrapyardButton.Pressable = true; })),
+                                      new CCCallFiniteTimeFunc(TRANSITION_TIME, (prog, duration) => { scrapyardButton.DrawNodeAlpha = prog; scrapyardButton.UpdateDrawNode(); }));
             action.Tag = FadeActionTag;
             return action;
         }
@@ -481,16 +483,6 @@ namespace CocosSharpMathGame
             {
                 NextCameraPosition = CameraPositionScrapyard;
                 NextCameraSize = new CCSize(Constants.COCOS_WORLD_WIDTH, Constants.COCOS_WORLD_HEIGHT);
-                // move all aircrafts away
-                foreach (var aircraft in Aircrafts)
-                {
-                    MoveAircraftOutOfView(aircraft, TransitionTime);
-                }
-                // make visible and fade in the scrapyard buttons
-                foreach (var button in ScrapyardButtons)
-                {
-                    button.AddAction(CreateUIFadeInAndEnableAction(button));
-                }
                 if (oldState == HangarState.SCRAPYARD_CHALLENGE)
                 {
                     // the transition starts off at SCRAPYARD_CHALLENGE, so do some more
@@ -504,6 +496,25 @@ namespace CocosSharpMathGame
                     // at the end of the transition make the current button pressable again
                     var button = CurrentScrapyardButton;
                     button.AddAction(new CCSequence(new CCDelayTime(TransitionTime), new CCCallFunc(() => { button.Pressable = true; })));
+                    // make visible and fade in the other scrapyard buttons
+                    foreach (var otherButton in ScrapyardButtons)
+                    {
+                        if (otherButton != button)
+                            otherButton.AddAction(CreateUIFadeInAndEnableAction(otherButton));
+                    }
+                }
+                else
+                {
+                    // move all aircrafts away
+                    foreach (var aircraft in Aircrafts)
+                    {
+                        MoveAircraftOutOfView(aircraft, TransitionTime);
+                    }
+                    // make visible and fade in the scrapyard buttons
+                    foreach (var button in ScrapyardButtons)
+                    {
+                        button.AddAction(CreateUIFadeInAndEnableAction(button));
+                    }
                 }
             }
             else if (state == HangarState.SCRAPYARD_CHALLENGE)
@@ -538,6 +549,18 @@ namespace CocosSharpMathGame
 
         private void ScrapyardChallengeCallback(object sender, bool isSolution)
         {
+            // check if the player chose the right answer
+            if (isSolution)
+            {
+                // Advance the lootbox-meter
+                CurrentScrapyardButton.ChallengeSolved();
+            }
+            else
+            {
+                // Reset the lootbox-meter
+                CurrentScrapyardButton.ChallengeFailed();
+                GUILayer.AddScreenShake(38f, 38f);
+            }
             // generate and show the next challenge
             CurrentScrapyardButton.CreateNextChallenge();
             GUILayer.ChallengeNode = CurrentScrapyardButton.CurrentMathChallengeNode;

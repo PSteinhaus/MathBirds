@@ -5,34 +5,196 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using CocosSharp;
+using MathNet.Symbolics;
 
 namespace CocosSharpMathGame
 {
-    /// <summary>
-    /// these are the buttons that the player can click on in the scrapyard
-    /// </summary>
-    internal class ScrapyardButton : Button
+    internal class ScrapyardButtonButton : Button
     {
-        internal static readonly CCSize ButtonSize = new CCSize(200,200);
-        internal MathChallenge ChallengeModel { get; private protected set; }
-        internal MathChallengeNode CurrentMathChallengeNode { get; private set; }
-        internal ScrapyardButton(MathChallenge challengeModel, string textureName) : base(textureName, false)
+        internal ScrapyardButtonButton(string textureName) : base(textureName, false)
         {
-            ChallengeModel = challengeModel;
-            FitToBox(ButtonSize);
-            // check if the challenge type is locked
-            if (ChallengeModel.Locked)
-            {
-                var frame = UIElement.spriteSheet.Frames.Find(_ => _.TextureFilename.Equals("scrapyardLockedv2.png"));
-                ReplaceTexture(frame.Texture, frame.TextureRectInPixels);
-                Pressable = false;
-                Color = CCColor3B.Gray;
-            }
+            FitToBox(ScrapyardButton.ButtonSize);
         }
 
         private protected override void ButtonEnded(CCTouch touch)
         {
-            ((HangarLayer)Layer).EnterScrapyardChallengeState(this);
+            ((HangarLayer)Layer).EnterScrapyardChallengeState(((ScrapyardButton)Parent));
+        }
+    }
+    /// <summary>
+    /// these are the buttons that the player can click on in the scrapyard
+    /// </summary>
+    internal class ScrapyardButton : GameObjectNode
+    {
+        internal static readonly CCSize ButtonSize = new CCSize(200, 200);
+        private protected CCDrawNode MyDrawNode;
+        internal string[] PartRewardsTypeNames { get; private protected set; }
+        internal int LootboxCount { get; private protected set; }
+        internal float LootboxProgress { get; private protected set; }
+        internal float LootboxProgressGoal { get; private protected set; }
+        internal bool Pressable
+        {
+            get { return Button.Pressable; }
+            set { Button.Pressable = value; }
+        }
+        internal MathChallenge ChallengeModel { get; private protected set; }
+        internal MathChallengeNode CurrentMathChallengeNode { get; private set; }
+        internal Button Button { get; private set; }
+        internal ScrapyardButton(MathChallenge challengeModel, string textureName)
+        {
+            Scale = 1f;
+            AnchorPoint = CCPoint.AnchorMiddle;
+            Button = new ScrapyardButtonButton(textureName);
+            Button.AnchorPoint = CCPoint.AnchorLowerLeft;
+            AddChild(Button);
+            ContentSize = Button.ScaledContentSize;
+            ChallengeModel = challengeModel;
+            // check if the challenge type is locked
+            if (ChallengeModel.Locked)
+            {
+                var frame = UIElement.spriteSheet.Frames.Find(_ => _.TextureFilename.Equals("scrapyardLockedv2.png"));
+                Button.ReplaceTexture(frame.Texture, frame.TextureRectInPixels);
+                Button.Pressable = false;
+                Button.Color = CCColor3B.Gray;
+            }
+            else
+            {
+                // generate and add your drawnode (for drawing the progress bar and other things)
+                MyDrawNode = new CCDrawNode();
+                MyDrawNode.BlendFunc = CCBlendFunc.NonPremultiplied;
+                MyDrawNode.Position = (CCPoint)ContentSize / 2;
+                AddChild(MyDrawNode, -100000);
+                UpdateDrawNode();   // initialize it
+            }
+        }
+
+        protected override void AddedToScene()
+        {
+            base.AddedToScene();
+            if (!ChallengeModel.Locked)
+                Schedule();
+        }
+
+        public override void Update(float dt)
+        {
+            base.Update(dt);
+            // move towards the LootboxProgressGoal
+            if (LootboxProgress != LootboxProgressGoal)
+            {
+                const float LOOTBOX_PROGRESS_INCREASE_RATE = 0.1f; // per 1/60 s
+                const float BREAKOFF = 0.0001f;
+                float diff = LootboxProgressGoal - LootboxProgress;
+                if (Math.Abs(diff) > BREAKOFF)
+                    LootboxProgress += LOOTBOX_PROGRESS_INCREASE_RATE * diff;
+                else
+                    LootboxProgress = LootboxProgressGoal;
+                // if the progress bar is filled reward the player and decrease the progress and goal by 1
+                if (LootboxProgress >= 1f)
+                {
+                    if (LootboxCount > 0)
+                    {
+                        Reward();
+                        LootboxCount -= 1;
+                    }
+                    LootboxProgress -= 1f;
+                    LootboxProgressGoal -= 1f;
+                }
+                // visualize (update the DrawNode)
+                UpdateDrawNode();
+            }
+        }
+
+        internal float DrawNodeAlpha { get; set; } = 1f;
+        internal void UpdateDrawNode()
+        {
+            if (MyDrawNode == null) return;
+            MyDrawNode.Clear();
+            if (LootboxCount == 0) return;
+            // visualize lootbar-progress
+            float colorVal = LootboxProgress;
+            const float GROWTH_FACTOR = 1.3f;
+            const float BORDER_WIDTH = 4f;
+            CCColor4B white = new CCColor4B(1f, 1f, 1f, DrawNodeAlpha);
+            CCColor4B bright = new CCColor4B(1f, 1f, 1f, DrawNodeAlpha);
+            CCRect progressRect = new CCRect(-(ContentSize.Width * GROWTH_FACTOR) / 2, -(ContentSize.Height * GROWTH_FACTOR) / 2, ContentSize.Width * GROWTH_FACTOR, ContentSize.Height * GROWTH_FACTOR);
+            // draw the progress bar
+            var progressPoly = new List<CCPoint> { CCPoint.Zero, new CCPoint(0, (ContentSize.Height * GROWTH_FACTOR) / 2) };
+            if (LootboxProgress >= 0.125f)
+            {
+                progressPoly.Add(progressRect.UpperRight);
+            }
+            else
+            {
+                progressPoly.Add(new CCPoint(LootboxProgress / 0.125f * progressRect.MaxX, progressRect.MaxY));
+                goto done;
+            }
+            if (LootboxProgress >= 0.375f)
+            {
+                progressPoly.Add(new CCPoint(progressRect.MaxX, progressRect.MinY));
+            }
+            else
+            {
+                progressPoly.Add(new CCPoint(progressRect.MaxX, progressRect.MaxY - progressRect.Size.Height * ((LootboxProgress - 0.125f)*4)));
+                goto done;
+            }
+            if (LootboxProgress >= 0.625f)
+            {
+                progressPoly.Add(new CCPoint(progressRect.MinX, progressRect.MinY));
+            }
+            else
+            {
+                progressPoly.Add(new CCPoint(progressRect.MaxX - progressRect.Size.Width * ((LootboxProgress - 0.375f) * 4), progressRect.MinY));
+                goto done;
+            }
+            if (LootboxProgress >= 0.875f)
+            {
+                progressPoly.Add(new CCPoint(progressRect.MinX, progressRect.MaxY));
+            }
+            else
+            {
+                progressPoly.Add(new CCPoint(progressRect.MinX, progressRect.MinY + progressRect.Size.Height * ((LootboxProgress - 0.625f) * 4)));
+                goto done;
+            }
+            if (LootboxProgress > 0.875f)
+            {
+                progressPoly.Add(new CCPoint(progressRect.MinX + progressRect.Size.Width * (LootboxProgress - 0.875f) * 2, progressRect.MaxY));
+            }
+            done:
+            var progressPolyPoints = progressPoly.ToArray();
+            MyDrawNode.DrawPolygon(progressPolyPoints, progressPolyPoints.Length, bright, 0f, CCColor4B.Transparent);
+            // draw the progress bar border
+            MyDrawNode.DrawRect(progressRect, CCColor4B.Transparent, BORDER_WIDTH, white);
+            // keep the button itself black
+            var black = new CCColor4B(0f, 0f, 0f, DrawNodeAlpha);
+            MyDrawNode.DrawRect(new CCRect(-(ContentSize.Width) / 2, -(ContentSize.Height) / 2, ContentSize.Width, ContentSize.Height), black);
+        }
+
+        internal event EventHandler<Part> RewardEvent;
+        internal void Reward()
+        {
+            if (PartRewardsTypeNames != null && PartRewardsTypeNames.Length != 0)
+            {
+                // choose a random reward
+                Random rng = new Random();
+                Type t = Type.GetType(PartRewardsTypeNames[rng.Next(0, PartRewardsTypeNames.Length)]);
+                Part reward = ((Part)Activator.CreateInstance(t));
+                RewardEvent?.Invoke(this, reward);
+            }
+        }
+
+        internal float BaseIncrease { get; set; } = 0.2f;
+        internal float BonusIncrease { get; set; } = 0.1f;
+        internal void ChallengeSolved()
+        {
+            // advance the lootbox-meter-goal
+            var rng = new Random();
+            LootboxProgressGoal += BaseIncrease + ((float)rng.NextDouble()) * BonusIncrease;
+        }
+
+        internal void ChallengeFailed()
+        {
+            // reset the lootbox-meter-goal somewhat
+            LootboxProgressGoal *= 0.25f;    // lose 75% of your progress with each wrong answer 
         }
 
         internal MathChallengeNode GenerateMathChallengeNode()
