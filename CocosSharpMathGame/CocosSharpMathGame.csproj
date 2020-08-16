@@ -178,6 +178,8 @@
     <Compile Include="Layers\PlayLayer.cs" />
     <Compile Include="Layers\WreckageGUILayer.cs" />
     <Compile Include="Layers\WreckageLayer.cs" />
+    <Compile Include="MathChallenges\DivideChallenge.cs" />
+    <Compile Include="MathChallenges\MultiplyChallenge.cs" />
     <Compile Include="MathChallenges\SubChallenge.cs" />
     <Compile Include="MathChallenges\AddChallenge.cs" />
     <Compile Include="MathChallenges\MathChallenge.cs" />
@@ -251,8 +253,11 @@
     <Content Include="Data\sprites\hangarOptionStart.png" />
     <Content Include="Data\sprites\newAircraftButton.png" />
     <Content Include="Data\sprites\scrapyardAdd.png" />
+    <Content Include="Data\sprites\scrapyardDivide.png" />
     <Content Include="Data\sprites\scrapyardLocked.png" />
     <Content Include="Data\sprites\scrapyardLockedv2.png" />
+    <Content Include="Data\sprites\scrapyardMultiply.png" />
+    <Content Include="Data\sprites\scrapyardSub.png" />
     <Content Include="Data\sprites\testBody.png" />
     <Content Include="Data\sprites\testDoubleWing.png" />
     <Content Include="Data\sprites\testEngine.png" />

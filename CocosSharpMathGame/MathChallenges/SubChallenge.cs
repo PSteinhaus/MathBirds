@@ -10,7 +10,7 @@ namespace CocosSharpMathGame
     // TODO: turn this class from a placeholder to an actual subtraction challenge
     internal class SubChallenge : MathChallenge
     {
-        private static bool locked = true;
+        private static bool locked = false;
         internal override bool Locked
         {
             get { return locked; }
@@ -18,13 +18,13 @@ namespace CocosSharpMathGame
         }
         private const int STD_MIN_NUM = 1;
         private const int STD_MAX_NUM = 100;
-        private protected int SummandCount { get; set; }
+        private protected int NumbersCount { get; set; }
         private protected int MinNum { get; set; }
         private protected int MaxNum { get; set; }
-        internal SubChallenge(int answerCount = 4, int summandCount = 2, int minNum = STD_MIN_NUM, int maxNum = STD_MAX_NUM)
+        internal SubChallenge(int answerCount = 4, int numbersCount = 2, int minNum = STD_MIN_NUM, int maxNum = STD_MAX_NUM)
         {
             CreateAnswerArrays(answerCount);
-            SummandCount = summandCount;
+            NumbersCount = numbersCount;
             MinNum = minNum;
             MaxNum = maxNum;
 
@@ -32,17 +32,19 @@ namespace CocosSharpMathGame
             var rng = new Random();
 
             // create the challenge
-            // the challenge consists of adding 'summandCount' many summands together
-            int[] summands = new int[summandCount];
-            for (int i=0; i<summands.Length; i++)
-                summands[i] = rng.Next(minNum, maxNum);
-            ChallengeLaTeX = summands[0].ToString();
-            for (int i = 1; i < summands.Length; i++)
-                ChallengeLaTeX += "+" + summands[i].ToString();
+            int[] numbers = new int[numbersCount];
+            for (int i=0; i< numbers.Length; i++)
+                numbers[i] = rng.Next(minNum, maxNum);
+            ChallengeLaTeX = numbers[0].ToString();
+            for (int i = 1; i < numbers.Length; i++)
+                ChallengeLaTeX += "-" + numbers[i].ToString();
             ChallengeInfix = ChallengeLaTeX;
 
             // create the solution
-            SolutionInfix = summands.Sum().ToString();
+            int solution = numbers[0];
+            for (int i = 1; i < numbers.Length; i++)
+                solution -= numbers[i];
+            SolutionInfix = solution.ToString();
             SolutionLaTeX = SolutionInfix;
             // map it to a random answer
             int solutionIndex = rng.Next(answerCount);
@@ -55,34 +57,36 @@ namespace CocosSharpMathGame
                 // don't overwrite the solution
                 if (i == solutionIndex) continue;
                 // choose a random algorithm to create the next answer
-                AnswersInfix[i] = WrongAnswer(rng.Next(0, 2)).ToString();
+                AnswersInfix[i] = WrongAnswer(rng.Next(0, 2), numbers).ToString();
                 AnswersLaTeX[i] = AnswersInfix[i];
             }
         }
 
         internal override MathChallenge CreateFromSelf()
         {
-            return new AddChallenge(AnswersInfix.Length, SummandCount, MinNum, MaxNum);
+            return new SubChallenge(AnswersInfix.Length, NumbersCount, MinNum, MaxNum);
         }
-
-        private int WrongAnswer(int algorithm)
+        
+        private int WrongAnswer(int method, int[] numbers)
         {
             int wrongAnswer = 0;
             int solution = (int)((SymbolicExpression)Infix.ParseOrThrow(SolutionInfix)).RealNumberValue;
+            var rng = new Random();
             start:
-            switch(algorithm)
+            switch(method)
             {
                 case 0:
                     // take the solution and add or substract 1 or 2
-                    wrongAnswer = solution + new Random().Next(-2, 3);
+                    wrongAnswer = solution + rng.Next(-3, 4);
                     break;
                 case 1:
                     // take the solution and add or substract 10 or 20
-                    wrongAnswer = solution + new Random().Next(-2, 3)*10;
+                    wrongAnswer = solution + rng.Next(-2, 3)*10;
                     break;
                 default:
                     // just roll something in the range of the solution
-                    wrongAnswer = solution + new Random().Next(solution - (solution / 2), solution + (solution / 2));
+                    int range = Math.Abs(solution/4);
+                    wrongAnswer = solution + rng.Next(solution - range, solution + range);
                     break;
             }
             // check if the answer is identical to another
@@ -95,15 +99,15 @@ namespace CocosSharpMathGame
             // check if the answer is actually a solution
             if (IsSolution(wrongAnswer.ToString()))
                 goto start;
-            // check if the answer is positive (negative or 0 doesn't make much sense)
-            if (wrongAnswer<=1)
+            // check if the answer is smaller than the first number
+            if (wrongAnswer >= numbers[0])
                 goto start;
             return wrongAnswer;
         }
 
         internal override ScrapyardButton CreateScrapyardButton()
         {
-            return new ScrapyardButton(this, "scrapyardAdd.png");
+            return new ScrapyardButton(this, "scrapyardSub.png");
         }
     }
 }

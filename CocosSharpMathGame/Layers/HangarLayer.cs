@@ -101,7 +101,7 @@ namespace CocosSharpMathGame
             float bSize = ScrapyardButton.ButtonSize.Width;
             float totalSpacing = (Constants.COCOS_WORLD_WIDTH - 2 * bSize) / 3;
             float spacing = (totalSpacing + bSize) / 2;
-            return new CCPoint(i % 2 == 0 ? -spacing : spacing, -((i / 2) * spacing));
+            return new CCPoint(i % 2 == 0 ? -spacing : spacing, -((i/2) * spacing*2));
         }
 
         internal List<Aircraft> TakeoffAircrafts

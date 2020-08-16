@@ -21,7 +21,7 @@ namespace CocosSharpMathGame
             }
         }
         internal float NodeHeight { get; set; } = 220f;
-        internal float QuestionNodeHeight { get; set; } = 240f;
+        internal float QuestionNodeHeight { get { return MathChallenge.QuestionNodeHeight; } }
         internal int Columns { get; private protected set; }
         internal MathChallenge MathChallenge { get; private protected set; }
         internal MathNode[] AnswerNodes { get; private protected set; }

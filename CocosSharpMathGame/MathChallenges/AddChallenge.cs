@@ -74,15 +74,15 @@ namespace CocosSharpMathGame
             {
                 case 0:
                     // take the solution and add or substract 1 or 2
-                    wrongAnswer = solution + new Random().Next(-2, 3);
+                    wrongAnswer = solution + rng.Next(-2, 3);
                     break;
                 case 1:
                     // take the solution and add or substract 10 or 20
-                    wrongAnswer = solution + new Random().Next(-2, 3)*10;
+                    wrongAnswer = solution + rng.Next(-2, 3)*10;
                     break;
                 default:
                     // just roll something in the range of the solution
-                    wrongAnswer = solution + new Random().Next(solution - (solution / 2), solution + (solution / 2));
+                    wrongAnswer = solution + rng.Next(solution - (solution / 4), solution + (solution / 4));
                     break;
             }
             // check if the answer is identical to another

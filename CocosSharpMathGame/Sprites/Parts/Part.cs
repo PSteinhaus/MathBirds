@@ -284,7 +284,7 @@ namespace CocosSharpMathGame
         {
             Reinitialize();
             foreach (var part in MountedParts)
-                ReinitializeRecursively()
+                ReinitializeRecursively();
         }
 
         internal void Repair(float amount)
