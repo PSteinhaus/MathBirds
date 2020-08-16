@@ -26,12 +26,15 @@ namespace CocosSharpMathGame
             get { return challengeNode; }
             set
             {
-                // if there is an old node remove it first
-                if (challengeNode != null && challengeNode.Parent == this)
-                    RemoveChild(challengeNode);
-                challengeNode = value;
-                if (challengeNode != null)
-                    AddChild(challengeNode);
+                //if (value != challengeNode) // only do something if the value is actually changed
+                {
+                    // if there is an old node remove it first
+                    if (challengeNode != null && challengeNode.Parent == this)
+                        RemoveChild(challengeNode);
+                    challengeNode = value;
+                    if (challengeNode != null && challengeNode.Parent != this)
+                        AddChild(challengeNode);
+                }
             }
         }
         internal GOButton GOButton { get; private protected set; }

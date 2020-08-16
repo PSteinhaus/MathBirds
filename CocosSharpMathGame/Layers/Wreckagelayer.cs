@@ -273,7 +273,8 @@ namespace CocosSharpMathGame
                 {
                     if (singlePart.Flipped) singlePart.Flip();
                 }
-                part.Color = CCColor3B.White;
+                // repair the part fully
+                part.Reinitialize();
             }
             // choose the parts that will be salvaged
             SalvagedParts = new List<Part>();

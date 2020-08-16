@@ -221,7 +221,6 @@ namespace CocosSharpMathGame
 
         private protected override void OnTouchesBeganUI(List<CCTouch> touches, CCEvent touchEvent)
         {
-            Console.WriteLine(Pressable);
             switch (touches.Count)
             {
                 case 1:

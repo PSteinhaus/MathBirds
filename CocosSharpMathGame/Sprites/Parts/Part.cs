@@ -260,6 +260,49 @@ namespace CocosSharpMathGame
                 Aircraft.PartsChanged(deathPossible: true);
         }
 
+        private void UnDie()
+        {
+            if (MyState == State.DESTROYED)
+            {
+                MyState = State.ACTIVE;
+                Color = CCColor3B.White;
+                // unreduce your mass (it was halfed at death)
+                for (int i = 0; i < MassPoints.Length; i++)
+                    MassPoints[i].Mass *= 2;
+            }
+        }
+
+        internal void Reinitialize()
+        {
+            UnDie();
+            Health = MaxHealth;
+            // delete all DamageClouds
+            DamageCloudTailNodes.Clear();
+        }
+
+        internal void ReinitializeRecursively()
+        {
+            Reinitialize();
+            foreach (var part in MountedParts)
+                ReinitializeRecursively()
+        }
+
+        internal void Repair(float amount)
+        {
+            // remove (some) DamageClouds
+            int cloudsRemoved = (int)((amount / (MaxHealth - Health)) * DamageCloudTailNodes.Count);
+            if (cloudsRemoved > DamageCloudTailNodes.Count)
+                cloudsRemoved = DamageCloudTailNodes.Count;
+            for (int i = 0; i < cloudsRemoved; i++)
+            {
+                DamageCloudTailNodes.RemoveAt(0);
+            }
+            Health += amount;
+            if (Health > MaxHealth)
+                Health = MaxHealth;
+            UnDie();
+        }
+
         internal void ReactToHit(float damage, CCPoint collisionPos)
         {
             const float MAX_DISTANCE_FROM_COLLISION = 200f;

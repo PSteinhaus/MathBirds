@@ -28,8 +28,8 @@ namespace CocosSharpMathGame
     {
         internal static readonly CCSize ButtonSize = new CCSize(200, 200);
         private protected CCDrawNode MyDrawNode;
-        internal string[] PartRewardsTypeNames { get; private protected set; }
-        internal int LootboxCount { get; private protected set; }
+        internal string[] PartRewardsTypeNames { get; private protected set; } = new string[] { typeof(TestRotor).AssemblyQualifiedName, typeof(TestBody).AssemblyQualifiedName };
+        internal int LootboxCount { get; private protected set; } = 5;
         internal float LootboxProgress { get; private protected set; }
         internal float LootboxProgressGoal { get; private protected set; }
         internal bool Pressable
@@ -111,7 +111,6 @@ namespace CocosSharpMathGame
             MyDrawNode.Clear();
             if (LootboxCount == 0) return;
             // visualize lootbar-progress
-            float colorVal = LootboxProgress;
             const float GROWTH_FACTOR = 1.3f;
             const float BORDER_WIDTH = 4f;
             CCColor4B white = new CCColor4B(1f, 1f, 1f, DrawNodeAlpha);
@@ -178,7 +177,20 @@ namespace CocosSharpMathGame
                 Random rng = new Random();
                 Type t = Type.GetType(PartRewardsTypeNames[rng.Next(0, PartRewardsTypeNames.Length)]);
                 Part reward = ((Part)Activator.CreateInstance(t));
-                RewardEvent?.Invoke(this, reward);
+                // start some visualization-actions showing the reward
+                Button.AddAction(new CCSequence(new CCFadeTo(0.25f, 0), new CCDelayTime(3f), new CCFadeTo(1f, byte.MaxValue)));
+                var guiLayer = ((HangarLayer)Layer).GUILayer;
+                reward.Position = guiLayer.HangarCoordinatesToGUI(BoundingBoxTransformedToWorld.Center);
+                guiLayer.AddChild(reward);
+                reward.FitToBox(Button.BoundingBoxTransformedToWorld.Size * 2);
+                var rewardEndScale = reward.GetTotalScale();
+                reward.Scale = 0.000001f;
+                reward.AddAction(new CCSequence(new CCDelayTime(1.25f),
+                                                new CCEaseBackOut(new CCScaleTo(0.5f, rewardEndScale)),
+                                                new CCDelayTime(1f),
+                                                new CCEaseIn(new CCMoveTo(0.8f, guiLayer.VisibleBoundsWorldspace.Center + new CCPoint(0, guiLayer.VisibleBoundsWorldspace.Size.Height)), 3f),
+                                                new CCRemoveSelf(),
+                                                new CCCallFunc( () => { RewardEvent?.Invoke(this, reward); } )));
             }
         }
 
@@ -194,7 +206,7 @@ namespace CocosSharpMathGame
         internal void ChallengeFailed()
         {
             // reset the lootbox-meter-goal somewhat
-            LootboxProgressGoal *= 0.25f;    // lose 75% of your progress with each wrong answer 
+            LootboxProgressGoal *= 0.33f;    // lose 66% of your progress with each wrong answer 
         }
 
         internal MathChallengeNode GenerateMathChallengeNode()

@@ -200,16 +200,6 @@ namespace CocosSharpMathGame
         {
             // stop all scrolling
             Scroller.OnTouchesBegan(touches, touchEvent);
-            switch (touches.Count)
-            {
-                case 1:
-                    {
-                        
-                    }
-                    break;
-                default:
-                    break;
-            }
         }
         private protected override void OnTouchesMovedUI(List<CCTouch> touches, CCEvent touchEvent)
         {
@@ -230,16 +220,6 @@ namespace CocosSharpMathGame
         {
             // start inert scrolling
             Scroller.OnTouchesEnded(touches, touchEvent);
-            switch (touches.Count)
-            {
-                case 1:
-                    {
-                        
-                    }
-                    break;
-                default:
-                    break;
-            }
         }
     }
 }

@@ -30,11 +30,15 @@ namespace CocosSharpMathGame
             AddEventListener(touchListener, this);
         }
 
-        private protected void OnTouchesBegan(List<CCTouch> touches, CCEvent touchEvent)
+        internal void OnTouchesBegan(List<CCTouch> touches, CCEvent touchEvent)
         {
             if (Pressable && MyVisible && TouchStartedOnIt(touches[0]))
             {
-                if (SwallowTouch) touchEvent.StopPropogation();
+                if (SwallowTouch)
+                {
+                    Console.WriteLine("SWALLOWED: "+touches[0].Location);
+                    touchEvent.StopPropogation();
+                }
                 Pressed = true;
                 OnTouchesBeganUI(touches, touchEvent);
             }

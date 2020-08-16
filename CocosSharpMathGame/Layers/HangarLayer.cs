@@ -50,8 +50,9 @@ namespace CocosSharpMathGame
             {
                 var button = challengeModels[i].CreateScrapyardButton();
                 ScrapyardButtons[i] = button;
-                button.Position = GetScrapyardButtonPosition(i);
+                button.Position = ScrapyardButtonPosition(i);
                 button.Visible = false;
+                button.RewardEvent += (sender, rewardPart) => { AddPart(rewardPart); };
                 AddChild(button, 2);
             }
             NewAircraftButton = new NewAircraftButton(this);
@@ -95,7 +96,7 @@ namespace CocosSharpMathGame
             CameraPosition = CameraPositionHangar;
         }
 
-        private CCPoint GetScrapyardButtonPosition(int i)
+        private CCPoint ScrapyardButtonPosition(int i)
         {
             float bSize = ScrapyardButton.ButtonSize.Width;
             float totalSpacing = (Constants.COCOS_WORLD_WIDTH - 2 * bSize) / 3;
@@ -489,10 +490,11 @@ namespace CocosSharpMathGame
                     // the carousel was removed so add it again
                     GUILayer.HangarOptionCarousel.AddAction(AddCarousel);
                     // remove the challenge node
-                    //GUILayer.ChallengeNode.Pressable = false;
+                    GUILayer.ChallengeNode = CurrentScrapyardButton.CurrentMathChallengeNode;
                     var challenge = GUILayer.ChallengeNode;
-                    var moveAction = new CCEaseIn(new CCMoveTo(TransitionTime, new CCPoint(0, -GUILayer.ChallengeNode.BoundingBoxTransformedToWorld.Size.Height - 1f)), 0.6f);
-                    GUILayer.ChallengeNode.AddAction(moveAction);
+                    challenge.Pressable = false;
+                    var moveAction = new CCEaseIn(new CCMoveTo(TransitionTime, new CCPoint(0, -challenge.BoundingBoxTransformedToWorld.Size.Height - 1f)), 0.6f);
+                    challenge.AddAction(moveAction);
                     // at the end of the transition make the current button pressable again
                     var button = CurrentScrapyardButton;
                     button.AddAction(new CCSequence(new CCDelayTime(TransitionTime), new CCCallFunc(() => { button.Pressable = true; })));
@@ -523,7 +525,6 @@ namespace CocosSharpMathGame
                 GUILayer.HangarOptionCarousel.AddAction(RemoveCarousel);
                 // camera
                 var nextRect = ScrapyardButtonCameraRect(CurrentScrapyardButton);
-                Console.WriteLine("nextRect: " + nextRect);
                 NextCameraPosition = nextRect.Origin;
                 NextCameraSize = nextRect.Size;
                 // stop the current button from going invisible
@@ -1146,7 +1147,7 @@ namespace CocosSharpMathGame
                             case HangarState.SCRAPYARD_CHALLENGE:
                                 {
                                     // return to the scrapyard
-                                    if (!GUILayer.ChallengeNode.BoundingBoxTransformedToWorld.ContainsPoint(GUILayer.HangarCoordinatesToGUI(touch.Location)))
+                                    if (GUILayer.ChallengeNode == null || !GUILayer.ChallengeNode.BoundingBoxTransformedToWorld.ContainsPoint(GUILayer.HangarCoordinatesToGUI(touch.Location)))
                                         StartTransition(HangarState.SCRAPYARD);
                                 }
                                 break;

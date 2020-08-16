@@ -11,7 +11,9 @@ namespace CocosSharpMathGame
     {
         internal float SigmoidFactor { get; set; } = 1.0f / 40f;
         internal NonScalingCarousel(CCSize contentSize) : base(contentSize)
-        { }
+        {
+            //SwallowTouch = false;
+        }
 
         private protected override CCNode UpdateNodes()
         {
@@ -46,6 +48,15 @@ namespace CocosSharpMathGame
                 }
             }
             return middleNode;
+        }
+
+        private protected override void OnTouchesBeganUI(List<CCTouch> touches, CCEvent touchEvent)
+        {
+            base.OnTouchesBeganUI(touches, touchEvent); // stops the scroller
+            // bug-fix: let your middle node check for being pressed
+            if (MiddleNode is PartCarouselNode pcn)
+                pcn.PartCollectionNode.OnTouchesBegan(touches, touchEvent);
+
         }
     }
 }
