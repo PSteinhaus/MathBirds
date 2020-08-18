@@ -22,6 +22,7 @@ namespace CocosSharpMathGame
         internal string SolutionLaTeX { get; private protected set; }
         internal string SolutionInfix { get; private protected set; }
         internal float QuestionNodeHeight { get; private protected set; } = 240f;
+        internal float NodeHeight { get; private protected set; } = 220f;
 
         /// <summary>
         /// Returns a MathChallenge that is generated based on the parameters of the calling MathChallenge.
@@ -45,7 +46,7 @@ namespace CocosSharpMathGame
         internal static MathChallenge[] GetAllChallengeModels()
         {
             // keep this list updated when adding new major challenge types
-            return new MathChallenge[] { new AddChallenge(), new SubChallenge(), new MultiplyChallenge(), new DivideChallenge() };
+            return new MathChallenge[] { new AddChallenge(), new SubChallenge(), new MultiplyChallenge(), new DivideChallenge(), new SolveChallenge() };
         }
 
         internal abstract ScrapyardButton CreateScrapyardButton();

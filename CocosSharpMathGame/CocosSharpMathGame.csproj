@@ -178,6 +178,7 @@
     <Compile Include="Layers\PlayLayer.cs" />
     <Compile Include="Layers\WreckageGUILayer.cs" />
     <Compile Include="Layers\WreckageLayer.cs" />
+    <Compile Include="MathChallenges\SolveChallenge.cs" />
     <Compile Include="MathChallenges\DivideChallenge.cs" />
     <Compile Include="MathChallenges\MultiplyChallenge.cs" />
     <Compile Include="MathChallenges\SubChallenge.cs" />
@@ -257,6 +258,7 @@
     <Content Include="Data\sprites\scrapyardLocked.png" />
     <Content Include="Data\sprites\scrapyardLockedv2.png" />
     <Content Include="Data\sprites\scrapyardMultiply.png" />
+    <Content Include="Data\sprites\scrapyardSolve.png" />
     <Content Include="Data\sprites\scrapyardSub.png" />
     <Content Include="Data\sprites\testBody.png" />
     <Content Include="Data\sprites\testDoubleWing.png" />

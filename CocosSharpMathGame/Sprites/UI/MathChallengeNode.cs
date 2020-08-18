@@ -20,7 +20,7 @@ namespace CocosSharpMathGame
                     answerNode.Pressable = pressable;
             }
         }
-        internal float NodeHeight { get; set; } = 220f;
+        internal float NodeHeight { get { return MathChallenge.NodeHeight; } }
         internal float QuestionNodeHeight { get { return MathChallenge.QuestionNodeHeight; } }
         internal int Columns { get; private protected set; }
         internal MathChallenge MathChallenge { get; private protected set; }

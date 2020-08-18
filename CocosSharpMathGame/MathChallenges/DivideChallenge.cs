@@ -18,7 +18,7 @@ namespace CocosSharpMathGame
             set { locked = value; }
         }
         private const int STD_MIN_NUM = -50;
-        private const int STD_MAX_NUM = 400;
+        private const int STD_MAX_NUM = 200;
         private protected int MinNum { get; set; }
         private protected int MaxNum { get; set; }
         internal DivideChallenge(int answerCount = 4, int minNum = STD_MIN_NUM, int maxNum = STD_MAX_NUM)
