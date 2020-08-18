@@ -59,7 +59,7 @@ namespace CocosSharpMathGame
                     else
                         variables[i] = 1.ToString();
                 }
-                if (rng.NextBoolean())
+                if (rng.Next(4) == 0)
                 {
                     signs[i] = "-";
                 }
@@ -200,17 +200,19 @@ namespace CocosSharpMathGame
                 if (i == solutionIndex) continue;
                 // choose a random algorithm to create the next answer
                 bool[] alreadyTried = new bool[7];
-                string infix = "";
+                string infix = Infix.ParseOrThrow(SolutionInfix).Equals(0) ? "1" : "0";
                 int method = -1;
                 bool ok = false;
                 for (int tries = 0; tries < 30 && !ok; tries++)
                 {
+                    var whileTries = 0;
                     switch (challengeType)
                     {
                         case 0:
                             {
                                 do
                                 {
+                                    whileTries++;
                                     if (method != -1)
                                         alreadyTried[method] = true;
                                     method = rng.Next(7);
@@ -253,13 +255,14 @@ namespace CocosSharpMathGame
                                             break;
                                     }
                                 }
-                                while (alreadyTried[method]);
+                                while (alreadyTried[method] && whileTries < 14);
                             }
                             break;
                         case 1:
                             {
                                 do
                                 {
+                                    whileTries++;
                                     if (method != -1)
                                         alreadyTried[method] = true;
                                     method = rng.Next(6);
@@ -297,13 +300,14 @@ namespace CocosSharpMathGame
                                             break;
                                     }
                                 }
-                                while (alreadyTried[method]);
+                                while (alreadyTried[method] && whileTries < 14);
                             }
                             break;
                         case 2:
                             {
                                 do
                                 {
+                                    whileTries++;
                                     if (method != -1)
                                         alreadyTried[method] = true;
                                     method = rng.Next(6);
@@ -341,13 +345,14 @@ namespace CocosSharpMathGame
                                             break;
                                     }
                                 }
-                                while (alreadyTried[method]);
+                                while (alreadyTried[method] && whileTries < 14);
                             }
                             break;
                         case 3:
                             {
                                 do
                                 {
+                                    whileTries++;
                                     if (method != -1)
                                         alreadyTried[method] = true;
                                     method = rng.Next(6);
@@ -385,13 +390,14 @@ namespace CocosSharpMathGame
                                             break;
                                     }
                                 }
-                                while (alreadyTried[method]);
+                                while (alreadyTried[method] && whileTries < 14);
                             }
                             break;
                         case 4:
                             {
                                 do
                                 {
+                                    whileTries++;
                                     if (method != -1)
                                         alreadyTried[method] = true;
                                     method = rng.Next(6);
@@ -429,7 +435,7 @@ namespace CocosSharpMathGame
                                             break;
                                     }
                                 }
-                                while (alreadyTried[method]);
+                                while (alreadyTried[method] && whileTries < 14);
                             }
                             break;
                     }
