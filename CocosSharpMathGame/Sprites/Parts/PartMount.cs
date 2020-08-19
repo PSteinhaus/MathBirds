@@ -35,6 +35,7 @@ namespace CocosSharpMathGame
             }
         }
         internal float NullRotation { get; set; }
+        internal float MaxTurningAngle { get; set; } = 10f;
         internal Part.Type[] AllowedTypes { get; set; }
         internal Part.SizeType[] AllowedSizes { get; set; } = new Part.SizeType[1] { Part.SizeType.REGULAR };
         /// <summary>

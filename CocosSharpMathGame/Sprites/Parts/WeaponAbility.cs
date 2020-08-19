@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CocosSharp;
 using MathNet.Numerics.LinearAlgebra.Complex;
+using MathNet.Numerics.Random;
 using MathNet.Symbolics;
 using Symbolism.Trigonometric;
 
@@ -144,10 +145,19 @@ namespace CocosSharpMathGame
                 float angleToAimFor = AngleToAimFor();
                 float angleToTurnTo = angleToAimFor;
                 float angleTurn = Constants.AngleFromToDeg(MyPart.NullRotation, angleToTurnTo);
-                if (angleTurn > MaxTurningAngle)
-                    angleToTurnTo = MyPart.NullRotation + MaxTurningAngle;
-                else if (angleTurn < -MaxTurningAngle)
-                    angleToTurnTo = MyPart.NullRotation - MaxTurningAngle;
+                // make sure you don't rotate further than your MountPoint allows
+                if (angleTurn > MyPart.MountPoint.MaxTurningAngle)
+                    angleToTurnTo = MyPart.NullRotation + MyPart.MountPoint.MaxTurningAngle;
+                else if (angleTurn < -MyPart.MountPoint.MaxTurningAngle)
+                    angleToTurnTo = MyPart.NullRotation - MyPart.MountPoint.MaxTurningAngle;
+                // make sure you don't rotate further than this weapons MaxTurningAngle allows
+                if (MaxTurningAngle < MyPart.MountPoint.MaxTurningAngle)
+                {
+                    if (angleTurn > MaxTurningAngle)
+                        angleToTurnTo = MyPart.NullRotation + MaxTurningAngle;
+                    else if (angleTurn < -MaxTurningAngle)
+                        angleToTurnTo = MyPart.NullRotation - MaxTurningAngle;
+                }
                 MyPart.RotateTowards(angleToTurnTo, TurningAnglePerSecond * dt);
                 // if you're now close enough to the perfect angle (and in range) start shooting
                 if (CanShoot()
@@ -204,7 +214,8 @@ namespace CocosSharpMathGame
         }
 
         /// <summary>
-        /// Returns the angle (for MyRotation) that the weapon should be turned to to be able to hit the target perfectly
+        /// Returns the (relative) rotation angle (for MyRotation) indicating how far into which direction the weapon
+        /// should be turned to be able to hit the target perfectly.
         /// </summary>
         /// <returns></returns>
         internal float AngleToAimFor()
@@ -219,7 +230,7 @@ namespace CocosSharpMathGame
             // and b) the point where the target actually is going to be by then
             // of course we want to minimize this error, for this we will iterate
 
-            // ALTERNATIVE ITERATION MATHOD USING THE BISECTION METHOD
+            // ITERATION USING THE BISECTION METHOD
             double epsilon = 1;
             double angle = 0;
             // define the interval
@@ -261,7 +272,12 @@ namespace CocosSharpMathGame
             {
                 CooldownUntilNextShot = ShootDelay;
                 Projectile newProjectile = (Projectile)ProjectileBlueprint.Clone();
-                newProjectile.SetRotation(MyPart.TotalRotation, updateDxDy:false);
+
+                // add an (additive) error to the shot angle
+                var rng = new Random();
+                float spreadError = (float)rng.NextDouble() * SpreadAngle * (rng.NextBoolean() ? 1 : -1);
+
+                newProjectile.SetRotation(MyPart.TotalRotation + spreadError, updateDxDy:false);
                 newProjectile.SetVelocity(newProjectile.Velocity + AircraftVelocityBoost());
                 newProjectile.Position = MyPart.PositionWorldspace;
                 newProjectile.MyTeam = MyPart.Aircraft.Team;
