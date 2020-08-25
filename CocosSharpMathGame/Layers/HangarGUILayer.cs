@@ -152,7 +152,7 @@ namespace CocosSharpMathGame
             TakeoffNode.AnchorPoint = CCPoint.AnchorLowerLeft;
             TakeoffNode.AddChild(TakeoffCollectionNode);
             TakeoffCollectionNode.PositionY = borderToCollection;
-            TakeoffCollectionNode.Columns = 4;
+            TakeoffCollectionNode.Columns = HangarLayer.UnlockedPlaneSlots;  // start off with only one plane slot unlocked
             TakeoffCollectionNode.Rows = 1;
             TakeoffCollectionNode.BoxSize = new CCSize(TakeoffCollectionNode.ContentSize.Height, TakeoffCollectionNode.ContentSize.Height);
             AddChild(TakeoffNode, zOrder: 1);

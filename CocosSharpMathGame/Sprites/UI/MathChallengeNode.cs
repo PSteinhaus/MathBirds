@@ -23,6 +23,9 @@ namespace CocosSharpMathGame
         internal float NodeHeight { get { return MathChallenge.NodeHeight; } }
         internal float QuestionNodeHeight { get { return MathChallenge.QuestionNodeHeight; } }
         internal int Columns { get; private protected set; }
+        internal static bool UnlockedAddSubSlot { get; private protected set; } = false;
+        internal static bool UnlockedMulDivSlot { get; private protected set; } = false;
+        internal static bool UnlockedSolveSlot { get; private protected set; } = false;
         internal MathChallenge MathChallenge { get; private protected set; }
         internal MathNode[] AnswerNodes { get; private protected set; }
         internal MathNode QuestionNode { get; private protected set; }
@@ -102,10 +105,58 @@ namespace CocosSharpMathGame
                 if (Multiplier != multiplBefore)
                 {
                     UpdateMultiplierLabel();
+                    // also check if a plane-slot-unlock has just been triggered
+                    switch (MathChallenge)
+                    {
+                        case AddChallenge ac:
+                        case SubChallenge sc:
+                            {
+                                if (!UnlockedAddSubSlot && (new AddChallenge(dummy: true)).Multiplier >= 3 && (new SubChallenge(dummy: true)).Multiplier >= 3)
+                                    UnlockAddSubSlot();
+                            }
+                            break;
+                        case MultiplyChallenge mc:
+                        case DivideChallenge dc:
+                            {
+                                if (!UnlockedMulDivSlot && (new MultiplyChallenge(dummy: true)).Multiplier >= 4 && (new DivideChallenge(dummy: true)).Multiplier >= 4)
+                                    UnlockMulDivSlot();
+                            }
+                            break;
+                        case SolveChallenge sc:
+                            {
+                                if (!UnlockedSolveSlot && (new SolveChallenge(dummy: true)).Multiplier >= 4)
+                                    UnlockSolveSlot();
+                            }
+                            break;
+                    }
                 }
                 // visualize (update the DrawNode)
                 UpdateDrawNode();
             }
+        }
+
+        internal static event EventHandler UnlockedAddSubSlotEvent;
+
+        private void UnlockAddSubSlot()
+        {
+            UnlockedAddSubSlot = true;
+            UnlockedAddSubSlotEvent?.Invoke(this, EventArgs.Empty);
+        }
+
+        internal static event EventHandler UnlockedMulDivSlotEvent;
+
+        private void UnlockMulDivSlot()
+        {
+            UnlockedMulDivSlot = true;
+            UnlockedMulDivSlotEvent?.Invoke(this, EventArgs.Empty);
+        }
+
+        internal static event EventHandler UnlockedSolveSlotEvent;
+
+        private void UnlockSolveSlot()
+        {
+            UnlockedSolveSlot = true;
+            UnlockedSolveSlotEvent?.Invoke(this, EventArgs.Empty);
         }
 
         internal static CCColor4B MultiplierBarColor(int multiplier)
@@ -194,6 +245,9 @@ namespace CocosSharpMathGame
         internal event EventHandler<bool> AnswerChosenEvent;
         internal void AnswerChosen(string mathInfix)
         {
+            // as soon as the player first answers a math challenge of this type unlock it
+            if (MathChallenge.Locked)
+                MathChallenge.Locked = false;
             AnswerChosenEvent?.Invoke(this, MathChallenge.TrySolveWith(mathInfix));
         }
     }

@@ -66,6 +66,7 @@ namespace CocosSharpMathGame
             if (startSlopeDx == 0) startSlopeDx = 0.001f;
             if (startSlopeDy == 0) startSlopeDy = 0.001f;
 
+            /*
             // ALTERNATIVE METHOD:
             // create a path that is a circular arc
             // for this 1. find the rotational center
@@ -76,15 +77,6 @@ namespace CocosSharpMathGame
             const float DELTA = 0.01f;
             if (CCPoint.Distance(normalizedVectorStartEnd, new CCPoint(startSlopeDx, startSlopeDy)) < DELTA)
             {
-                /*
-                var xValues = new float[] { startPosition.X, (endPosition.X + startPosition.X) / 2, endPosition.X };
-                var yValues = new float[] { startPosition.Y, (endPosition.Y + startPosition.Y) / 2, endPosition.Y };
-                CubicSpline.FitParametric(xValues, yValues, POINTS_PER_PATH, out float[] pathX, out float[] pathY);
-                for (int i=0; i<pathX.Length; i++)
-                {
-                    pathPoints.Add(new CCPoint(pathX[i], pathY[i]));
-                }
-                */
                 pathPoints.Add(startPosition);
                 pathPoints.Add(endPosition);
             }
@@ -153,23 +145,10 @@ namespace CocosSharpMathGame
                     CCPoint pathPoint = CCPoint.RotateByAngle(startPosition, rotationPoint, angleSign * angleDestination * ((float)i / (float)steps));
                     pathPoints.Add(pathPoint);
                 }
-                /*
-                CCPoint pathPoint = startPosition;
-                pathPoints.Add(pathPoint);
-                float radius = CCPoint.Distance(rotationPoint, startPosition);
-                float dAlpha = 3f / radius;
-                float STOP_DISTANCE = ((radius * (float)Math.PI) / ((float)Math.PI / dAlpha)) * 2;
-                while (CCPoint.Distance(pathPoint, endPosition) > STOP_DISTANCE)
-                {
-                    // rotate the path point a little towards the end position
-                    pathPoint = CCPoint.RotateByAngle(pathPoint, rotationPoint, dAlpha * angleSign);
-                    pathPoints.Add(pathPoint);
-                }
-                */
                 pathPoints.Add(endPosition);
             }
-
-            /*
+            */
+            
             // calculate a spline
             // as the first point of the input-path add a new point
             // this point realises the start slope
@@ -262,9 +241,9 @@ namespace CocosSharpMathGame
                 newPath[i] = new CCPoint(pathX[i], pathY[i]);
             }
             Path = newPath;
-            */
+            
 
-            Path = pathPoints.ToArray();
+            //Path = pathPoints.ToArray();
             // draw it properly
             Clear();
             // don't draw all the points, a portion of it is enough

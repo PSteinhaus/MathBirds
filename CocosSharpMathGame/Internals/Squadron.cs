@@ -47,7 +47,7 @@ namespace CocosSharpMathGame
         /// <summary>
         /// the distance between two (randomly generated) waypoints
         /// </summary>
-        internal float WayPointDistance { get; set; } = 3000f;
+        internal float WayPointDistance { get; set; } = 5000f;
         /// <summary>
         /// if any player aircraft moves in closer than this it will pull the aggro (i.e. cause the squadron to break formation and attack)
         /// </summary>
@@ -69,7 +69,7 @@ namespace CocosSharpMathGame
             if (Leader == null)
                 Leader = aircraft;
             // check if you have to adapt the velocity
-            float v = aircraft.MaxVelocity * 0.65f;
+            float v = aircraft.MaxVelocity * 0.85f;
             if (v < Velocity)
                 Velocity = v;
         }
@@ -113,12 +113,12 @@ namespace CocosSharpMathGame
 
             if (!InFormation) return;   // squadrons only control their units while in formation
 
-            Console.WriteLine("FLYING IN FORMATION");
+            //Console.WriteLine("FLYING IN FORMATION");
 
             const float dt = Constants.TURN_DURATION;
             // if you're too close to the current Waypoint roll a new one
             var diff = WayPoint - Leader.Position;
-            float advanceDistance = Velocity * dt * 4;
+            float advanceDistance = Velocity * dt;
             if (diff.Length < advanceDistance)
             {
                 GenerateWayPoint();

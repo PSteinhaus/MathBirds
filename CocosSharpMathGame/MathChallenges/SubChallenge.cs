@@ -26,8 +26,9 @@ namespace CocosSharpMathGame
         private protected int NumbersCount { get; set; }
         private protected int MinNum { get; set; }
         private protected int MaxNum { get; set; }
-        internal SubChallenge(int answerCount = 4, int numbersCount = 2, int minNum = STD_MIN_NUM, int maxNum = STD_MAX_NUM)
+        internal SubChallenge(int answerCount = 4, int numbersCount = 2, int minNum = STD_MIN_NUM, int maxNum = STD_MAX_NUM, bool dummy=false)
         {
+            if (dummy) return;
             CreateAnswerArrays(answerCount);
             NumbersCount = numbersCount;
             MinNum = minNum;

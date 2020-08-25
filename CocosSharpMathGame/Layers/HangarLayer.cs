@@ -24,6 +24,11 @@ namespace CocosSharpMathGame
     public class HangarLayer : MyLayer
     {
         public static HangarLayer GlobalHangarLayer { get; private set; }
+        internal static int UnlockedPlaneSlots
+        {
+            get;
+            set;
+        } = 1;
         const float TRANSITION_TIME = 0.5f;
 
         internal enum HangarState
@@ -82,6 +87,10 @@ namespace CocosSharpMathGame
             DrawBG();
             BGNode.ZOrder = -20;
             //BGNode.Rotation = 45f;
+            // listen to the MathChallengeNode class for possible plane slot unlocks
+            MathChallengeNode.UnlockedAddSubSlotEvent += UnlockSlot;
+            MathChallengeNode.UnlockedMulDivSlotEvent += UnlockSlot;
+            MathChallengeNode.UnlockedSolveSlotEvent  += UnlockSlot;
             // add a touch listener
             var touchListener = new CCEventListenerTouchAllAtOnce();
             touchListener.OnTouchesBegan = OnTouchesBegan;
@@ -103,6 +112,14 @@ namespace CocosSharpMathGame
 
             CameraSize = CameraSizeHangar;
             CameraPosition = CameraPositionHangar;
+        }
+
+        /// <summary>
+        /// Unlock a new plane slot (allowing the player to take one more plane into battle).
+        /// </summary>
+        private void UnlockSlot(object sender, EventArgs empty)
+        {
+            GUILayer.TakeoffCollectionNode.Columns = ++UnlockedPlaneSlots;
         }
 
         /// <summary>

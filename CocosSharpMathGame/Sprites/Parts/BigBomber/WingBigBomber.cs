@@ -20,7 +20,7 @@ namespace CocosSharpMathGame
             var rotorMount1 = new PartMount(this, new CCPoint(ContentSize.Width - 3f, 8.5f), Type.ROTOR);
             var rotorMount2 = new PartMount(this, new CCPoint(ContentSize.Width - 3f, 21.5f), Type.ROTOR);
 
-            PartMounts = new PartMount[] { rotorMount1, rotorMount1 };
+            PartMounts = new PartMount[] { rotorMount1, rotorMount2 };
 
             // specify the collision polygon
             CollisionType = Collisions.CreateDiamondCollisionPolygon(this);

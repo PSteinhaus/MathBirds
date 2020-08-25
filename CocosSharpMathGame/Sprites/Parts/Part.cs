@@ -395,7 +395,8 @@ namespace CocosSharpMathGame
 
         private float DamageToReferenceSize(float damage, float maxRefSize = 50f)
         {
-            float refSize = damage * 6;
+            const float baseSize = 6f;
+            float refSize = baseSize + damage * 3;
             return refSize <= maxRefSize ? refSize : maxRefSize;
         }
 
