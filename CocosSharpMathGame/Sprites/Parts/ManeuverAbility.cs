@@ -13,7 +13,7 @@ namespace CocosSharpMathGame
     /// </summary>
     internal class ManeuverAbility
     {
-        internal CloudTailNode CloudTailNode { get; private protected set; }
+        internal CloudTailNode CloudTailNode { get; set; }
         /// <summary>
         /// How much propellment this part can generate (per second)
         /// </summary>

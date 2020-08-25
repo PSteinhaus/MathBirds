@@ -26,9 +26,11 @@ namespace CocosSharpMathGame
         /// In CCDegrees
         /// </summary>
         internal float MaxTurningAngle { get; set; }
+
         internal float ShootingRange { get; set; }
         internal float SpreadAngle { get; set; } // doesn't do anything yet
         internal bool FireAtWill { get; set; } = true;
+        internal float ToleratedError { get; set; } = 2f;
         /// <summary>
         /// Measured in shots per second
         /// </summary>
@@ -73,7 +75,7 @@ namespace CocosSharpMathGame
                 return TargetPart.Parent as Aircraft;
             }
         }
-        internal float UpdateTargetDelay { get; set; } = 0.25f;
+        internal float UpdateTargetDelay { get; set; } = 0.5f;
         internal float CooldownUntilNextTargetUpdate { get; set; }
 
         /// <summary>
@@ -162,7 +164,7 @@ namespace CocosSharpMathGame
                 // if you're now close enough to the perfect angle (and in range) start shooting
                 if (CanShoot()
                     && CCPoint.Distance(MyPart.PositionWorldspace, TargetPart.PositionWorldspace) <= ShootingRange
-                    && (Constants.AbsAngleDifferenceDeg(angleToAimFor, MyPart.MyRotation) <= 2f || WouldHit()))
+                    && (Constants.AbsAngleDifferenceDeg(angleToAimFor, MyPart.MyRotation) <= ToleratedError || WouldHit()))
                 {
                     TryShoot();
                 }
@@ -179,10 +181,10 @@ namespace CocosSharpMathGame
         {
             // collect aircrafts that are near enough to have parts which could be targets
             List<Aircraft> aircraftsInRange = new List<Aircraft>();
-            foreach (var aircraft in ((PlayLayer)MyPart.Layer).Aircrafts)
+            foreach (var aircraft in (MyPart.Aircraft.Team == Team.PlayerTeam ? ((PlayLayer)MyPart.Layer).Aircrafts : ((PlayLayer)MyPart.Layer).PlayerAircrafts))   // a bit dirty since technically NPC allies to the player could exist (someday), which would not be contained in PlayerAircrafts, but which would still (maybe) be part of the player team
             {
                 // check if it is considered an enemy
-                if (!((Aircraft)MyPart.Parent).Team.IsEnemy(aircraft.Team) || aircraft.MyState.Equals(Aircraft.State.SHOT_DOWN))
+                if (!MyPart.Aircraft.Team.IsEnemy(aircraft.Team) || aircraft.MyState.Equals(Aircraft.State.SHOT_DOWN))
                     continue;
                 // check if in attention arc
                 if (Collisions.CollideArcBoundingBox(MyPart.PositionWorldspace, AttentionRange, MyPart.TotalNullRotation, AttentionAngle, aircraft.BoundingBoxTransformedToWorld))
@@ -238,7 +240,7 @@ namespace CocosSharpMathGame
             double endAngle = 0;
             float totalBulletVelocity = ProjectileBlueprint.Velocity + AircraftVelocityBoost();
             double deltaStart = TargetToMyPart.X - TargetToMyPart.Y / Math.Tan(startAngle) + (TargetToMyPart.Y * TargetAircraft.VelocityVector.Length) / (Math.Sin(startAngle) * totalBulletVelocity);
-            for (int i = 0; i < 6; i++) // iterate 6 times at max
+            for (int i = 0; i < 4; i++) // iterate 6 times at max
             {
                 angle = (startAngle + endAngle) / 2;
                 double delta = TargetToMyPart.X - TargetToMyPart.Y / Math.Tan(angle) + (TargetToMyPart.Y * TargetAircraft.VelocityVector.Length) / (Math.Sin(angle) * totalBulletVelocity);
@@ -322,11 +324,91 @@ namespace CocosSharpMathGame
             var testWeapon = new WeaponAbility(myPart);
             testWeapon.ProjectileBlueprint = new TestProjectile();
             testWeapon.CalcBaseValuesFromProjectile();
+            testWeapon.SpreadAngle = 2f;
             testWeapon.ShootDelay = 0.5f;
             testWeapon.MaxTurningAngle = 15f;
-            testWeapon.TurningAnglePerSecond = testWeapon.MaxTurningAngle;
+            testWeapon.TurningAnglePerSecond = 20f;
             testWeapon.CalcAttentionAngle();
             return testWeapon;
+        }
+
+        internal static WeaponAbility CreateBalloonWeapon(Part weaponBalloon)
+        {
+            var weapon = new WeaponAbility(weaponBalloon);
+            weapon.ProjectileBlueprint = new BalloonProjectile();
+            weapon.CalcBaseValuesFromProjectile();
+            weapon.SpreadAngle = 5f;
+            weapon.ShootDelay = 2f;
+            weapon.MaxTurningAngle = 180f;
+            weapon.TurningAnglePerSecond = 25f;
+            weapon.CalcAttentionAngle();
+            return weapon;
+        }
+
+        internal static WeaponAbility CreateBatWeapon(Part weaponBat)
+        {
+            var weapon = new WeaponAbility(weaponBat);
+            weapon.ProjectileBlueprint = new BatProjectile();
+            weapon.CalcBaseValuesFromProjectile();
+            weapon.SpreadAngle = 20f;
+            weapon.ShootDelay = 0.25f;
+            weapon.MaxTurningAngle = 180f;
+            weapon.TurningAnglePerSecond = 90f;
+            weapon.CalcAttentionAngle();
+            return weapon;
+        }
+
+        internal static WeaponAbility CreatePotatoWeapon(Part weaponPotato)
+        {
+            var weapon = new WeaponAbility(weaponPotato);
+            weapon.ProjectileBlueprint = new PotatoProjectile();
+            weapon.CalcBaseValuesFromProjectile();
+            weapon.SpreadAngle = 2.5f;
+            weapon.ShootDelay = 1.5f;
+            weapon.MaxTurningAngle = 35f;
+            weapon.TurningAnglePerSecond = 55f;
+            weapon.CalcAttentionAngle();
+            return weapon;
+        }
+
+        internal static WeaponAbility CreateBigBomberWeapon(Part weaponBigBomber)
+        {
+            var weapon = new WeaponAbility(weaponBigBomber);
+            weapon.ProjectileBlueprint = new BigBomberProjectile();
+            weapon.CalcBaseValuesFromProjectile();
+            weapon.SpreadAngle = 15.5f;
+            weapon.ShootDelay = 0.35f;
+            weapon.MaxTurningAngle = 180f;
+            weapon.TurningAnglePerSecond = 35f;
+            weapon.CalcAttentionAngle();
+            return weapon;
+        }
+
+        internal static WeaponAbility CreateFighterWeapon(Part weaponFighter)
+        {
+            var weapon = new WeaponAbility(weaponFighter);
+            weapon.ProjectileBlueprint = new FighterProjectile();
+            weapon.CalcBaseValuesFromProjectile();
+            weapon.SpreadAngle = 0.5f;
+            weapon.ShootDelay = 0.5f;
+            weapon.MaxTurningAngle = 10f;
+            weapon.TurningAnglePerSecond = 60f;
+            weapon.CalcAttentionAngle();
+            return weapon;
+        }
+
+        internal static WeaponAbility CreateJetWeapon(Part wingJet)
+        {
+            var weapon = new WeaponAbility(wingJet);
+            weapon.ProjectileBlueprint = new FighterProjectile();
+            weapon.CalcBaseValuesFromProjectile();
+            weapon.SpreadAngle = 1.5f;
+            weapon.ShootDelay = 1.5f;
+            weapon.MaxTurningAngle = 0f;
+            weapon.TurningAnglePerSecond = 0f;
+            weapon.AttentionAngle = 45f;
+            weapon.ToleratedError = 7f;
+            return weapon;
         }
 
         /// <summary>

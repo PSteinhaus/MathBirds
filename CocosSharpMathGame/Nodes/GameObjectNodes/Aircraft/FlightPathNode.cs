@@ -14,11 +14,11 @@ namespace CocosSharpMathGame
     /// </summary>
     internal class FlightPathNode : CCDrawNode
     {
-        private const int POINTS_PER_PATH = 800;
+        private const int POINTS_PER_PATH = 100;
         /// <summary>
         /// Divide the POINTS_PER_PATH by this number and only draw so many lines.
         /// </summary>
-        private const int DRAWING_QUOTIENT = 80;
+        private const int DRAWING_QUOTIENT = 8;
         internal CCColor4B LineColor { get; set; } = CCColor4B.White;
         internal float LineWidth { get; set; } = 3f;
         internal CCPoint[] Path { get; private set; }
@@ -76,6 +76,7 @@ namespace CocosSharpMathGame
             const float DELTA = 0.01f;
             if (CCPoint.Distance(normalizedVectorStartEnd, new CCPoint(startSlopeDx, startSlopeDy)) < DELTA)
             {
+                /*
                 var xValues = new float[] { startPosition.X, (endPosition.X + startPosition.X) / 2, endPosition.X };
                 var yValues = new float[] { startPosition.Y, (endPosition.Y + startPosition.Y) / 2, endPosition.Y };
                 CubicSpline.FitParametric(xValues, yValues, POINTS_PER_PATH, out float[] pathX, out float[] pathY);
@@ -83,6 +84,9 @@ namespace CocosSharpMathGame
                 {
                     pathPoints.Add(new CCPoint(pathX[i], pathY[i]));
                 }
+                */
+                pathPoints.Add(startPosition);
+                pathPoints.Add(endPosition);
             }
             else
             {
@@ -141,8 +145,9 @@ namespace CocosSharpMathGame
                 float angleShift = (float)(2.0 * Math.PI) - angleStart;
                 angleEnd = (angleEnd + angleShift) % (float)(2.0 * Math.PI);
                 float angleDestination = angleSign == 1 ? angleEnd : (float)(2.0*Math.PI) - angleEnd;
-                int steps = (int)(radius * angleDestination);
-                if (steps < 200) steps = 200;
+                //int steps = (int)(radius * angleDestination);
+                //if (steps < 200) steps = 200;
+                int steps = 250;
                 for (int i=0; i < steps; i++)
                 {
                     CCPoint pathPoint = CCPoint.RotateByAngle(startPosition, rotationPoint, angleSign * angleDestination * ((float)i / (float)steps));
@@ -286,7 +291,7 @@ namespace CocosSharpMathGame
         /// <param name="distance"></param>
         /// <param name="destination">position after the advance</param>
         /// <param name="cCfinalDirection">direction of the segment that the position is on after the advance</param>
-        internal void Advance(float distance, out CCPoint destination, out float CCfinalDirection)
+        internal void Advance(CCPoint currentPosition, float distance, out CCPoint destination, out float CCfinalDirection)
         {
             int currentIndex = (int) AdvancementAsQuasiIndex;
             float relativeAdvancementToNextPoint = AdvancementAsQuasiIndex % 1;
@@ -296,15 +301,13 @@ namespace CocosSharpMathGame
                 CCfinalDirection = DirectionAt(currentIndex);
                 return;
             }
-            //float absoluteAdvancementToNextPoint = relativeAdvancementToNextPoint * Path[currentIndex].DistanceSquared(ref Path[currentIndex + 1]);
-            float absoluteAdvancementToNextPoint = relativeAdvancementToNextPoint * Constants.DistanceBetween(Path[currentIndex], Path[currentIndex+1]);
+            float absoluteAdvancementToNextPoint = relativeAdvancementToNextPoint * CCPoint.Distance(Path[currentIndex], Path[currentIndex+1]);
             float directionToNextPointInRadians = Constants.CCDegreesToMathRadians(DirectionAt(currentIndex));
             float absoluteXAdvancement = absoluteAdvancementToNextPoint * (float)Math.Cos(directionToNextPointInRadians);
             float absoluteYAdvancement = absoluteAdvancementToNextPoint * (float)Math.Sin(directionToNextPointInRadians);
-            CCPoint currentPosition = new CCPoint(Path[currentIndex].X + absoluteXAdvancement, Path[currentIndex].Y + absoluteYAdvancement);
-            CCPoint startPosition = currentPosition;
+            //CCPoint currentPosition = new CCPoint(Path[currentIndex].X + absoluteXAdvancement, Path[currentIndex].Y + absoluteYAdvancement);
             // try to advance from the current position to the next point on the Path
-            float distanceToNextPoint = Constants.DistanceBetween(currentPosition, Path[currentIndex + 1]); //DistanceSquared(ref Path[currentIndex + 1]);
+            float distanceToNextPoint = CCPoint.Distance(currentPosition, Path[currentIndex + 1]);
             while (distanceToNextPoint < distance)
             {
                 currentIndex = currentIndex + 1;
@@ -312,7 +315,7 @@ namespace CocosSharpMathGame
                 distance -= distanceToNextPoint;
                 AdvancementAsQuasiIndex = currentIndex;
                 if (currentIndex == Path.Length - 1) break;
-                distanceToNextPoint = Constants.DistanceBetween(currentPosition, Path[currentIndex + 1]);//currentPosition.DistanceSquared(ref Path[currentIndex + 1]);
+                distanceToNextPoint = CCPoint.Distance(currentPosition, Path[currentIndex + 1]);
             }
             // if you can't go far enough just move towards the point
             if (distance > 0 && currentIndex != Path.Length - 1)
@@ -326,7 +329,7 @@ namespace CocosSharpMathGame
                 float newX = currentPosition.X + distance * (float)Math.Cos(directionToNextPointInRadians);
                 // in y direction
                 float newY = currentPosition.Y + distance * (float)Math.Sin(directionToNextPointInRadians);
-                AdvancementAsQuasiIndex += relativeAdvanche;
+                AdvancementAsQuasiIndex = (float)currentIndex + relativeAdvanche;
                 destination = new CCPoint(newX, newY);
                 CCfinalDirection = Constants.RadiansToCCDegrees(directionToNextPointInRadians);
             }

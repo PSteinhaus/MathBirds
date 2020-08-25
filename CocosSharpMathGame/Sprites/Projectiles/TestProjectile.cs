@@ -16,35 +16,5 @@ namespace CocosSharpMathGame
             LifeTime = 1.0f;
             Damage = 2f;
         }
-
-        internal override void CollideWithAircraft(Aircraft aircraft)
-        {
-            // collect all parts that you could collide with right now and then choose the one that is lowest in the mount hierarchy
-            List<Part> collidingParts = new List<Part>();
-            // check if you really collide with it (at this point you only know that you collided with its bounding box)
-            foreach (var part in aircraft.TotalParts)
-            {
-                if (part.MyState != Part.State.DESTROYED && Collisions.Collide(this,part))
-                {
-                    collidingParts.Add(part);
-                }
-            }
-            Part lowestPart = null;
-            int maxMountParents = -1;
-            foreach (var part in collidingParts)
-            {
-                int mountParents = part.NumOfMountParents();
-                if (mountParents > maxMountParents)
-                {
-                    lowestPart = part;
-                    maxMountParents = mountParents;
-                }
-            }
-            if (lowestPart != null)
-            {
-                CCPoint collisionPos = Collisions.CollisionPosLinePoly((CollisionTypeLine)CollisionType, lowestPart);
-                StandardCollisionBehaviour(lowestPart, collisionPos);
-            }
-        }
     }
 }

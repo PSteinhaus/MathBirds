@@ -7,22 +7,23 @@ using CocosSharp;
 
 namespace CocosSharpMathGame
 {
-    internal class TestRudder : Part
+    internal class RudderPotato : Part
     {
-        public TestRudder() : base("testRudder.png")
+        public RudderPotato() : base("rudderPotato.png")
         {
+            SetHealthAndMaxHealth(1);
             // set your types
             Types = new Type[] { Type.RUDDER };
             NormalAnchorPoint = new CCPoint(0.5f, 0f);
 
             // specify the mass points
-            MassPoints = CreateDiamondMassPoints(5f);
+            MassPoints = CreateDiamondMassPoints(1f);
 
-            // specify the collision polygon
+            // specify the collision type
             CollisionType = Collisions.CreateDiamondCollisionPolygon(this);
 
-            // give the rotor ManeuverAbility
-            ManeuverAbility = new ManeuverAbility(0,0, (float)Math.Pow(10, 5) * 1f, (float)Math.Pow(10, 5) * 3.0f);
+            // give the rudder ManeuverAbility
+            ManeuverAbility = new ManeuverAbility(0,0, (float)Math.Pow(10, 5) * 0.5f, (float)Math.Pow(10, 5) * 1.25f);
         }
     }
 }

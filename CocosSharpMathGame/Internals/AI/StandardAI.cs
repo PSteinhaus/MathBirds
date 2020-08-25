@@ -17,15 +17,20 @@ namespace CocosSharpMathGame
         {
 
         }
-        internal override void ActInPlanningPhase(IEnumerable<Aircraft> aircrafts)
+        internal override void ActInPlanningPhase()
         {
             // first go through all aircrafts and find the closest enemy
-            // (for now an enemy is everyone who isn't on your team
+            // (for now an enemy is everyone who isn't on your team)
             var myTeam = Aircraft.Team;
+            IEnumerable<Aircraft> aircrafts;
+            if (myTeam == Team.PlayerTeam)
+                aircrafts = Aircraft.AircraftsInLevel();
+            else
+                aircrafts = Aircraft.PlayerAircraftsInLevel();
             Aircraft closestAircraft = null;
             foreach (var aircraft in aircrafts)
             {
-                if (aircraft != Aircraft && aircraft.Team != myTeam && aircraft.MyState != Aircraft.State.SHOT_DOWN)
+                if (aircraft.MyState != Aircraft.State.SHOT_DOWN && aircraft != Aircraft && aircraft.Team.IsEnemy(myTeam) && aircraft.IsActive())
                 {
                     // check the distance (closer is better)
                     if (closestAircraft == null ||
@@ -35,7 +40,10 @@ namespace CocosSharpMathGame
             }
             // set path towards where he might be at the end of the next turn
             if (closestAircraft != null)
+            {
+                Console.WriteLine("Attacking!");
                 Aircraft.TryToSetFlightPathHeadTo(closestAircraft.Position + (closestAircraft.VelocityVector * Constants.TURN_DURATION));
+            }
         }
     }
 }

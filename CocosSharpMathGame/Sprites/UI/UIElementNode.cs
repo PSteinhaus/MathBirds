@@ -16,7 +16,7 @@ namespace CocosSharpMathGame
         internal bool Pressable { get; set; } = true;// { return pressable; } set { pressable = value; Console.WriteLine("pressable: " + pressable); } }
         internal bool Pressed { get; set; } = false;
         internal float RadiusFactor { get; set; } = 0.5f;
-        internal void MakeClickable(bool touchMustEndOnIt = true, bool IsCircleButton = false, bool swallowTouch = true)
+        internal void MakeClickable(bool touchMustEndOnIt = true, bool IsCircleButton = false, bool swallowTouch = true, int priority = -25)
         {
             this.IsCircleButton = IsCircleButton;
             SwallowTouch = swallowTouch;
@@ -27,7 +27,10 @@ namespace CocosSharpMathGame
             touchListener.OnTouchesMoved = OnTouchesMoved;
             touchListener.OnTouchesEnded = OnTouchesEnded;
             touchListener.OnTouchesCancelled = OnTouchesEnded;
-            AddEventListener(touchListener, this);
+            if (priority == -25)
+                AddEventListener(touchListener, this);
+            else
+                AddEventListener(touchListener, priority);
         }
 
         internal void OnTouchesBegan(List<CCTouch> touches, CCEvent touchEvent)

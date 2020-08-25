@@ -68,11 +68,11 @@ namespace CocosSharpMathGame
             CollectionNode.AnchorPoint = CCPoint.AnchorUpperLeft;
             CollectionNode.PositionY = contentSize.Height;
             CollectionNode.PositionX = MaxX;
-            AddChild(CollectionNode);
             AnchorPoint = CCPoint.AnchorLowerLeft;
             Scale = 1f;
             Scroller.MoveFunction = MoveCollectionNode;
-            MakeClickable(touchMustEndOnIt: false);
+            MakeClickable(touchMustEndOnIt: false, false, true, -99999);
+            AddChild(CollectionNode);
         }
 
         public override void Update(float dt)
@@ -221,6 +221,7 @@ namespace CocosSharpMathGame
 
         private protected override void OnTouchesBeganUI(List<CCTouch> touches, CCEvent touchEvent)
         {
+            Console.WriteLine("REALLY TOUCHED!: "+Pressed);
             switch (touches.Count)
             {
                 case 1:
@@ -235,6 +236,7 @@ namespace CocosSharpMathGame
         }
         private protected override void OnTouchesMovedUI(List<CCTouch> touches, CCEvent touchEvent)
         {
+            Console.WriteLine("REALLY MOVING!: " + Pressed);
             switch (touches.Count)
             {
                 case 1:

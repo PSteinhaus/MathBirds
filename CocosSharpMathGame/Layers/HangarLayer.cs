@@ -44,8 +44,10 @@ namespace CocosSharpMathGame
         public HangarLayer() : base(CCColor4B.Black)
         {
             GlobalHangarLayer = this;
+            GUILayer = new HangarGUILayer(this);
             var challengeModels = MathChallenge.GetAllChallengeModels();
             ScrapyardButtons = new ScrapyardButton[challengeModels.Length];
+            var rng = new Random();
             for (int i=0; i<challengeModels.Length; i++)
             {
                 var button = challengeModels[i].CreateScrapyardButton();
@@ -53,6 +55,14 @@ namespace CocosSharpMathGame
                 button.Position = ScrapyardButtonPosition(i);
                 button.Visible = false;
                 button.RewardEvent += (sender, rewardPart) => { AddPart(rewardPart); };
+                // roll the loot chances
+                if (challengeModels[i] is AddChallenge && !CrappyPartsCheck())
+                {
+                    // make sure that the player can always earn enough parts to go again
+                    button.LootboxCount = 2;
+                }
+                else
+                    button.LootboxCount = (rng.Next(4) == 0) ? rng.Next(1, 3) : 0; 
                 AddChild(button, 2);
             }
             NewAircraftButton = new NewAircraftButton(this);
@@ -64,7 +74,6 @@ namespace CocosSharpMathGame
             HighDrawNode.BlendFunc = CCBlendFunc.NonPremultiplied;
             // a double tap starts the transition back the workshop state (of course only coming from the modify-aircraft state)
             DoubleTapEvent += (sender, args) => { if(State == HangarState.MODIFY_AIRCRAFT) StartTransition(HangarState.WORKSHOP); }; 
-            GUILayer = new HangarGUILayer(this);
             BGNode = new CCNode();
             AddChild(BGNode);
             BGDrawNode = new CCDrawNode();
@@ -94,6 +103,20 @@ namespace CocosSharpMathGame
 
             CameraSize = CameraSizeHangar;
             CameraPosition = CameraPositionHangar;
+        }
+
+        /// <summary>
+        /// Check whether the player owns a complete potato-set
+        /// </summary>
+        /// <returns></returns>
+        internal bool CrappyPartsCheck()
+        {
+            var parts = GetParts();
+            return parts.OfType<BodyPotato>().Any() &&
+                   parts.OfType<RotorPotato>().Any() &&
+                   parts.OfType<RudderPotato>().Any() &&
+                   parts.OfType<WeaponPotato>().Any() &&
+                   parts.OfType<WingPotato>().Any();
         }
 
         private CCPoint ScrapyardButtonPosition(int i)
@@ -537,6 +560,11 @@ namespace CocosSharpMathGame
                     CurrentScrapyardButton.CreateNextChallenge();
                     CurrentScrapyardButton.CurrentMathChallengeNode.AnswerChosenEvent += ScrapyardChallengeCallback;
                 }
+                else
+                {
+                    CurrentScrapyardButton.CreateSameChallenge();
+                    CurrentScrapyardButton.CurrentMathChallengeNode.AnswerChosenEvent += ScrapyardChallengeCallback;
+                }
                 GUILayer.ChallengeNode = CurrentScrapyardButton.CurrentMathChallengeNode;
                 GUILayer.ChallengeNode.Pressable = true;
                 GUILayer.ChallengeNode.Position = new CCPoint(0, -GUILayer.ChallengeNode.BoundingBoxTransformedToWorld.Size.Height - 1f);
@@ -563,7 +591,7 @@ namespace CocosSharpMathGame
                 GUILayer.AddScreenShake(38f, 38f);
             }
             // generate and show the next challenge
-            CurrentScrapyardButton.CreateNextChallenge();
+            CurrentScrapyardButton.CreateNextChallenge(CurrentScrapyardButton.CurrentMathChallengeNode.MultiplVisible);
             GUILayer.ChallengeNode = CurrentScrapyardButton.CurrentMathChallengeNode;
             GUILayer.ChallengeNode.AnswerChosenEvent += ScrapyardChallengeCallback;
         }
@@ -1406,7 +1434,7 @@ namespace CocosSharpMathGame
         {
             // add some aircrafts
             AddAircraft(Aircraft.CreateTestAircraft(), CCPoint.Zero);
-            AddAircraft(Aircraft.CreateTestAircraft(false), CCPoint.Zero);
+            AddAircraft(Aircraft.CreateTestAircraft(1), CCPoint.Zero);
             AddAircraft(Aircraft.CreateTestAircraft(), CCPoint.Zero);
             AddAircraft(Aircraft.CreateTestAircraft(), CCPoint.Zero);
             AddAircraft(Aircraft.CreateTestAircraft(), CCPoint.Zero);

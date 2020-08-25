@@ -80,7 +80,7 @@ namespace CocosSharpMathGame
             var pathDifferenceInPercent = dt / Constants.TURN_DURATION;
             var distance = pathDifferenceInPercent * FlightPathNode.PathLength;
             //Console.WriteLine("distance " + distance);
-            FlightPathNode.Advance(distance, out CCPoint destination, out float CCfinalDirection);
+            FlightPathNode.Advance(Aircraft.Position, distance, out CCPoint destination, out float CCfinalDirection);
             Aircraft.MoveTo(destination);
             Aircraft.RotateTo(CCfinalDirection);
             return destination.Equals(FlightPathNode.EndPoint);

@@ -11,6 +11,7 @@ namespace CocosSharpMathGame
     {
         public TestDoubleWing() : base("testDoubleWing.png")
         {
+            SetHealthAndMaxHealth(14);
             // set your types
             Types = new Type[] { Type.WINGS };
             NormalAnchorPoint = CCPoint.AnchorMiddle;

@@ -15,6 +15,25 @@ namespace CocosSharpMathGame
     internal abstract class MathChallenge
     {
         internal abstract bool Locked { get; set; }
+        internal abstract int Combo { get; set; }
+        internal int Multiplier
+        {
+            get
+            {
+                int baseValue = 1 + (int)((float)Math.Sqrt(Combo * 0.05f) / 0.4f);
+                return baseValue < 6 ? baseValue : 30; 
+            }
+        }
+        /// <summary>
+        /// returns the progress towards the next higher multiplier in percent
+        /// </summary>
+        internal float MultiplProgress
+        {
+            get
+            {
+                return ((float)Math.Sqrt(Combo * 0.05f) / 0.4f) % 1;
+            }
+        }
         internal string ChallengeLaTeX { get; private protected set; }
         internal string ChallengeInfix { get; private protected set; }
         internal string[] AnswersLaTeX { get; private protected set; }
@@ -41,6 +60,20 @@ namespace CocosSharpMathGame
             var answerExpr = Infix.ParseOrUndefined(answerInfix);
             if (answerExpr.IsUndefined) return false;
             else return answerExpr.Equals(Infix.ParseOrThrow(SolutionInfix));
+        }
+
+        internal bool TrySolveWith(string answerInfix)
+        {
+            if (IsSolution(answerInfix))
+            {
+                Combo++;
+                return true;
+            }
+            else
+            {
+                Combo = 0;
+                return false;
+            }
         }
 
         internal static MathChallenge[] GetAllChallengeModels()

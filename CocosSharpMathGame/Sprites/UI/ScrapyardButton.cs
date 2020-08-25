@@ -28,8 +28,8 @@ namespace CocosSharpMathGame
     {
         internal static readonly CCSize ButtonSize = new CCSize(200, 200);
         private protected CCDrawNode MyDrawNode;
-        internal string[] PartRewardsTypeNames { get; private protected set; } = new string[] { typeof(TestRotor).AssemblyQualifiedName, typeof(TestBody).AssemblyQualifiedName };
-        internal int LootboxCount { get; private protected set; } = 5;
+        internal string[] PartRewardsTypeNames { get; private protected set; }
+        internal int LootboxCount { get; set; }
         internal float LootboxProgress { get; private protected set; }
         internal float LootboxProgressGoal { get; private protected set; }
         internal bool Pressable
@@ -66,6 +66,45 @@ namespace CocosSharpMathGame
                 AddChild(MyDrawNode, -100000);
                 UpdateDrawNode();   // initialize it
             }
+            // set the rewards
+            switch (ChallengeModel)
+            {
+                case AddChallenge a:
+                    {
+                        PartRewardsTypeNames = new string[] { typeof(BodyPotato).AssemblyQualifiedName, typeof(RotorPotato).AssemblyQualifiedName,
+                                                              typeof(RudderPotato).AssemblyQualifiedName, typeof(WeaponPotato).AssemblyQualifiedName,
+                                                              typeof(WingPotato).AssemblyQualifiedName };
+                    }
+                    break;
+                case SubChallenge s:
+                    {
+                        PartRewardsTypeNames = new string[] { typeof(BodyBat).AssemblyQualifiedName, typeof(RotorBat).AssemblyQualifiedName,
+                                                              typeof(WeaponBat).AssemblyQualifiedName, typeof(WingBat).AssemblyQualifiedName };
+                    }
+                    break;
+                case MultiplyChallenge m:
+                    {
+                        PartRewardsTypeNames = new string[] { typeof(TestRotor).AssemblyQualifiedName, typeof(TestBody).AssemblyQualifiedName,
+                                                              typeof(TestDoubleWing).AssemblyQualifiedName, typeof(TestRudder).AssemblyQualifiedName,
+                                                              typeof(TestWeapon).AssemblyQualifiedName };
+                    }
+                    break;
+                case DivideChallenge d:
+                    {
+                        PartRewardsTypeNames = new string[] { typeof(BodyBalloon).AssemblyQualifiedName, typeof(RotorBalloon).AssemblyQualifiedName,
+                                                              typeof(WeaponBalloon).AssemblyQualifiedName };
+                    }
+                    break;
+                case SolveChallenge s:
+                    {
+                        PartRewardsTypeNames = new string[] { typeof(BodyFighter).AssemblyQualifiedName, typeof(RotorFighter).AssemblyQualifiedName,
+                                                              typeof(RudderFighter).AssemblyQualifiedName, typeof(WeaponFighter).AssemblyQualifiedName,
+                                                              typeof(WingFighter).AssemblyQualifiedName };
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
 
         protected override void AddedToScene()
@@ -94,7 +133,8 @@ namespace CocosSharpMathGame
                     if (LootboxCount > 0)
                     {
                         Reward();
-                        LootboxCount -= 1;
+                        if (!(ChallengeModel is AddChallenge) || ((HangarLayer)Layer).CrappyPartsCheck())
+                            LootboxCount -= 1;
                     }
                     LootboxProgress -= 1f;
                     LootboxProgressGoal -= 1f;
@@ -194,13 +234,13 @@ namespace CocosSharpMathGame
             }
         }
 
-        internal float BaseIncrease { get; set; } = 0.2f;
-        internal float BonusIncrease { get; set; } = 0.1f;
+        internal float BaseIncrease { get; set; } = 0.125f;
+        internal float BonusIncrease { get; set; } = 0.075f;
         internal void ChallengeSolved()
         {
             // advance the lootbox-meter-goal
             var rng = new Random();
-            LootboxProgressGoal += BaseIncrease + ((float)rng.NextDouble()) * BonusIncrease;
+            LootboxProgressGoal += (BaseIncrease + ((float)rng.NextDouble()) * BonusIncrease) * CurrentMathChallengeNode.Multiplier;
         }
 
         internal void ChallengeFailed()
@@ -209,14 +249,19 @@ namespace CocosSharpMathGame
             LootboxProgressGoal *= 0.33f;    // lose 66% of your progress with each wrong answer 
         }
 
-        internal MathChallengeNode GenerateMathChallengeNode()
+        internal MathChallengeNode GenerateMathChallengeNode(float multiplVisible)
         {
-            return new MathChallengeNode(ChallengeModel.CreateFromSelf());
+            return new MathChallengeNode(ChallengeModel.CreateFromSelf(), multiplVisible);
         }
 
-        internal void CreateNextChallenge()
+        internal void CreateNextChallenge(float multiplVisible = 1)
         {
-            CurrentMathChallengeNode = GenerateMathChallengeNode();
+            CurrentMathChallengeNode = GenerateMathChallengeNode(multiplVisible);
+        }
+
+        internal void CreateSameChallenge(float multiplVisible = 1)
+        {
+            CurrentMathChallengeNode = new MathChallengeNode(CurrentMathChallengeNode.MathChallenge, multiplVisible);
         }
     }
 }

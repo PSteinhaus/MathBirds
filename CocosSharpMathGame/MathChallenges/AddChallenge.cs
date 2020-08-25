@@ -15,6 +15,12 @@ namespace CocosSharpMathGame
             get { return locked; }
             set { locked = value; }
         }
+        private static int combo = 0;
+        internal override int Combo
+        {
+            get { return combo; }
+            set { combo = value; }
+        }
         private const int STD_MIN_NUM = 1;
         private const int STD_MAX_NUM = 100;
         private protected int SummandCount { get; set; }

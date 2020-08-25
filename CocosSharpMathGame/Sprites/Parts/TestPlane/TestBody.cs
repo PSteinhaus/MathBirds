@@ -11,6 +11,7 @@ namespace CocosSharpMathGame
     {
         public TestBody() : base("testBody.png")
         {
+            SetHealthAndMaxHealth(14);
             NormalAnchorPoint = CCPoint.AnchorMiddle;
             //Position = new CCPoint((ContentSize.Width / 2), (ContentSize.Height / 2));
             // set your types
@@ -18,8 +19,8 @@ namespace CocosSharpMathGame
 
             // OLD: add a mount point for wings at your center
             // NEW: add mount points for two single wings
-            var wingMount1 = new PartMount(this, new CCPoint((ContentSize.Width / 2), (ContentSize.Height / 2) + 1), Type.SINGLE_WING);
-            var wingMount2 = new PartMount(this, new CCPoint((ContentSize.Width / 2), (ContentSize.Height / 2) - 1), Type.SINGLE_WING);
+            var wingMount1 = new PartMount(this, new CCPoint((ContentSize.Width / 2), (ContentSize.Height / 2) + 4), Type.SINGLE_WING);
+            var wingMount2 = new PartMount(this, new CCPoint((ContentSize.Width / 2), (ContentSize.Height / 2) - 4), Type.SINGLE_WING);
             var doubleWingMount = new PartMount(this, new CCPoint((ContentSize.Width / 2)+2.5f, (ContentSize.Height / 2)), Type.WINGS);
             doubleWingMount.PossiblyBlockingPartMounts.Add(wingMount1);
             doubleWingMount.PossiblyBlockingPartMounts.Add(wingMount2);

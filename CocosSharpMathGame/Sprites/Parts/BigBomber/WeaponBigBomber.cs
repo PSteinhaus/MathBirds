@@ -7,22 +7,23 @@ using CocosSharp;
 
 namespace CocosSharpMathGame
 {
-    internal class TestWeapon : Part
+    internal class WeaponBigBomber : Part
     {
-        public TestWeapon() : base("testWeapon.png") // for now, as there is no gun sprite yet
+        public WeaponBigBomber() : base("weaponBigBomber.png")
         {
+            SetHealthAndMaxHealth(16);
             // set your types
             Types = new Type[] { Type.GUN };
-            NormalAnchorPoint = new CCPoint(1/ContentSize.Width, 0.5f);
+            NormalAnchorPoint = new CCPoint(1.5f/ContentSize.Width, 0.5f);
 
             // specify the mass points
-            MassPoints = new MassPoint[] { new MassPoint(ContentSize.Width / 2, ContentSize.Height / 2, 30) };
+            MassPoints = CreateDiamondMassPoints(25f);
 
             // specify the collision polygon
             CollisionType = Collisions.CreateDiamondCollisionPolygon(this);
 
             // give the gun a WeaponAbility
-            WeaponAbility = WeaponAbility.CreateTestWeapon(this);
+            WeaponAbility = WeaponAbility.CreateBigBomberWeapon(this);
         }
     }
 }

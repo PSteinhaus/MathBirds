@@ -23,9 +23,11 @@ namespace CocosSharpMathGame
     internal class CollisionTypeCircle : CollisionType
     {
         internal float radius;
-        internal CollisionTypeCircle(float radius)
+        internal bool useScale;
+        internal CollisionTypeCircle(float radius, bool useScale = true)
         {
             this.radius = radius;
+            this.useScale = useScale;
         }
     }
 
@@ -145,6 +147,11 @@ namespace CocosSharpMathGame
             return false;
         }
 
+        internal static float CorrectRadius(ICollidible circleCollidible, CollisionTypeCircle cTypeCircle)
+        {
+            return (cTypeCircle.useScale ? circleCollidible.GetTotalScale() : 1f) * cTypeCircle.radius;
+        }
+
         internal static bool CollidePositionPolygon(CCPoint position, ICollidible polyCollidible)
         {
             // transform the polygon to match the positioning, rotation and scale of the node
@@ -165,7 +172,7 @@ namespace CocosSharpMathGame
 
         internal static bool CollidePositionCircle(ICollidible posCollidible, ICollidible circleCollidible, CollisionTypeCircle cTypeCircle)
         {
-            return ((CCNode)circleCollidible).PositionWorldspace.IsNear(((CCNode)posCollidible).PositionWorldspace, cTypeCircle.radius);
+            return ((CCNode)circleCollidible).PositionWorldspace.IsNear(((CCNode)posCollidible).PositionWorldspace, CorrectRadius(circleCollidible, cTypeCircle));
         }
 
         internal static bool CollidePositionPolygon(ICollidible posCollidible, ICollidible polyCollidible, CollisionTypePolygon cTypePoly)
@@ -194,14 +201,14 @@ namespace CocosSharpMathGame
 
         internal static bool CollideBoundingBoxCircle(ICollidible boxCollidible, ICollidible circleCollidible, CollisionTypeCircle cTypeCircle)
         {
-            return CollideBoundingBoxCircle(((CCNode)boxCollidible).BoundingBoxTransformedToWorld, ((CCNode)circleCollidible).PositionWorldspace, cTypeCircle.radius);
+            return CollideBoundingBoxCircle(((CCNode)boxCollidible).BoundingBoxTransformedToWorld, ((CCNode)circleCollidible).PositionWorldspace, CorrectRadius(circleCollidible, cTypeCircle));
         }
 
         internal static bool CollideBoundingBoxCircle(CCRect box, CCPoint circlePos, float radius)
         {
             // for peformance first approximate the box with a circle and check whether these two collide
             // if they don't then the circle can't collide with the box either
-            float boxRadius = box.Size.Width > box.Size.Height ? box.Size.Width/2 : box.Size.Height/2;
+            float boxRadius = box.Size.Width > box.Size.Height ? box.Size.Width : box.Size.Height;
             if (!CollideCircleCircle(circlePos, radius, box.Center, boxRadius))
                 return false;
             // check whether the circle center is inside the bounding box
@@ -263,7 +270,7 @@ namespace CocosSharpMathGame
         // is dirty, as it only checks whether polygon points are contained in the circle, not whether polygon lines are crossed by it
         internal static bool CollideCirclePolygon(ICollidible circleCollidible, CollisionTypeCircle cTypeCircle, ICollidible polyCollidible, CollisionTypePolygon cTypePoly)
         {
-            float radius = cTypeCircle.radius;
+            float radius = CorrectRadius(circleCollidible, cTypeCircle);
             CCPoint pos = ((CCNode)circleCollidible).PositionWorldspace;
             // transform the polygon to match the positioning, rotation and scale of the node
             Polygon transformedPolygon = ((Polygon)cTypePoly.collisionPolygon.Clone());
@@ -279,8 +286,8 @@ namespace CocosSharpMathGame
         {
             CCPoint pos1 = ((CCNode)circleCollidible1).PositionWorldspace;
             CCPoint pos2 = ((CCNode)circleCollidible2).PositionWorldspace;
-            float radius1 = cTypeCircle1.radius;
-            float radius2 = cTypeCircle2.radius;
+            float radius1 = CorrectRadius(circleCollidible1, cTypeCircle1);
+            float radius2 = CorrectRadius(circleCollidible2, cTypeCircle2);
             return pos1.IsNear(pos2, radius1 + radius2);
         }
 
@@ -295,7 +302,7 @@ namespace CocosSharpMathGame
             CCPoint vectorPerpToLine = CCPoint.PerpendicularCCW((cTypeLine.EndPoint - cTypeLine.StartPoint));
             CCPoint vectorLineStartToCircle = ((CCNode)circleCollidible1).PositionWorldspace - cTypeLine.StartPoint;
             float perpLength = (float)Math.Abs( CCPoint.Dot(vectorPerpToLine, vectorLineStartToCircle) / vectorPerpToLine.Length );
-            return perpLength <= cTypeCircle1.radius;
+            return perpLength <= CorrectRadius(circleCollidible1, cTypeCircle1);
         }
 
         internal static bool CollideCircleLine(CCPoint circlePos, float radius, CCPoint LineStart, CCPoint LineEnd)
@@ -430,7 +437,7 @@ namespace CocosSharpMathGame
         internal static bool CollideDiamondCircle(ICollidible collidibleDiamond, ICollidible collidibleCircle, CollisionTypeCircle cTypeCircle)
         {
             var circlePos = ((CCNode)collidibleCircle).PositionWorldspace;
-            var radius = cTypeCircle.radius;
+            var radius = CorrectRadius(collidibleCircle, cTypeCircle);
             // for performance first check whether they are too far to collide anyway
             var diamondBox = ((CCNode)collidibleDiamond).BoundingBoxTransformedToWorld;
             float maxSizeBox = diamondBox.Size.Width > diamondBox.Size.Height ? diamondBox.Size.Width : diamondBox.Size.Height;

@@ -510,6 +510,12 @@ namespace CocosSharpMathGame
             //Console.WriteLine("Part ContentSize: " + ContentSize);
         }
 
+        private protected void SetHealthAndMaxHealth(float newHealth)
+        {
+            MaxHealth = newHealth;
+            Health = newHealth;
+        }
+
         /// <summary>
         /// Mirror the part on its x axis
         /// </summary>
@@ -520,7 +526,8 @@ namespace CocosSharpMathGame
             for (int i = 0; i < MassPoints.Length; i++)
                 MassPoints[i].Y *= -1;
             // flip the collision polygon
-            ((CollisionTypePolygon)CollisionType).collisionPolygon.MirrorOnXAxis();
+            if (CollisionType is CollisionTypePolygon ctp)
+                ctp.collisionPolygon.MirrorOnXAxis();
             for (int i = 0; i < PartMounts.Length; i++)
             {
                 var pm = PartMounts[i];

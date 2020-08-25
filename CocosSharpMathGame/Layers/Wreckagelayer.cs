@@ -245,16 +245,21 @@ namespace CocosSharpMathGame
 
         internal void InitWreckage(List<Aircraft> downedAircrafts)
         {
-            Wrecks = downedAircrafts;
-            // roll the repair percentages
-            var rng = new Random();
-            foreach (var aircraft in downedAircrafts)
+            if (downedAircrafts.Any())
             {
-                float startP = MIN_START_WRECKAGE_PERCENTILE + (float)rng.NextDouble() * (MAX_START_WRECKAGE_PERCENTILE - MIN_START_WRECKAGE_PERCENTILE);
-                SetWreckPercentile(aircraft, startP);
-                float minEndP = startP + MIN_END_WRECKAGE_BONUS_PERCENTILE;
-                WreckMaxPercentile[aircraft] = Constants.Clamp(minEndP + (float)rng.NextDouble() * (MAX_END_WRECKAGE_PERCENTILE - minEndP), minEndP, MAX_END_WRECKAGE_PERCENTILE);
+                Wrecks = downedAircrafts;
+                // roll the repair percentages
+                var rng = new Random();
+                foreach (var aircraft in downedAircrafts)
+                {
+                    float startP = MIN_START_WRECKAGE_PERCENTILE + (float)rng.NextDouble() * (MAX_START_WRECKAGE_PERCENTILE - MIN_START_WRECKAGE_PERCENTILE);
+                    SetWreckPercentile(aircraft, startP);
+                    float minEndP = startP + MIN_END_WRECKAGE_BONUS_PERCENTILE;
+                    WreckMaxPercentile[aircraft] = Constants.Clamp(minEndP + (float)rng.NextDouble() * (MAX_END_WRECKAGE_PERCENTILE - minEndP), minEndP, MAX_END_WRECKAGE_PERCENTILE);
+                }
             }
+            else
+                ReturnToHangar();
         }
         int RotationTag = 73465253;
         internal void Salvage()
@@ -383,12 +388,18 @@ namespace CocosSharpMathGame
         internal void StartRepair()
         {
             State = WreckageState.REPAIR;
-            // generate and show math
-            var mathChNode = new MathChallengeNode(MiddleAircraft.GetChallenge());
-            GUILayer.MathChallengeNode = mathChNode;
-            mathChNode.Position = new CCPoint(0, -mathChNode.ContentSize.Height);
-            mathChNode.AddAction(new CCEaseOut(new CCMoveTo(0.5f, CCPoint.Zero), 3f));
-            mathChNode.AnswerChosenEvent += AnswerChosen;
+            // only go into repair-mode when the wreck-percentile can still actually be increased 
+            if (GetWreckPercentile(MiddleAircraft) < GetWreckMaxPercentile(MiddleAircraft))
+            {
+                // generate and show math
+                var mathChNode = new MathChallengeNode(MiddleAircraft.GetChallenge());
+                GUILayer.MathChallengeNode = mathChNode;
+                mathChNode.Position = new CCPoint(0, -mathChNode.ContentSize.Height);
+                mathChNode.AddAction(new CCEaseOut(new CCMoveTo(0.5f, CCPoint.Zero), 3f));
+                mathChNode.AnswerChosenEvent += AnswerChosen;
+            }
+            else
+                EndRepair(false);
         }
 
         private void AnswerChosen(object sender, bool answerIsCorrect)
@@ -397,7 +408,7 @@ namespace CocosSharpMathGame
             {
                 var mAircraft = MiddleAircraft;
                 float oldP = GetWreckPercentile(mAircraft);
-                float newP = Math.Min(oldP + 0.1f, GetWreckMaxPercentile(mAircraft));
+                float newP = Math.Min(oldP + 0.1f * ((MathChallengeNode)sender).Multiplier, GetWreckMaxPercentile(mAircraft));
                 float diff = newP - oldP;
                 AddAction(new CCEaseIn(new CCCallFiniteTimeFunc(1f, (progress, duration) => { SetWreckPercentile(mAircraft, newP - diff * (1 - progress)); }), 4f));
                 EndRepair(false);

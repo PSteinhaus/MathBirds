@@ -33,7 +33,9 @@ namespace CocosSharpMathGame
                         RemoveChild(challengeNode);
                     challengeNode = value;
                     if (challengeNode != null && challengeNode.Parent != this)
+                    {
                         AddChild(challengeNode);
+                    }
                 }
             }
         }

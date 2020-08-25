@@ -7,22 +7,25 @@ using CocosSharp;
 
 namespace CocosSharpMathGame
 {
-    internal class TestRotor : Part
+    internal class RotorBalloon : Part
     {
-        public TestRotor() : base("testRotor.png")
+        public RotorBalloon() : base("rotorBalloon.png")
         {
+            SetHealthAndMaxHealth(2);
             // set your types
             Types = new Type[] { Type.ROTOR };
-            NormalAnchorPoint = new CCPoint(3 / ContentSize.Width, 0.5f);
+            NormalAnchorPoint = new CCPoint(0.35f, 0.5f);
 
             // specify the mass points
-            MassPoints = CreateDiamondMassPoints(10f);
+            MassPoints = CreateDiamondMassPoints(8f);
 
             // specify the collision polygon
             CollisionType = Collisions.CreateDiamondCollisionPolygon(this);
 
             // give the rotor ManeuverAbility
-            ManeuverAbility = new ManeuverAbility((float)Math.Pow(10, 5) * 1.25f, (float)Math.Pow(10, 5) * 13.0f);
+            ManeuverAbility = new ManeuverAbility((float)Math.Pow(10, 5) * 0.5f, (float)Math.Pow(10, 5) * 1.0f);
+            ManeuverAbility.CloudTailNode.CloudDelay = 0.35f;
+            ManeuverAbility.CloudTailNode.CloudLifeTime = 1.0f;
         }
     }
 }

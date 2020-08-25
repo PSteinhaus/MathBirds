@@ -4,12 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CocosSharp;
+using MathNet.Numerics.Random;
 
 namespace CocosSharpMathGame
 {
     internal partial class Aircraft
     {
-        internal static Aircraft CreateTestAircraft(bool withWeapon=true)
+        internal static Aircraft CreateTestAircraft(int numWeapons = 2)
         {
             Aircraft aircraft = new Aircraft();
             //IsManeuverPolygonDrawn = true;
@@ -23,9 +24,16 @@ namespace CocosSharpMathGame
             aircraft.Body.MountPart(new TestRudder());
             aircraft.Body.MountPart(new TestRudder());
             //Body.MountPart(new TestEngineStrong());
-            if (withWeapon)
+            var rng = new Random();
+            if (numWeapons == 1)
             {
-                // give both wings guns
+                if (rng.NextBoolean())
+                    wings.MountPart(0, new TestWeapon());
+                else
+                    wings.MountPart(1, new TestWeapon());
+            }
+            else if (numWeapons == 2)
+            {
                 wings.MountPart(new TestWeapon());
                 wings.MountPart(new TestWeapon());
             }
@@ -79,6 +87,148 @@ namespace CocosSharpMathGame
             //var drawNode = maneuverPolygon.CreateDrawNode();
             //AddChild(drawNode);
             //drawNode.Scale = 1 / Constants.STANDARD_SCALE;
+        }
+
+        internal static Aircraft CreateBalloon(bool withWeapon = true)
+        {
+            Aircraft aircraft = new Aircraft();
+            aircraft.Body = new BodyBalloon();
+            // mount the rotors
+            aircraft.Body.MountPart(new RotorBalloon());
+            aircraft.Body.MountPart(new RotorBalloon());
+            if (withWeapon)
+            {
+                aircraft.Body.MountPart(new WeaponBalloon());
+            }
+            // set the math challenges
+            aircraft.WeightedChallenges = new List<Tuple<int, MathChallenge>> { new Tuple<int, MathChallenge>(1, new MultiplyChallenge(4, 3, -5, 9)),
+                                                                                new Tuple<int, MathChallenge>(1, new DivideChallenge()) };
+            return aircraft;
+        }
+
+        internal static Aircraft CreateBat(bool withWeapon = true)
+        {
+            Aircraft aircraft = new Aircraft();
+            aircraft.Body = new BodyBat();
+            // mount the wings
+            aircraft.Body.MountPart(new WingBat());
+            aircraft.Body.MountPart(new WingBat());
+            // mount the rotor and the weapon
+            aircraft.Body.MountPart(new RotorBat());
+            if (withWeapon)
+            {
+                aircraft.Body.MountPart(new WeaponBat());
+            }
+            // mount the rudders
+            aircraft.Body.MountPart(new RudderPotato());
+            aircraft.Body.MountPart(new RudderPotato());
+            // set the math challenges
+            var rng = new Random();
+            aircraft.WeightedChallenges = new List<Tuple<int, MathChallenge>> { new Tuple<int, MathChallenge>(1, new AddChallenge(4, rng.Next(2,4), 0, 51)),
+                                                                                new Tuple<int, MathChallenge>(1, new SubChallenge(4, 2, 0, 50)) };
+            return aircraft;
+        }
+
+        internal static Aircraft CreatePotato(bool withWeapon = false)
+        {
+            Aircraft aircraft = new Aircraft();
+            aircraft.Body = new BodyPotato();
+            // mount the wings
+            aircraft.Body.MountPart(new WingPotato());
+            aircraft.Body.MountPart(new WingPotato());
+            // mount the rotor or the weapon
+            if (withWeapon)
+            {
+                aircraft.Body.MountPart(new WeaponPotato());
+            }
+            else
+            {
+                aircraft.Body.MountPart(new RotorPotato());
+            }
+            // mount the rudders
+            aircraft.Body.MountPart(new RudderPotato());
+            aircraft.Body.MountPart(new RudderPotato());
+            // set the math challenges
+            var rng = new Random();
+            aircraft.WeightedChallenges = new List<Tuple<int, MathChallenge>> { new Tuple<int, MathChallenge>(1, new AddChallenge(4, 2, 0, 81)),
+                                                                                new Tuple<int, MathChallenge>(1, new SubChallenge(4, rng.Next(2,4), 0, 50)) };
+            return aircraft;
+        }
+
+        internal static Aircraft CreateBigBomber(bool withWeapon = true)
+        {
+            Aircraft aircraft = new Aircraft();
+            aircraft.Body = new BodyBigBomber();
+            // mount the wings
+            var wing1 = new WingBigBomber();
+            var wing2 = new WingBigBomber();
+            aircraft.Body.MountPart(wing1);
+            aircraft.Body.MountPart(wing2);
+            // mount the weapon
+            if (withWeapon)
+            {
+                aircraft.Body.MountPart(new WeaponBigBomber());
+            }
+            // mount 4 rotors (2 per wing)
+            wing1.MountPart(new RotorBigBomber());
+            wing1.MountPart(new RotorBigBomber());
+            wing2.MountPart(new RotorBigBomber());
+            wing2.MountPart(new RotorBigBomber());
+            // mount the rudders
+            aircraft.Body.MountPart(new RudderBigBomber());
+            aircraft.Body.MountPart(new RudderBigBomber());
+            // set the math challenges
+            aircraft.WeightedChallenges = new List<Tuple<int, MathChallenge>> { new Tuple<int, MathChallenge>(1, new SolveChallenge()) };
+            return aircraft;
+        }
+
+        internal static Aircraft CreateFighter(int numWeapons = 2)
+        {
+            Aircraft aircraft = new Aircraft();
+            aircraft.Body = new BodyFighter();
+            // mount the wings
+            var wing1 = new WingFighter();
+            var wing2 = new WingFighter();
+            aircraft.Body.MountPart(wing1);
+            aircraft.Body.MountPart(wing2);
+            // mount the weapons
+            var rng = new Random();
+            if (numWeapons == 1)
+            {
+                if (rng.NextBoolean())
+                    wing1.MountPart(new WeaponFighter());
+                else
+                    wing2.MountPart(new WeaponFighter());
+            }
+            else if (numWeapons == 2)
+            {
+                wing1.MountPart(new WeaponFighter());
+                wing2.MountPart(new WeaponFighter());
+            }
+            // mount the rotor
+            aircraft.Body.MountPart(new RotorFighter());
+            // mount the rudders
+            aircraft.Body.MountPart(new RudderFighter());
+            aircraft.Body.MountPart(new RudderFighter());
+            // set the math challenges
+            aircraft.WeightedChallenges = new List<Tuple<int, MathChallenge>> { new Tuple<int, MathChallenge>(1, new SolveChallenge()),
+                                                                                new Tuple<int, MathChallenge>(1, new MultiplyChallenge())};
+            return aircraft;
+        }
+
+        internal static Aircraft CreateJet()
+        {
+            Aircraft aircraft = new Aircraft();
+            aircraft.Body = new BodyJet();
+            // mount the wings
+            aircraft.Body.MountPart(new WingJet());
+            aircraft.Body.MountPart(new WingJet());
+            // mount the rudders
+            aircraft.Body.MountPart(new RudderJet());
+            aircraft.Body.MountPart(new RudderJet());
+            // set the math challenges
+            aircraft.WeightedChallenges = new List<Tuple<int, MathChallenge>> { new Tuple<int, MathChallenge>(1, new SolveChallenge(4, 1, 20)) };
+            return aircraft;
         }
     }
 }

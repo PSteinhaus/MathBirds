@@ -8,7 +8,6 @@ using MathNet.Symbolics;
 
 namespace CocosSharpMathGame
 {
-    // TODO: turn this class from a placeholder to an actual subtraction challenge
     internal class DivideChallenge : MathChallenge
     {
         private static bool locked = false;
@@ -16,6 +15,12 @@ namespace CocosSharpMathGame
         {
             get { return locked; }
             set { locked = value; }
+        }
+        private static int combo = 0;
+        internal override int Combo
+        {
+            get { return combo; }
+            set { combo = value; }
         }
         private const int STD_MIN_NUM = -50;
         private const int STD_MAX_NUM = 200;

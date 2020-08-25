@@ -7,7 +7,6 @@ using MathNet.Symbolics;
 
 namespace CocosSharpMathGame
 {
-    // TODO: turn this class from a placeholder to an actual subtraction challenge
     internal class SubChallenge : MathChallenge
     {
         private static bool locked = false;
@@ -15,6 +14,12 @@ namespace CocosSharpMathGame
         {
             get { return locked; }
             set { locked = value; }
+        }
+        private static int combo = 0;
+        internal override int Combo
+        {
+            get { return combo; }
+            set { combo = value; }
         }
         private const int STD_MIN_NUM = 1;
         private const int STD_MAX_NUM = 100;
@@ -57,7 +62,7 @@ namespace CocosSharpMathGame
                 // don't overwrite the solution
                 if (i == solutionIndex) continue;
                 // choose a random algorithm to create the next answer
-                AnswersInfix[i] = WrongAnswer(rng.Next(0, 2), numbers).ToString();
+                AnswersInfix[i] = WrongAnswer(numbers).ToString();
                 AnswersLaTeX[i] = AnswersInfix[i];
             }
         }
@@ -67,12 +72,13 @@ namespace CocosSharpMathGame
             return new SubChallenge(AnswersInfix.Length, NumbersCount, MinNum, MaxNum);
         }
         
-        private int WrongAnswer(int method, int[] numbers)
+        private int WrongAnswer(int[] numbers)
         {
             int wrongAnswer = 0;
             int solution = (int)((SymbolicExpression)Infix.ParseOrThrow(SolutionInfix)).RealNumberValue;
             var rng = new Random();
-            start:
+        start:
+            int method = rng.Next(3);
             switch(method)
             {
                 case 0:

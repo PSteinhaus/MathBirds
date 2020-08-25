@@ -15,10 +15,11 @@ namespace CocosSharpMathGame
         {
             PLANNING, EXECUTING_ORDERS
         }
-        internal Team PlayerTeam { get; private protected set; } = new Team();
+        internal Team PlayerTeam { get { return Team.PlayerTeam; } }
         internal GameState State { get; private set; } = GameState.PLANNING;
         public GUILayer GUILayer { get; set; }
         private CCDrawNode drawNode = new CCDrawNode();
+        internal List<Squadron> Squadrons { get; private protected set; } = new List<Squadron>();
         internal List<Aircraft> Aircrafts { get; private protected set; } = new List<Aircraft>();
         internal List<Aircraft> PlayerAircrafts { get; private protected set; }
         internal List<Aircraft> DownedAircrafts { get; private protected set; } = new List<Aircraft>();
@@ -71,6 +72,18 @@ namespace CocosSharpMathGame
             var mouseListener = new CCEventListenerMouse();
             mouseListener.OnMouseScroll = OnMouseScrollZoom;
             AddEventListener(mouseListener, int.MaxValue);
+        }
+
+        const float CHUNK_SIZE = 8000f;
+        internal static CCPointI PosToWorldChunk(CCPoint position)
+        {
+            var scaled = position / CHUNK_SIZE;
+            return new CCPointI((int)Math.Round(scaled.X, 0), (int)Math.Round(scaled.Y, 0));
+        }
+
+        internal static CCPoint ChunkToWorldPos(CCPointI chunkPos)
+        {
+            return new CCPoint(chunkPos.X * (int)CHUNK_SIZE, chunkPos.Y * (int)CHUNK_SIZE);
         }
 
         internal void InitPlayerAircrafts(List<Aircraft> playerAircrafts)
@@ -181,6 +194,7 @@ namespace CocosSharpMathGame
             */
             
             // add two other planes from different teams
+            /*
             var secondAircraft = Aircraft.CreateTestAircraft();
             var secondTeam = new Team();
             secondAircraft.Team = secondTeam;
@@ -218,6 +232,7 @@ namespace CocosSharpMathGame
             AddAircraft(fifthAircraft);
             fifthAircraft.MoveBy(bounds.Size.Width * 1.3f, bounds.Size.Height * 0.2f);
             fifthAircraft.RotateBy(-20f);
+            */
 
             //ExecuteOrdersButton.Position = new CCPoint(bounds.MinX+ExecuteOrdersButton.ScaledContentSize.Width, bounds.MaxY- ExecuteOrdersButton.ScaledContentSize.Height);
             //AddChild(ExecuteOrdersButton);
@@ -244,6 +259,13 @@ namespace CocosSharpMathGame
         }
         internal void RemoveAircraft(Aircraft aircraft)
         {
+            var squadron = aircraft.Squadron;
+            if (squadron != null)
+            {
+                squadron.RemoveAircraft(aircraft);
+                if (squadron.Leader == null)
+                    RemoveSquadron(squadron);
+            }
             Aircrafts.Remove(aircraft);
             aircraft.VertexZ = 0f;  // reset vertexZ
             if (PlayerAircrafts.Contains(aircraft))
@@ -293,11 +315,38 @@ namespace CocosSharpMathGame
                 return alive;
             }
         }
+
+        internal List<CCPointI> ActiveChunks { get; private protected set; } = new List<CCPointI>();
+        internal List<CCPointI> KnownChunks { get; private protected set; } = new List<CCPointI>();
+
         internal void StartPlanningPhase()
         {
             State = GameState.PLANNING;
-            // prepare the aircrafts
-            foreach (var aircraft in Aircrafts)
+            // find all active chunks
+            // for that first find the player chunks and then grow around them
+            ActiveChunks.Clear();
+            foreach (var aircraft in PlayerAircrafts)
+            {
+                var aircraftChunk = PosToWorldChunk(aircraft.Position);
+                for (int dx = -1; dx <= 1; dx++)
+                    for (int dy = -1; dy <= 1; dy++)
+                    {
+                        var activeChunk = aircraftChunk + new CCPointI(dx, dy);
+                        if (!ActiveChunks.Contains(activeChunk))
+                            ActiveChunks.Add(activeChunk);
+                    }
+            }
+            // check if there are any new chunks
+            // if there are generate their contents (i.e. the enemies that are supposed to be there)
+            foreach (var chunkPoint in ActiveChunks)
+                if (!KnownChunks.Contains(chunkPoint))
+                    InitiateChunk(chunkPoint);
+            // prepare the squadrons
+            foreach (var squadron in Squadrons)
+                if (ActiveChunks.Contains(PosToWorldChunk(squadron.Position)))
+                    squadron.PrepareForPlanningPhase(this);
+            // prepare the player-aircrafts
+            foreach (var aircraft in PlayerAircrafts)
                 aircraft.PrepareForPlanningPhase();
             // only go back to normal if the player is still alive
             if (PlayerIsAlive)
@@ -307,8 +356,256 @@ namespace CocosSharpMathGame
             }
             else
             {
-                State = GameState.EXECUTING_ORDERS;
+                ExecuteOrders();
+                //AddAction(new CCSequence(new CCDelayTime(0.25f), new CCCallFunc( () => ExecuteOrders() )));
             }
+            
+        }
+
+        static readonly float[] ZoneEndRadii = new float[] { 1500f, 7000f, 14000f, 30000f };
+        internal static int RadiusToZoneNum(float radius)
+        {
+            for (int i = 0; i < ZoneEndRadii.Length; i++)
+                if (radius < ZoneEndRadii[i])
+                    return i;
+            return ZoneEndRadii.Length;
+        }
+
+        internal void AddSquadron(Squadron squadron, CCPoint position, float CCdirection)
+        {
+            squadron.Leader.Position = position;
+            squadron.Leader.RotateTo(CCdirection);
+            // rotate all formation positions correctly around the leader and set everyone to their positions
+            float angle = Constants.CCDegreesToMathRadians(CCdirection);
+            foreach (var entry in squadron.AircraftsWithRelPositions)
+            {
+                var formationPoint = CCPoint.RotateByAngle(entry.Value, CCPoint.Zero, angle);
+                entry.Key.Position = position + formationPoint;
+                entry.Key.RotateTo(CCdirection);
+                AddAircraft(entry.Key);
+            }
+            squadron.GenerateWayPoint();
+            Squadrons.Add(squadron);
+        }
+
+        internal void RemoveSquadron(Squadron squadron)
+        {
+            foreach (var entry in squadron.AircraftsWithRelPositions)
+            {
+                RemoveAircraft(entry.Key);
+            }
+            Squadrons.Remove(squadron);
+        }
+
+        /// <summary>
+        /// Returned Squadron can be null!
+        /// </summary>
+        /// <param name="zoneNum"></param>
+        /// <returns></returns>
+        internal Squadron GenerateSquadron(int zoneNum, Random rng)
+        {
+            Squadron newSquadron = null;
+            switch (zoneNum)
+            {
+                case 0:
+                    {
+                        // no squadrons are present in the first zone
+                    }
+                    break;
+                case 1:
+                    {
+                        // second zone: potatos and bats
+                        switch (rng.Next(4))
+                        {
+                            case 0:
+                                {
+                                    // create a peaceful Potato
+                                    var leader = Aircraft.CreatePotato();
+                                    leader.AI = new PeacefulFleeingAI();
+                                    newSquadron = new Squadron();
+                                    newSquadron.AddAircraft(leader, CCPoint.Zero);
+                                }
+                                break;
+                            case 1:
+                                {
+                                    // create a non-peaceful Potato
+                                    var leader = Aircraft.CreatePotato(true);
+                                    leader.AI = new StandardAI();
+                                    newSquadron = new Squadron();
+                                    newSquadron.AddAircraft(leader, CCPoint.Zero);
+                                }
+                                break;
+                            case 2:
+                                {
+                                    // create a bat
+                                    var leader = Aircraft.CreateBat();
+                                    leader.AI = new StandardAI();
+                                    newSquadron = new Squadron();
+                                    newSquadron.AddAircraft(leader, CCPoint.Zero);
+                                }
+                                break;
+                            case 3:
+                                {
+                                    // create a 3-potato squad
+                                    var leader = Aircraft.CreatePotato(true);
+                                    var ally1 = Aircraft.CreatePotato();
+                                    var ally2 = Aircraft.CreatePotato();
+                                    leader.AI = new StandardAI();
+                                    ally1.AI = new PeacefulFleeingAI();
+                                    ally2.AI = new PeacefulFleeingAI();
+                                    newSquadron = new Squadron();
+                                    newSquadron.AddAircraft(leader, CCPoint.Zero);
+                                    newSquadron.AddAircraft(ally1, new CCPoint(-90f, 145f));
+                                    newSquadron.AddAircraft(ally2, new CCPoint(-90f, -145f));
+                                }
+                                break;
+                        }
+                    }
+                    break;
+                case 2:
+                    {
+                        // third zone: TestAircrafts and Balloons
+                        switch (rng.Next(3))
+                        {
+                            case 0:
+                                {
+                                    // create a lone TestAircraft
+                                    var leader = Aircraft.CreateTestAircraft();
+                                    leader.AI = new StandardAI();
+                                    newSquadron = new Squadron();
+                                    newSquadron.AddAircraft(leader, CCPoint.Zero);
+                                }
+                                break;
+                            case 1:
+                                {
+                                    // create a Balloon
+                                    var leader = Aircraft.CreateBalloon(true);
+                                    leader.AI = new StandardAI();
+                                    newSquadron = new Squadron();
+                                    newSquadron.AddAircraft(leader, CCPoint.Zero);
+                                }
+                                break;
+                            case 2:
+                                {
+                                    // create a squad of 3 TestAircrafts
+                                    newSquadron = new Squadron();
+                                    Aircraft[] planes = new Aircraft[3];
+                                    for (int i = 0; i < 3; i++)
+                                    {
+                                        int weaponNum = rng.Next(3);
+                                        planes[i] = Aircraft.CreateTestAircraft(weaponNum);
+                                        planes[i].AI = weaponNum != 0 ? (AI)(new StandardAI()) : (AI)(new PeacefulFleeingAI());
+                                    }
+                                    newSquadron.AddAircraft(planes[0], CCPoint.Zero);
+                                    newSquadron.AddAircraft(planes[1], new CCPoint(-250f, 255f));
+                                    newSquadron.AddAircraft(planes[2], new CCPoint(-250f,-255f));
+                                }
+                                break;
+                        }
+                    }
+                    break;
+                case 3:
+                    {
+                        // fourth zone: Fighters and BigBombers
+                        switch (rng.Next(5))
+                        {
+                            case 0:
+                            case 1:
+                                {
+                                    // create a lone Fighter
+                                    var leader = Aircraft.CreateFighter();
+                                    leader.AI = new StandardAI();
+                                    newSquadron = new Squadron();
+                                    newSquadron.AddAircraft(leader, CCPoint.Zero);
+                                }
+                                break;
+                            case 2:
+                                {
+                                    // create a Fighter Squad of 2 Fighters
+                                    var leader = Aircraft.CreateFighter();
+                                    leader.AI = new StandardAI();
+                                    var plane2 = Aircraft.CreateFighter();
+                                    plane2.Team = Team.EnemyTeam;
+                                    plane2.AI = new StandardAI();
+                                    newSquadron = new Squadron();
+                                    newSquadron.AddAircraft(leader, new CCPoint(0, 270f));
+                                    newSquadron.AddAircraft(plane2, new CCPoint(0,-270f));
+                                }
+                                break;
+                            case 3:
+                                {
+                                    // create a squad of a BigBomber and some Fighters
+                                    newSquadron = new Squadron();
+                                    newSquadron.AddAircraft(Aircraft.CreateBigBomber(), CCPoint.Zero);
+                                    int fighterCount = rng.NextBoolean() ? 2 : 4;
+                                    Aircraft[] fighter = new Aircraft[fighterCount];
+                                    for (int i = 0; i < fighterCount; i++)
+                                    {
+                                        fighter[i] = Aircraft.CreateFighter();
+                                        fighter[i].AI = new StandardAI();
+                                    }
+                                    if (fighterCount >= 2)
+                                    {
+                                        newSquadron.AddAircraft(fighter[0], new CCPoint(330f, 255f));
+                                        newSquadron.AddAircraft(fighter[1], new CCPoint(330f, -255f));
+                                    }
+                                    if (fighterCount == 4)
+                                    {
+                                        newSquadron.AddAircraft(fighter[2], new CCPoint(-330f, 255f));
+                                        newSquadron.AddAircraft(fighter[3], new CCPoint(-330f, -255f));
+                                    }
+                                }
+                                break;
+                        }
+                    }
+                    break;
+                case 4:
+                default:    // this is also the default case because this is the last zone
+                    {
+                        // fifth zone: Jets, Jets and more Jets
+                        var leader = Aircraft.CreateJet();
+                        leader.Team = Team.EnemyTeam;
+                        leader.AI = new StandardAI();
+                        newSquadron = new Squadron();
+                        newSquadron.AddAircraft(leader, CCPoint.Zero);
+                    }
+                    break;
+            }
+            if (newSquadron != null)
+            {
+                newSquadron.MinR = ZoneEndRadii[zoneNum - 1];
+                newSquadron.MaxR = (zoneNum < ZoneEndRadii.Length ? ZoneEndRadii[zoneNum] : float.PositiveInfinity);
+            }
+            return newSquadron;
+        }
+
+        private protected void InitiateChunk(CCPointI chunkPoint)
+        {
+            
+            // add some squadrons randomly
+            var rng = new Random();
+            /*
+            const int MIN_SQUADS_PER_CHUNK = 4;
+            const int MAX_SQUADS_PER_CHUNK = 5;
+            int squadCount = rng.Next(MIN_SQUADS_PER_CHUNK, MAX_SQUADS_PER_CHUNK + 1);
+            */
+            const int squadCount = 5;
+            // choose random positions inside of this chunk
+            CCPoint chunkMiddle = ChunkToWorldPos(chunkPoint);
+            for (int i=0; i<squadCount; i++)
+            {
+                var randomPos = Constants.RandomPointBoxnear(chunkMiddle, CHUNK_SIZE / 2, rng);
+                int zone = RadiusToZoneNum(randomPos.Length);
+                var newSquadron = GenerateSquadron(zone, rng);
+                if (newSquadron != null)
+                {
+                    // choose a random orientation
+                    var CCdirection = (float)rng.NextDouble() * 360f;
+                    AddSquadron(newSquadron, randomPos, CCdirection);
+                }
+            }
+            
+            KnownChunks.Add(chunkPoint);
         }
 
         private protected void EnterWreckageLayer()
@@ -341,7 +638,19 @@ namespace CocosSharpMathGame
                         // DEBUG: Console.WriteLine("EXECUTING ORDERS; dt: " + dt);
                         // go through all aircrafts and let them execute their orders
                         List<Aircraft> aircraftToBeRemoved = new List<Aircraft>();
-                        foreach (var aircraft in Aircrafts)
+                        // first the enemies (organized into squadrons)
+                        foreach (var squadron in Squadrons)
+                            if (squadron.IsActive(this))
+                            {
+                                foreach (var aircraft in squadron.AircraftsWithRelPositions.Keys)
+                                {
+                                    aircraft.ExecuteOrders(dt);
+                                    if (aircraft.ToBeRemoved)
+                                        aircraftToBeRemoved.Add(aircraft);
+                                }
+                            }
+                        // then the player aircrafts
+                        foreach (var aircraft in PlayerAircrafts)
                         {
                             aircraft.ExecuteOrders(dt);
                             if (aircraft.ToBeRemoved)
@@ -370,9 +679,13 @@ namespace CocosSharpMathGame
                     }
                     break;
             }
-            // shake the screen (now managed by MyLayer)
-            //ShakeScreen(dt);
         }
+
+        internal bool PosIsActive(CCPoint position)
+        {
+            return ActiveChunks.Contains(PosToWorldChunk(position));
+        }
+
         /// <summary>
         /// Draw everything that is supposed to be drawn by the DrawNode
         /// </summary>
@@ -385,7 +698,8 @@ namespace CocosSharpMathGame
                 drawNodeUser.UseDrawNodes(HighDrawNode, LowDrawNode);
             // draw everything directly related to the aircrafts
             foreach (var aircraft in Aircrafts)
-                aircraft.UseDrawNodes(HighDrawNode, LowDrawNode);
+                if (PosIsActive(aircraft.Position))
+                    aircraft.UseDrawNodes(HighDrawNode, LowDrawNode);
         }
 
         new void OnTouchesBegan(List<CCTouch> touches, CCEvent touchEvent)

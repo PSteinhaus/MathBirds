@@ -58,6 +58,49 @@ namespace CocosSharpMathGame
         /// the minimal velocity that any aircraft needs to have to not fall out of the sky
         /// </summary>
         internal const float V_MIN = 150f;
+        /// <summary>
+        /// Calculate and return the maximum (straight) velocity that this aircraft can reach, based upon its ManeuverPolygon
+        /// </summary>
+        internal float MaxVelocity
+        {
+            get
+            {
+                GetManeuverParts(out IEnumerable<Part> leftSideParts, out IEnumerable<Part> rightSideParts);
+                float EkinRight = 0;
+                float EkinLeft = 0;
+                float ErotRight = 0;
+                float ErotLeft = 0;
+                float ErotBonusRight = 0;
+                float ErotBonusLeft = 0;
+                foreach (var part in rightSideParts)
+                {
+                    GetEkinAndErotOfPart(part, out float EkinMin, out float EkinMax, out float ErotMin, out float ErotMax, out float ErotBonusMin, out float ErotBonusMax);
+                    EkinRight += EkinMax;
+                    ErotRight += ErotMax;
+                    ErotBonusRight += ErotBonusMax;
+                }
+                foreach (var part in leftSideParts)
+                {
+                    GetEkinAndErotOfPart(part, out float EkinMin, out float EkinMax, out float ErotMin, out float ErotMax, out float ErotBonusMin, out float ErotBonusMax);
+                    EkinLeft += EkinMax;
+                    ErotLeft += ErotMax;
+                    ErotBonusLeft += ErotBonusMax;
+                }
+
+                float Clamp(float value, float min, float max)
+                {
+                    return (value < min) ? min : (value > max) ? max : value;
+                }
+                float CalcEkin()
+                {
+                    float Ekin = EkinRight + EkinLeft + (ErotRight + ErotLeft - (float)Math.Abs(ErotRight - ErotLeft)) +
+                        ((ErotRight - ErotLeft > 0) ? Clamp(ErotBonusLeft - ErotBonusRight, 0, (float)Math.Abs(ErotRight - ErotLeft)) : Clamp(ErotBonusRight - ErotBonusLeft, 0, (float)Math.Abs(ErotRight - ErotLeft)));
+                    return Ekin;
+                }
+                float v = (float)Math.Sqrt((2 * CalcEkin()) / Mass) * Constants.STANDARD_SCALE;
+                return v;
+            }
+        }
         protected FlightPathControlNode FlightPathControlNode { get; set; }
         internal Team Team { get; set; }
         private protected List<Tuple<int,MathChallenge>> WeightedChallenges { get; set; }
@@ -919,6 +962,8 @@ namespace CocosSharpMathGame
         internal List<Part> TotalParts { get; set; }
         internal bool ToBeRemoved { get; private set; } = false;
 
+        internal Squadron Squadron { get; set; }
+
         /// <summary>
         /// Set into a state so that the planning phase can act properly on this aircraft
         /// </summary>
@@ -926,14 +971,26 @@ namespace CocosSharpMathGame
         {
             UpdateManeuverPolygon();
             FlightPathControlNode.ResetHeadPosition();
-            if (AI != null && MyState != State.SHOT_DOWN)
+            if (AI != null && MyState != State.SHOT_DOWN && (Squadron == null || !Squadron.InFormation))
             {
-                var aircraftsInLevel = AircraftsInLevel();
-                if (aircraftsInLevel != null)
-                    AI.ActInPlanningPhase(aircraftsInLevel);
+                AI.ActInPlanningPhase();
             }
             if (ControlledByPlayer && MyState != State.SHOT_DOWN)
                 FlightPathControlNode.Visible = true;
+        }
+
+        internal IEnumerable<Aircraft> PlayerAircraftsInLevel()
+        {
+            var playLayer = (Layer as PlayLayer);
+            if (playLayer != null)
+                return playLayer.PlayerAircrafts;
+            else
+                return null;
+        }
+
+        internal bool IsActive()
+        {
+            return ControlledByPlayer || (Squadron != null ? Squadron.IsActive((PlayLayer)Layer) : ((PlayLayer)Layer).PosIsActive(Position));
         }
 
         internal IEnumerable<Aircraft> AircraftsInLevel()

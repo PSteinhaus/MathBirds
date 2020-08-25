@@ -23,7 +23,7 @@ namespace CocosSharpMathGame
         /// Do your move.
         /// </summary>
         /// <param name="aircrafts">The list of all aircrafts in the level</param>
-        internal abstract void ActInPlanningPhase(IEnumerable<Aircraft> aircrafts);
+        internal abstract void ActInPlanningPhase();
 
         protected enum StreamEnum : byte
         {

@@ -48,11 +48,11 @@ namespace CocosSharpMathGame
             CollectionNode.AnchorPoint = CCPoint.AnchorLowerLeft;
             CollectionNode.PositionY = contentSize.Height;
             CollectionNode.PositionX = MaxX;
-            AddChild(CollectionNode);
             AnchorPoint = CCPoint.AnchorLowerLeft;
             Scale = 1f;
             Scroller.MoveFunction = MoveCollectionNode;
             MakeClickable(touchMustEndOnIt: false, swallowTouch: swallowTouches);
+            AddChild(CollectionNode);
             // DEBUG:
             DrawNode = new CCDrawNode();
         }
