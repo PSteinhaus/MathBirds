@@ -25,6 +25,8 @@ namespace CocosSharpMathGame
         }
         private const int STD_MIN_NUM = 1;
         private const int STD_MAX_NUM = 9;
+        public SolveChallenge() : this(dummy: false)
+        { }
         internal SolveChallenge(int answerCount = 4, int minNum = STD_MIN_NUM, int maxNum = STD_MAX_NUM, bool dummy=false)
         {
             if (dummy) return;

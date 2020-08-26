@@ -64,7 +64,6 @@ namespace CocosSharpMathGame
                 MyDrawNode.BlendFunc = CCBlendFunc.NonPremultiplied;
                 MyDrawNode.Position = (CCPoint)ContentSize / 2;
                 AddChild(MyDrawNode, -100000);
-                UpdateDrawNode();   // initialize it
             }
             // set the rewards
             switch (ChallengeModel)
@@ -111,7 +110,11 @@ namespace CocosSharpMathGame
         {
             base.AddedToScene();
             if (!ChallengeModel.Locked)
+            {
                 Schedule();
+                CreateNextChallenge(); ;   // initialize it
+                UpdateDrawNode(useMultiplGoal: true); // use the de facto value since the visual value is not up to date
+            }
         }
 
         public override void Update(float dt)
@@ -145,67 +148,86 @@ namespace CocosSharpMathGame
         }
 
         internal float DrawNodeAlpha { get; set; } = 1f;
-        internal void UpdateDrawNode()
+        internal void UpdateDrawNode(bool useMultiplGoal = false)
         {
             if (MyDrawNode == null) return;
             MyDrawNode.Clear();
-            if (LootboxCount == 0) return;
-            // visualize lootbar-progress
-            const float GROWTH_FACTOR = 1.3f;
-            const float BORDER_WIDTH = 4f;
-            CCColor4B white = new CCColor4B(1f, 1f, 1f, DrawNodeAlpha);
-            CCColor4B bright = new CCColor4B(1f, 1f, 1f, DrawNodeAlpha);
-            CCRect progressRect = new CCRect(-(ContentSize.Width * GROWTH_FACTOR) / 2, -(ContentSize.Height * GROWTH_FACTOR) / 2, ContentSize.Width * GROWTH_FACTOR, ContentSize.Height * GROWTH_FACTOR);
-            // draw the progress bar
-            var progressPoly = new List<CCPoint> { CCPoint.Zero, new CCPoint(0, (ContentSize.Height * GROWTH_FACTOR) / 2) };
-            if (LootboxProgress >= 0.125f)
+            if (LootboxCount != 0)
             {
-                progressPoly.Add(progressRect.UpperRight);
-            }
-            else
-            {
-                progressPoly.Add(new CCPoint(LootboxProgress / 0.125f * progressRect.MaxX, progressRect.MaxY));
-                goto done;
-            }
-            if (LootboxProgress >= 0.375f)
-            {
-                progressPoly.Add(new CCPoint(progressRect.MaxX, progressRect.MinY));
-            }
-            else
-            {
-                progressPoly.Add(new CCPoint(progressRect.MaxX, progressRect.MaxY - progressRect.Size.Height * ((LootboxProgress - 0.125f)*4)));
-                goto done;
-            }
-            if (LootboxProgress >= 0.625f)
-            {
-                progressPoly.Add(new CCPoint(progressRect.MinX, progressRect.MinY));
-            }
-            else
-            {
-                progressPoly.Add(new CCPoint(progressRect.MaxX - progressRect.Size.Width * ((LootboxProgress - 0.375f) * 4), progressRect.MinY));
-                goto done;
-            }
-            if (LootboxProgress >= 0.875f)
-            {
-                progressPoly.Add(new CCPoint(progressRect.MinX, progressRect.MaxY));
-            }
-            else
-            {
-                progressPoly.Add(new CCPoint(progressRect.MinX, progressRect.MinY + progressRect.Size.Height * ((LootboxProgress - 0.625f) * 4)));
-                goto done;
-            }
-            if (LootboxProgress > 0.875f)
-            {
-                progressPoly.Add(new CCPoint(progressRect.MinX + progressRect.Size.Width * (LootboxProgress - 0.875f) * 2, progressRect.MaxY));
-            }
+                // visualize lootbar-progress
+                const float GROWTH_FACTOR = 1.3f;
+                const float BORDER_WIDTH = 4f;
+                CCColor4B white = new CCColor4B(1f, 1f, 1f, DrawNodeAlpha);
+                CCColor4B bright = new CCColor4B(1f, 1f, 1f, DrawNodeAlpha);
+                CCRect progressRect = new CCRect(-(ContentSize.Width * GROWTH_FACTOR) / 2, -(ContentSize.Height * GROWTH_FACTOR) / 2, ContentSize.Width * GROWTH_FACTOR, ContentSize.Height * GROWTH_FACTOR);
+                // draw the progress bar
+                var progressPoly = new List<CCPoint> { CCPoint.Zero, new CCPoint(0, (ContentSize.Height * GROWTH_FACTOR) / 2) };
+                if (LootboxProgress >= 0.125f)
+                {
+                    progressPoly.Add(progressRect.UpperRight);
+                }
+                else
+                {
+                    progressPoly.Add(new CCPoint(LootboxProgress / 0.125f * progressRect.MaxX, progressRect.MaxY));
+                    goto done;
+                }
+                if (LootboxProgress >= 0.375f)
+                {
+                    progressPoly.Add(new CCPoint(progressRect.MaxX, progressRect.MinY));
+                }
+                else
+                {
+                    progressPoly.Add(new CCPoint(progressRect.MaxX, progressRect.MaxY - progressRect.Size.Height * ((LootboxProgress - 0.125f) * 4)));
+                    goto done;
+                }
+                if (LootboxProgress >= 0.625f)
+                {
+                    progressPoly.Add(new CCPoint(progressRect.MinX, progressRect.MinY));
+                }
+                else
+                {
+                    progressPoly.Add(new CCPoint(progressRect.MaxX - progressRect.Size.Width * ((LootboxProgress - 0.375f) * 4), progressRect.MinY));
+                    goto done;
+                }
+                if (LootboxProgress >= 0.875f)
+                {
+                    progressPoly.Add(new CCPoint(progressRect.MinX, progressRect.MaxY));
+                }
+                else
+                {
+                    progressPoly.Add(new CCPoint(progressRect.MinX, progressRect.MinY + progressRect.Size.Height * ((LootboxProgress - 0.625f) * 4)));
+                    goto done;
+                }
+                if (LootboxProgress > 0.875f)
+                {
+                    progressPoly.Add(new CCPoint(progressRect.MinX + progressRect.Size.Width * (LootboxProgress - 0.875f) * 2, progressRect.MaxY));
+                }
             done:
-            var progressPolyPoints = progressPoly.ToArray();
-            MyDrawNode.DrawPolygon(progressPolyPoints, progressPolyPoints.Length, bright, 0f, CCColor4B.Transparent);
-            // draw the progress bar border
-            MyDrawNode.DrawRect(progressRect, CCColor4B.Transparent, BORDER_WIDTH, white);
-            // keep the button itself black
-            var black = new CCColor4B(0f, 0f, 0f, DrawNodeAlpha);
-            MyDrawNode.DrawRect(new CCRect(-(ContentSize.Width) / 2, -(ContentSize.Height) / 2, ContentSize.Width, ContentSize.Height), black);
+                var progressPolyPoints = progressPoly.ToArray();
+                MyDrawNode.DrawPolygon(progressPolyPoints, progressPolyPoints.Length, bright, 0f, CCColor4B.Transparent);
+                // draw the progress bar border
+                MyDrawNode.DrawRect(progressRect, CCColor4B.Transparent, BORDER_WIDTH, white);
+            }
+
+            // additionally color the button depending on the multiplier progress
+            int multiplier = 1;
+            float progress = 0;
+            if (useMultiplGoal)
+            {
+                multiplier = (int)CurrentMathChallengeNode.MultiplGoal;
+                progress = CurrentMathChallengeNode.MathChallenge.MultiplProgress;
+            }
+            else
+            {
+                multiplier = CurrentMathChallengeNode.Multiplier;
+                progress = CurrentMathChallengeNode.MultiplProgressVisible;
+            }
+            var lastColor = MathChallengeNode.MultiplierBarColor(multiplier - 1);
+            var nextColor = MathChallengeNode.MultiplierBarColor(multiplier);
+            var currentColor = multiplier <= 5 ? CCColor4B.Lerp(lastColor, nextColor, progress) : lastColor;
+            var darkenedColor = CCColor4B.Lerp(currentColor, CCColor4B.Black, 0.25f);
+            darkenedColor.A = (byte)(DrawNodeAlpha * byte.MaxValue);
+            MyDrawNode.DrawRect(new CCRect(-(ContentSize.Width) / 2, -(ContentSize.Height) / 2, ContentSize.Width, ContentSize.Height), darkenedColor);
         }
 
         internal event EventHandler<Part> RewardEvent;

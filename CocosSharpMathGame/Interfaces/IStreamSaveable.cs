@@ -25,7 +25,7 @@ namespace CocosSharpMathGame
             {
                 obj = Activator.CreateInstance(Type.GetType(typeName));
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 obj = null;
             }

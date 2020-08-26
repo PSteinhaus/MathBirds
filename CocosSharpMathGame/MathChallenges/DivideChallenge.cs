@@ -26,6 +26,8 @@ namespace CocosSharpMathGame
         private const int STD_MAX_NUM = 200;
         private protected int MinNum { get; set; }
         private protected int MaxNum { get; set; }
+        public DivideChallenge() : this(dummy: false)
+        { }
         internal DivideChallenge(int answerCount = 4, int minNum = STD_MIN_NUM, int maxNum = STD_MAX_NUM, bool dummy=false)
         {
             if (dummy) return;
@@ -127,5 +129,6 @@ namespace CocosSharpMathGame
         {
             return new ScrapyardButton(this, "scrapyardDivide.png");
         }
+
     }
 }

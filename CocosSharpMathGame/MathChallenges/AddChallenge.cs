@@ -27,6 +27,8 @@ namespace CocosSharpMathGame
         private protected int SummandCount { get; set; }
         private protected int MinNum { get; set; }
         private protected int MaxNum { get; set; }
+        public AddChallenge() : this(dummy: false)
+        { }
         internal AddChallenge(int answerCount = 4, int summandCount = 2, int minNum = STD_MIN_NUM, int maxNum = STD_MAX_NUM, bool dummy=false)
         {
             if (dummy) return;
@@ -113,11 +115,6 @@ namespace CocosSharpMathGame
         internal override ScrapyardButton CreateScrapyardButton()
         {
             return new ScrapyardButton(this, "scrapyardAdd.png");
-        }
-
-        internal static AddChallenge GetDummy()
-        {
-            return new AddChallenge(dummy:true);
         }
     }
 }

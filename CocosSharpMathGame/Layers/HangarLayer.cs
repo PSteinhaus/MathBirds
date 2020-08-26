@@ -225,14 +225,14 @@ namespace CocosSharpMathGame
         private CCAction CreateUIFadeOutAndDisableAction(ScrapyardButton scrapyardButton)
         {
             var action = new CCSpawn( new CCSequence(new CCCallFunc(() => { scrapyardButton.Pressable = false; }), FadeOut, new CCCallFunc(() => { scrapyardButton.Visible = false; })),
-                                      new CCCallFiniteTimeFunc(TRANSITION_TIME, (prog, duration) => { scrapyardButton.DrawNodeAlpha = 1 - prog; scrapyardButton.UpdateDrawNode(); }));
+                                      new CCCallFiniteTimeFunc(TRANSITION_TIME, (prog, duration) => { scrapyardButton.DrawNodeAlpha = 1 - prog; scrapyardButton.UpdateDrawNode(true); }));
             action.Tag = FadeActionTag;
             return action;
         }
         private CCAction CreateUIFadeInAndEnableAction(ScrapyardButton scrapyardButton)
         {
             var action = new CCSpawn( new CCSequence(new CCCallFunc(() => { scrapyardButton.Visible = true; }), FadeIn, new CCCallFunc(() => { if (!scrapyardButton.ChallengeModel.Locked) scrapyardButton.Pressable = true; })),
-                                      new CCCallFiniteTimeFunc(TRANSITION_TIME, (prog, duration) => { scrapyardButton.DrawNodeAlpha = prog; scrapyardButton.UpdateDrawNode(); }));
+                                      new CCCallFiniteTimeFunc(TRANSITION_TIME, (prog, duration) => { scrapyardButton.DrawNodeAlpha = prog; scrapyardButton.UpdateDrawNode(true); }));
             action.Tag = FadeActionTag;
             return action;
         }
@@ -1415,13 +1415,9 @@ namespace CocosSharpMathGame
                                         // save which kinds of math challenges are unlocked already
                                         // load how many challenges there were when the save was written (as this could change)
                                         int challengeCount = reader.ReadInt32();
-                                        if (challengeCount == 5)
+                                        for (int i=0; i<challengeCount; i++)
                                         {
-                                            (new AddChallenge(dummy: true)).ReadFromStream(reader);
-                                            (new SubChallenge(dummy: true)).ReadFromStream(reader);
-                                            (new MultiplyChallenge(dummy: true)).ReadFromStream(reader);
-                                            (new DivideChallenge(dummy: true)).ReadFromStream(reader);
-                                            (new SolveChallenge(dummy: true)).ReadFromStream(reader);
+                                            MathChallenge.CreateFromStream(reader);
                                         }
                                     }
                                     break;

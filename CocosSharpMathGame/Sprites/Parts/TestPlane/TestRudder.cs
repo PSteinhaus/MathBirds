@@ -11,7 +11,7 @@ namespace CocosSharpMathGame
     {
         public TestRudder() : base("testRudder.png")
         {
-            SetHealthAndMaxHealth(5);
+            SetHealthAndMaxHealth(4);
             // set your types
             Types = new Type[] { Type.RUDDER };
             NormalAnchorPoint = new CCPoint(0.5f, 0f);

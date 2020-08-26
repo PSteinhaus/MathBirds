@@ -21,7 +21,7 @@ namespace CocosSharpMathGame
         {
             get
             {
-                int baseValue = 1 + (int)((float)Math.Sqrt(Combo * 0.05f) / 0.4f);
+                int baseValue = 1 + (int)((float)Math.Sqrt(Combo * 0.05f) / 0.08f);
                 return baseValue < 6 ? baseValue : 30; 
             }
         }
@@ -32,7 +32,7 @@ namespace CocosSharpMathGame
         {
             get
             {
-                return ((float)Math.Sqrt(Combo * 0.05f) / 0.4f) % 1;
+                return ((float)Math.Sqrt(Combo * 0.05f) / 0.08f) % 1;
             }
         }
         internal string ChallengeLaTeX { get; private protected set; }
@@ -101,11 +101,12 @@ namespace CocosSharpMathGame
             // write the current combo
             writer.Write((byte)StreamEnum.COMBO);
             writer.Write(Combo);
+            Console.WriteLine("wrote combo: " + Combo);
             //stop
             writer.Write((byte)StreamEnum.STOP);
         }
 
-        internal void ReadFromStream(BinaryReader reader)
+        internal static MathChallenge CreateFromStream(BinaryReader reader)
         {
             bool reading = true;
             MathChallenge dummy = null;
@@ -118,21 +119,27 @@ namespace CocosSharpMathGame
                         {
                             // read the string containing the full name of the challenge class
                             string className = reader.ReadString();
+                            Console.WriteLine("read name: " + className);
                             dummy = (MathChallenge)TypeHelper.CreateFromTypeName(className);
+                            Console.WriteLine("dummy == null: " + dummy == null);
                         }
                         break;
                     case StreamEnum.LOCKED:
                         {
-                            bool locked = reader.ReadBoolean();
+                            var locked = reader.ReadBoolean();
                             if (dummy != null)
                                 dummy.Locked = locked;
                         }
                         break;
                     case StreamEnum.COMBO:
                         {
-                            int combo = reader.ReadInt32();
+                            var combo = reader.ReadInt32();
+                            Console.WriteLine("read combo: " + combo);
                             if (dummy != null)
+                            {
                                 dummy.Combo = combo;
+                                Console.WriteLine("dummy.Combo: " + dummy.Combo);
+                            }
                         }
                         break;
                     case StreamEnum.STOP:
@@ -140,6 +147,7 @@ namespace CocosSharpMathGame
                         break;
                 }
             }
+            return dummy;
         }
     }
 }

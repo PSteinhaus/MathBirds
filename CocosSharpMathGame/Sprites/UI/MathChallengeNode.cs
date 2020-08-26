@@ -195,11 +195,6 @@ namespace CocosSharpMathGame
                         barColor = new CCColor4B(0.225f, 0, 0.8f, 1f);
                     }
                     break;
-                case 30:
-                    {
-                        barColor = CCColor4B.Transparent;
-                    }
-                    break;
             }
             return barColor;
         }

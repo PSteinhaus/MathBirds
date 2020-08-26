@@ -51,7 +51,7 @@ namespace CocosSharpMathGame
         /// <summary>
         /// if any player aircraft moves in closer than this it will pull the aggro (i.e. cause the squadron to break formation and attack)
         /// </summary>
-        internal float AggroRange { get; set; } = 800f;
+        internal float AggroRange { get; set; } = 1100f;
 
         internal void RemoveAircraft(Aircraft aircraft)
         {

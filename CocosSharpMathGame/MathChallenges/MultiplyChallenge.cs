@@ -27,6 +27,8 @@ namespace CocosSharpMathGame
         private protected int NumbersCount { get; set; }
         private protected int MinNum { get; set; }
         private protected int MaxNum { get; set; }
+        public MultiplyChallenge() : this(dummy: false)
+        { }
         internal MultiplyChallenge(int answerCount = 4, int numbersCount = 2, int minNum = STD_MIN_NUM, int maxNum = STD_MAX_NUM, bool dummy=false)
         {
             if (dummy) return;
@@ -140,5 +142,6 @@ namespace CocosSharpMathGame
         {
             return new ScrapyardButton(this, "scrapyardMultiply.png");
         }
+
     }
 }
