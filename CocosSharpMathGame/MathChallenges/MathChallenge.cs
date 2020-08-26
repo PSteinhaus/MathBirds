@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -83,5 +84,62 @@ namespace CocosSharpMathGame
         }
 
         internal abstract ScrapyardButton CreateScrapyardButton();
+        protected enum StreamEnum : byte
+        {
+            STOP = 0, NAME = 1, LOCKED = 2,
+            COMBO = 3
+        }
+        internal void WriteToStream(BinaryWriter writer)
+        {
+            // write the string containing the full name of the challenge class
+            writer.Write((byte)StreamEnum.NAME);
+            string name = GetType().AssemblyQualifiedName;
+            writer.Write(name);
+            // write whether you're locked
+            writer.Write((byte)StreamEnum.LOCKED);
+            writer.Write(Locked);
+            // write the current combo
+            writer.Write((byte)StreamEnum.COMBO);
+            writer.Write(Combo);
+            //stop
+            writer.Write((byte)StreamEnum.STOP);
+        }
+
+        internal void ReadFromStream(BinaryReader reader)
+        {
+            bool reading = true;
+            MathChallenge dummy = null;
+            while (reading)
+            {
+                StreamEnum nextEnum = (StreamEnum)reader.ReadByte();
+                switch (nextEnum)
+                {
+                    case StreamEnum.NAME:
+                        {
+                            // read the string containing the full name of the challenge class
+                            string className = reader.ReadString();
+                            dummy = (MathChallenge)TypeHelper.CreateFromTypeName(className);
+                        }
+                        break;
+                    case StreamEnum.LOCKED:
+                        {
+                            bool locked = reader.ReadBoolean();
+                            if (dummy != null)
+                                dummy.Locked = locked;
+                        }
+                        break;
+                    case StreamEnum.COMBO:
+                        {
+                            int combo = reader.ReadInt32();
+                            if (dummy != null)
+                                dummy.Combo = combo;
+                        }
+                        break;
+                    case StreamEnum.STOP:
+                        reading = false;
+                        break;
+                }
+            }
+        }
     }
 }

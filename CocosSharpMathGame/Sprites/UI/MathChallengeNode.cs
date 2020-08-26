@@ -23,9 +23,9 @@ namespace CocosSharpMathGame
         internal float NodeHeight { get { return MathChallenge.NodeHeight; } }
         internal float QuestionNodeHeight { get { return MathChallenge.QuestionNodeHeight; } }
         internal int Columns { get; private protected set; }
-        internal static bool UnlockedAddSubSlot { get; private protected set; } = false;
-        internal static bool UnlockedMulDivSlot { get; private protected set; } = false;
-        internal static bool UnlockedSolveSlot { get; private protected set; } = false;
+        internal static bool UnlockedAddSubSlot { get; set; } = false;
+        internal static bool UnlockedMulDivSlot { get; set; } = false;
+        internal static bool UnlockedSolveSlot { get; set; } = false;
         internal MathChallenge MathChallenge { get; private protected set; }
         internal MathNode[] AnswerNodes { get; private protected set; }
         internal MathNode QuestionNode { get; private protected set; }

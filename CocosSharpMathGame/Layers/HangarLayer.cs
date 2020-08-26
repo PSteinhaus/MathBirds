@@ -1271,7 +1271,7 @@ namespace CocosSharpMathGame
         
         private enum StreamEnum : byte
         {
-            STOP, AIRCRAFTS, PARTS, CAMINFO
+            STOP, AIRCRAFTS, PARTS, CAMINFO, UNLOCKS, CHALLENGES
         }
         public async Task SaveToFile()
         {
@@ -1289,6 +1289,25 @@ namespace CocosSharpMathGame
                 using (MemoryStream mStream = new MemoryStream())
                 {
                     BinaryWriter writer = new BinaryWriter(mStream);
+                    // start challenge section
+                    writer.Write((byte)StreamEnum.CHALLENGES);
+                    // save which kinds of math challenges are unlocked already
+                    // save how many challenges there are (as this could change)
+                    writer.Write((int)5);
+                    (new AddChallenge(dummy: true)).WriteToStream(writer);
+                    (new SubChallenge(dummy: true)).WriteToStream(writer);
+                    (new MultiplyChallenge(dummy: true)).WriteToStream(writer);
+                    (new DivideChallenge(dummy: true)).WriteToStream(writer);
+                    (new SolveChallenge(dummy: true)).WriteToStream(writer);
+                    // start unlocks sections
+                    writer.Write((byte)StreamEnum.UNLOCKS);
+                    // save which kinds of plane slots are unlocked already
+                    // first write an int specifying the version of this protocol (in case I change the plane slot behaviour later on)
+                    // the current version is v0
+                    writer.Write((int)0);
+                    writer.Write(MathChallengeNode.UnlockedAddSubSlot);
+                    writer.Write(MathChallengeNode.UnlockedMulDivSlot);
+                    writer.Write(MathChallengeNode.UnlockedSolveSlot);
                     // start aircraft section
                     writer.Write((byte)StreamEnum.AIRCRAFTS);
                     // save how many aircrafts there are
@@ -1391,6 +1410,45 @@ namespace CocosSharpMathGame
                             StreamEnum nextEnum = (StreamEnum)reader.ReadByte();
                             switch(nextEnum)
                             {
+                                case StreamEnum.CHALLENGES:
+                                    {
+                                        // save which kinds of math challenges are unlocked already
+                                        // load how many challenges there were when the save was written (as this could change)
+                                        int challengeCount = reader.ReadInt32();
+                                        if (challengeCount == 5)
+                                        {
+                                            (new AddChallenge(dummy: true)).ReadFromStream(reader);
+                                            (new SubChallenge(dummy: true)).ReadFromStream(reader);
+                                            (new MultiplyChallenge(dummy: true)).ReadFromStream(reader);
+                                            (new DivideChallenge(dummy: true)).ReadFromStream(reader);
+                                            (new SolveChallenge(dummy: true)).ReadFromStream(reader);
+                                        }
+                                    }
+                                    break;
+                                case StreamEnum.UNLOCKS:
+                                    {
+                                        // load which kinds of plane slots are unlocked already
+                                        // first load an int specifying the version of this protocol (in case I change the plane slot behaviour later on)
+                                        // the current version is v0
+                                        int version = reader.ReadInt32();
+                                        switch (version)
+                                        {
+                                            case 0:
+                                                {
+                                                    MathChallengeNode.UnlockedAddSubSlot = reader.ReadBoolean();
+                                                    MathChallengeNode.UnlockedMulDivSlot = reader.ReadBoolean();
+                                                    MathChallengeNode.UnlockedSolveSlot  = reader.ReadBoolean();
+                                                    UnlockedPlaneSlots = 1;
+                                                    if (MathChallengeNode.UnlockedAddSubSlot) UnlockedPlaneSlots++;
+                                                    if (MathChallengeNode.UnlockedMulDivSlot) UnlockedPlaneSlots++;
+                                                    if (MathChallengeNode.UnlockedSolveSlot)  UnlockedPlaneSlots++;
+                                                }
+                                                break;
+                                            default:
+                                                break;
+                                        }
+                                    }
+                                    break;
                                 case StreamEnum.AIRCRAFTS:
                                     {
                                         // load the aircrafts
