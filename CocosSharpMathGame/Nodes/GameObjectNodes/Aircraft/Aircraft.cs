@@ -929,6 +929,17 @@ namespace CocosSharpMathGame
                 part.Color = newColor;
         }
 
+        internal void ColorByPlayLayer(CCColor4B planeColor)
+        {
+            foreach (var part in TotalParts)
+            {
+                if (part.MyState == Part.State.ACTIVE)
+                    part.Color = new CCColor3B(planeColor);
+                else
+                    part.Color = Part.PlaneToDeathColor(planeColor);
+            }
+        }
+
         protected override void AddedToScene()
         {
             base.AddedToScene();

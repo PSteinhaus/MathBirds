@@ -18,7 +18,8 @@ namespace CocosSharpMathGame
         internal Team PlayerTeam { get { return Team.PlayerTeam; } }
         internal GameState State { get; private set; } = GameState.PLANNING;
         public GUILayer GUILayer { get; set; }
-        private CCDrawNode drawNode = new CCDrawNode();
+        private readonly CCDrawNode DrawNode = new CCDrawNode();
+        private readonly CCDrawNode DrawNodeBG = new CCDrawNode();
         internal List<Squadron> Squadrons { get; private protected set; } = new List<Squadron>();
         internal List<Aircraft> Aircrafts { get; private protected set; } = new List<Aircraft>();
         internal List<Aircraft> PlayerAircrafts { get; private protected set; }
@@ -33,13 +34,16 @@ namespace CocosSharpMathGame
             BGNode = new CCNode();
             AddChild(BGNode);
             BGNode.VertexZ = Constants.VERTEX_Z_GROUND;
-            BGNode.AddChild(drawNode);
-            const float bgsize = 30000f;
-            var bgColor = new CCColor4B(28, 28, 28);
-            for (int i=-40; i<40; i++)
+            BGNode.AddChild(DrawNodeBG);
+            BGNode.AddChild(DrawNode);
+            DrawNode.BlendFunc = CCBlendFunc.NonPremultiplied;  // necessary for alpha to work
+            const float bgsize = 190000f;
+            const int lineCount = 200;
+            var bgLineColor = new CCColor4B(255, 255, 255, 20);
+            for (int i = -lineCount; i < lineCount; i++)
             {
-                drawNode.DrawLine(new CCPoint(i * bgsize/40, -bgsize), new CCPoint(i * bgsize/40, bgsize), 20f, bgColor);
-                drawNode.DrawLine(new CCPoint(-bgsize, i * bgsize/40), new CCPoint(bgsize, i * bgsize/40), 20f, bgColor);
+                DrawNode.DrawLine(new CCPoint(i * bgsize / lineCount, -bgsize), new CCPoint(i * bgsize / lineCount, bgsize), 20f, bgLineColor);
+                DrawNode.DrawLine(new CCPoint(-bgsize, i * bgsize / lineCount), new CCPoint(bgsize, i * bgsize / lineCount), 20f, bgLineColor);
             }
             BGNode.ZOrder = (int)Constants.VERTEX_Z_GROUND;
             BGNode.Rotation = 10f;
@@ -84,6 +88,30 @@ namespace CocosSharpMathGame
         internal static CCPoint ChunkToWorldPos(CCPointI chunkPos)
         {
             return new CCPoint(chunkPos.X * (int)CHUNK_SIZE, chunkPos.Y * (int)CHUNK_SIZE);
+        }
+
+        internal static CCColor4B RadiusToColor(float radius, bool groundNotAir)
+        {
+            int zone = RadiusToZoneNum(radius);
+            // calculate the relative difference of the radius to the radius marking the center of the zone (in percent)
+            float prevEndRad = zone != 0 ? ZoneEndRadii[zone - 1] : 0;
+            float zoneSize = zone != ZoneEndRadii.Length ? ZoneEndRadii[zone] - prevEndRad : 18000f;
+            float relDiff = (radius - prevEndRad) / zoneSize - 0.5f;
+            const float lerpStart = 0.3f;
+            if (relDiff < -lerpStart && zone != 0)
+            {
+                return CCColor4B.Lerp(groundNotAir ? ZoneColorsGround[zone] : ZoneColorsAir[zone],
+                                      groundNotAir ? ZoneColorsGround[zone - 1] : ZoneColorsAir[zone - 1],
+                                      (-relDiff - lerpStart) / (0.5f - lerpStart) / 2);
+            }
+            else if (relDiff > lerpStart)
+            {
+                return CCColor4B.Lerp(groundNotAir ? ZoneColorsGround[zone] : ZoneColorsAir[zone],
+                                      groundNotAir ? ZoneColorsGround[zone + 1] : ZoneColorsAir[zone + 1],
+                                      (relDiff - lerpStart) / (0.5f - lerpStart) / 2);
+            }
+            else
+                return groundNotAir ? ZoneColorsGround[zone] : ZoneColorsAir[zone];
         }
 
         internal void InitPlayerAircrafts(List<Aircraft> playerAircrafts)
@@ -363,6 +391,8 @@ namespace CocosSharpMathGame
         }
 
         static readonly float[] ZoneEndRadii = new float[] { 1500f, 7000f, 14000f, 30000f };
+        static readonly CCColor4B[] ZoneColorsGround = new CCColor4B[] { CCColor4B.Black, new CCColor4B(0.25f, 0f, 0f, 1f), new CCColor4B(0.2f, 0.2f, 0f, 1f), new CCColor4B(0f, 0.25f, 0f, 1f), new CCColor4B(0f, 0f, 0.15f, 1f) };
+        static readonly CCColor4B[] ZoneColorsAir = new CCColor4B[]    { CCColor4B.White, new CCColor4B(1f, 0f, 0f, 1f), new CCColor4B(1f, 1f, 0f, 1f), new CCColor4B(0f, 1f, 0f, 1f), new CCColor4B(0f, 0f, 1f, 1f) };
         internal static int RadiusToZoneNum(float radius)
         {
             for (int i = 0; i < ZoneEndRadii.Length; i++)
@@ -623,6 +653,34 @@ namespace CocosSharpMathGame
             */
             // place the aircrafts and add them as children
             wreckageLayer.AddAction(new CCCallFunc(() => wreckageLayer.InitWreckage(DownedAircrafts)));
+        }
+
+        internal override void UpdateCamera()
+        {
+            base.UpdateCamera();
+            // additionally color the background and the planes according to the position of the center of the camera relative to the zones
+            CCPoint camMid = CameraPosition + (CCPoint)CameraSize / 2;
+            float radius = camMid.Length;
+            var bgColor = RadiusToColor(radius, groundNotAir: true);
+            var planeColor = RadiusToColor(radius, groundNotAir: false);
+            DrawNodeBG.Clear();
+            DrawNodeBG.DrawRect(new CCRect(-99999999999f, -99999999999f, 99999999999f * 2, 99999999999f * 2), bgColor);
+            // now the planes
+            // only color the enemies
+            foreach (var squadron in Squadrons)
+                if (squadron.IsActive(this))
+                    foreach (var aircraft in squadron.AircraftsWithRelPositions.Keys)
+                        aircraft.ColorByPlayLayer(planeColor);
+        }
+
+        internal CCColor4B CurrentPlaneColor
+        {
+            get
+            {
+                CCPoint camMid = CameraPosition + (CCPoint)CameraSize / 2;
+                float radius = camMid.Length;
+                return RadiusToColor(radius, groundNotAir: false);
+            }
         }
 
         public override void Update(float dt)

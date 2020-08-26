@@ -233,11 +233,15 @@ namespace CocosSharpMathGame
             if (Health <= 0)
                 Die();
         }
+        internal static CCColor3B PlaneToDeathColor(CCColor4B planeColor)
+        {
+            return new CCColor3B(CCColor4B.Lerp(planeColor, CCColor4B.Black, 0.5f));
+        }
         internal void Die(bool callPartsChanged=true)
         {
             Health = 0;
             MyState = State.DESTROYED;
-            Color = CCColor3B.DarkGray; // TODO: switch to a "destroyed" version of the sprite instead of just darkening it
+            Color = PlaneToDeathColor(((PlayLayer)Layer).CurrentPlaneColor);
             // reduce your mass (half it for now)
             for (int i=0; i<MassPoints.Length; i++)
                 MassPoints[i].Mass /= 2;
@@ -346,9 +350,9 @@ namespace CocosSharpMathGame
                 if (Health <= 0)
                 {
                     baseRefSize *= (1 + TotalParts.Count()) * 0.8f;
-                    specialBonus += TotalMaxHealth;
+                    specialBonus += (float)Math.Sqrt(TotalMaxHealth) * 3;
                 }
-                float shakeAmount = baseRefSize * 16 * healthFactor + specialBonus;
+                float shakeAmount = baseRefSize * 10 * healthFactor + specialBonus;
                 ((PlayLayer)Layer).AddScreenShake(shakeAmount, shakeAmount);
             }
         }

@@ -284,6 +284,7 @@
     <Compile Include="Sprites\UI\NonScalingCarousel.cs" />
     <Compile Include="Sprites\UI\PartCarouselNode.cs" />
     <Compile Include="Sprites\UI\PartCollectionBG.cs" />
+    <Compile Include="Sprites\UI\PopUp.cs" />
     <Compile Include="Sprites\UI\ScrapyardButton.cs" />
     <Compile Include="Sprites\UI\ScrollableCollectionNode.cs" />
     <Compile Include="Sprites\UI\UIElement.cs" />
@@ -311,6 +312,9 @@
     <Content Include="Data\sprites\ui\hangarOptionMid.png" />
     <Content Include="Data\sprites\ui\hangarOptionStart.png" />
     <Content Include="Data\sprites\ui\newAircraftButton.png" />
+    <Content Include="Data\sprites\ui\popUpEnd.png" />
+    <Content Include="Data\sprites\ui\popUpMid.png" />
+    <Content Include="Data\sprites\ui\popUpStart.png" />
     <Content Include="Data\sprites\ui\scrapyardAdd.png" />
     <Content Include="Data\sprites\ui\scrapyardDivide.png" />
     <Content Include="Data\sprites\ui\scrapyardLocked.png" />

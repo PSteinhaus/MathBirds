@@ -146,7 +146,7 @@ namespace CocosSharpMathGame
         private protected float MaxCameraWidth = Constants.COCOS_WORLD_WIDTH * 8;
         private protected float MaxCameraHeight = Constants.COCOS_WORLD_HEIGHT * 8;
 
-        internal void UpdateCamera()
+        internal virtual void UpdateCamera()
         {
             Camera = new CCCamera(new CCRect(cameraPosition.X + ScreenShakeVec.X, cameraPosition.Y + ScreenShakeVec.Y, CameraSize.Width, CameraSize.Height));
             Camera.NearAndFarPerspectiveClipping = new CCNearAndFarClipping(1f, 1000000f);
