@@ -34,17 +34,9 @@ namespace CocosSharpMathGame
             BGNode = new CCNode();
             AddChild(BGNode);
             BGNode.VertexZ = Constants.VERTEX_Z_GROUND;
-            BGNode.AddChild(DrawNodeBG);
             BGNode.AddChild(DrawNode);
-            DrawNode.BlendFunc = CCBlendFunc.NonPremultiplied;  // necessary for alpha to work
-            const float bgsize = 190000f;
-            const int lineCount = 200;
-            var bgLineColor = new CCColor4B(255, 255, 255, 20);
-            for (int i = -lineCount; i < lineCount; i++)
-            {
-                DrawNode.DrawLine(new CCPoint(i * bgsize / lineCount, -bgsize), new CCPoint(i * bgsize / lineCount, bgsize), 20f, bgLineColor);
-                DrawNode.DrawLine(new CCPoint(-bgsize, i * bgsize / lineCount), new CCPoint(bgsize, i * bgsize / lineCount), 20f, bgLineColor);
-            }
+            BGNode.AddChild(DrawNodeBG);
+            DrawNodeBG.BlendFunc = CCBlendFunc.NonPremultiplied;  // necessary for alpha to work
             BGNode.ZOrder = (int)Constants.VERTEX_Z_GROUND;
             BGNode.Rotation = 10f;
 
@@ -63,6 +55,9 @@ namespace CocosSharpMathGame
             //AddChild(drawNode);
             //drawNode.ZOrder = 0;
             //mathSprite1.ZOrder = 1;
+
+            MaxCameraWidth = Constants.COCOS_WORLD_WIDTH * 10;
+            MaxCameraHeight = Constants.COCOS_WORLD_HEIGHT * 10;
 
             // add a touch listener
             var touchListener = new CCEventListenerTouchAllAtOnce();
@@ -98,13 +93,14 @@ namespace CocosSharpMathGame
             float zoneSize = zone != ZoneEndRadii.Length ? ZoneEndRadii[zone] - prevEndRad : 18000f;
             float relDiff = (radius - prevEndRad) / zoneSize - 0.5f;
             const float lerpStart = 0.3f;
+
             if (relDiff < -lerpStart && zone != 0)
             {
                 return CCColor4B.Lerp(groundNotAir ? ZoneColorsGround[zone] : ZoneColorsAir[zone],
                                       groundNotAir ? ZoneColorsGround[zone - 1] : ZoneColorsAir[zone - 1],
                                       (-relDiff - lerpStart) / (0.5f - lerpStart) / 2);
             }
-            else if (relDiff > lerpStart)
+            else if (relDiff > lerpStart && zone != ZoneEndRadii.Length)
             {
                 return CCColor4B.Lerp(groundNotAir ? ZoneColorsGround[zone] : ZoneColorsAir[zone],
                                       groundNotAir ? ZoneColorsGround[zone + 1] : ZoneColorsAir[zone + 1],
@@ -352,9 +348,18 @@ namespace CocosSharpMathGame
             State = GameState.PLANNING;
             // find all active chunks
             // for that first find the player chunks and then grow around them
+            // also calculate the new camera boundaries based on the plane positions
+            float minX = float.PositiveInfinity;
+            float minY = float.PositiveInfinity;
+            float maxX = float.NegativeInfinity;
+            float maxY = float.NegativeInfinity;
             ActiveChunks.Clear();
             foreach (var aircraft in PlayerAircrafts)
             {
+                if (aircraft.Position.X < minX) minX = aircraft.Position.X;
+                if (aircraft.Position.X > maxX) maxX = aircraft.Position.X;
+                if (aircraft.Position.Y < minY) minY = aircraft.Position.Y;
+                if (aircraft.Position.Y > maxY) maxY = aircraft.Position.Y;
                 var aircraftChunk = PosToWorldChunk(aircraft.Position);
                 for (int dx = -1; dx <= 1; dx++)
                     for (int dy = -1; dy <= 1; dy++)
@@ -364,6 +369,8 @@ namespace CocosSharpMathGame
                             ActiveChunks.Add(activeChunk);
                     }
             }
+            const float BORDER = 4000f;
+            CameraSpace = new CCRect(minX - BORDER, minY - BORDER, maxX - minX + BORDER * 2, maxY - minY + BORDER * 2);
             // check if there are any new chunks
             // if there are generate their contents (i.e. the enemies that are supposed to be there)
             foreach (var chunkPoint in ActiveChunks)
@@ -391,8 +398,8 @@ namespace CocosSharpMathGame
         }
 
         static readonly float[] ZoneEndRadii = new float[] { 1500f, 7000f, 14000f, 30000f };
-        static readonly CCColor4B[] ZoneColorsGround = new CCColor4B[] { CCColor4B.Black, new CCColor4B(0.25f, 0f, 0f, 1f), new CCColor4B(0.2f, 0.2f, 0f, 1f), new CCColor4B(0f, 0.25f, 0f, 1f), new CCColor4B(0f, 0f, 0.15f, 1f) };
-        static readonly CCColor4B[] ZoneColorsAir = new CCColor4B[]    { CCColor4B.White, new CCColor4B(1f, 0f, 0f, 1f), new CCColor4B(1f, 1f, 0f, 1f), new CCColor4B(0f, 1f, 0f, 1f), new CCColor4B(0f, 0f, 1f, 1f) };
+        static readonly CCColor4B[] ZoneColorsGround = new CCColor4B[] { new CCColor4B(0f, 0f, 0f, 0.1f), new CCColor4B(1f, 0f, 0f, 0.1f), new CCColor4B(1f, 1f, 0f, 0.1f), new CCColor4B(0f, 1f, 0f, 0.1f), new CCColor4B(0f, 0f, 1f, 0.1f) };
+        static readonly CCColor4B[] ZoneColorsAir = new CCColor4B[]    { CCColor4B.White, new CCColor4B(1f, 0.0f, 0.0f, 1f), new CCColor4B(1f, 1f, 0.0f, 1f), new CCColor4B(0.0f, 1f, 0.0f, 1f), new CCColor4B(0.0f, 0.0f, 1f, 1f) };
         internal static int RadiusToZoneNum(float radius)
         {
             for (int i = 0; i < ZoneEndRadii.Length; i++)
@@ -619,7 +626,7 @@ namespace CocosSharpMathGame
             const int MAX_SQUADS_PER_CHUNK = 5;
             int squadCount = rng.Next(MIN_SQUADS_PER_CHUNK, MAX_SQUADS_PER_CHUNK + 1);
             */
-            const int squadCount = 5;
+            const int squadCount = 7;
             // choose random positions inside of this chunk
             CCPoint chunkMiddle = ChunkToWorldPos(chunkPoint);
             for (int i=0; i<squadCount; i++)
@@ -663,8 +670,19 @@ namespace CocosSharpMathGame
             float radius = camMid.Length;
             var bgColor = RadiusToColor(radius, groundNotAir: true);
             var planeColor = RadiusToColor(radius, groundNotAir: false);
+            // draw the bg lines
+            DrawNode.Clear();
+            const float bgsize = 600000f;
+            const int lineCount = 200;
+            var bgLineColor = CCColor4B.Lerp(planeColor, CCColor4B.Black, 0.75f);
+            for (int i = -lineCount; i < lineCount; i++)
+            {
+                DrawNode.DrawLine(new CCPoint(i * bgsize / lineCount, -bgsize), new CCPoint(i * bgsize / lineCount, bgsize), 20f, bgLineColor);
+                DrawNode.DrawLine(new CCPoint(-bgsize, i * bgsize / lineCount), new CCPoint(bgsize, i * bgsize / lineCount), 20f, bgLineColor);
+            }
+            // draw the bg color
             DrawNodeBG.Clear();
-            DrawNodeBG.DrawRect(new CCRect(-99999999999f, -99999999999f, 99999999999f * 2, 99999999999f * 2), bgColor);
+            DrawNodeBG.DrawRect(new CCRect(-999999999f, -999999999f, 999999999f * 2, 999999999f * 2), bgColor);
             // now the planes
             // only color the enemies
             foreach (var squadron in Squadrons)
@@ -693,6 +711,8 @@ namespace CocosSharpMathGame
                 case GameState.EXECUTING_ORDERS:
                     {
                         TimeLeftExecutingOrders -= dt;
+                        if (Aircraft.CloudFrameCountdown != 0) Aircraft.CloudFrameCountdown--;
+                        else Aircraft.CloudFrameCountdown = Aircraft.CLOUD_FRAME_COUNTDOWN;
                         // DEBUG: Console.WriteLine("EXECUTING ORDERS; dt: " + dt);
                         // go through all aircrafts and let them execute their orders
                         List<Aircraft> aircraftToBeRemoved = new List<Aircraft>();

@@ -73,11 +73,11 @@ namespace CocosSharpMathGame
 				//gameScene = new GameScene(gameView);
 				var myScene = new CCScene(gameView);
 				//var playLayer = new PlayLayer();
-				myApp.CurrentHangarLayer = new HangarLayer();
+				var hangarLayer = new HangarLayer();
 				myApp.FinishedLoading = true;
 
-				myScene.AddChild(myApp.CurrentHangarLayer.GUILayer);
-				myScene.AddChild(myApp.CurrentHangarLayer, zOrder: int.MinValue);
+				myScene.AddChild(hangarLayer.GUILayer);
+				myScene.AddChild(hangarLayer, zOrder: int.MinValue);
 				//myScene.AddChild(playLayer);
 				//myScene.AddChild(playLayer.GUILayer);
 

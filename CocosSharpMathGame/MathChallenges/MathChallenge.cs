@@ -21,7 +21,7 @@ namespace CocosSharpMathGame
         {
             get
             {
-                int baseValue = 1 + (int)((float)Math.Sqrt(Combo * 0.05f) / 0.08f);
+                int baseValue = 1 + (int)((float)Math.Sqrt(Combo * 0.05f) / 0.4f);
                 return baseValue < 6 ? baseValue : 30; 
             }
         }
@@ -32,7 +32,7 @@ namespace CocosSharpMathGame
         {
             get
             {
-                return ((float)Math.Sqrt(Combo * 0.05f) / 0.08f) % 1;
+                return ((float)Math.Sqrt(Combo * 0.05f) / 0.4f) % 1;
             }
         }
         internal string ChallengeLaTeX { get; private protected set; }
@@ -106,7 +106,7 @@ namespace CocosSharpMathGame
             writer.Write((byte)StreamEnum.STOP);
         }
 
-        internal static MathChallenge CreateFromStream(BinaryReader reader)
+        internal static MathChallenge CreateFromStream(BinaryReader reader, bool keepCurrentMath)
         {
             bool reading = true;
             MathChallenge dummy = null;
@@ -119,26 +119,22 @@ namespace CocosSharpMathGame
                         {
                             // read the string containing the full name of the challenge class
                             string className = reader.ReadString();
-                            Console.WriteLine("read name: " + className);
                             dummy = (MathChallenge)TypeHelper.CreateFromTypeName(className);
-                            Console.WriteLine("dummy == null: " + dummy == null);
                         }
                         break;
                     case StreamEnum.LOCKED:
                         {
                             var locked = reader.ReadBoolean();
-                            if (dummy != null)
+                            if (dummy != null && !keepCurrentMath)
                                 dummy.Locked = locked;
                         }
                         break;
                     case StreamEnum.COMBO:
                         {
                             var combo = reader.ReadInt32();
-                            Console.WriteLine("read combo: " + combo);
-                            if (dummy != null)
+                            if (dummy != null && !keepCurrentMath)
                             {
                                 dummy.Combo = combo;
-                                Console.WriteLine("dummy.Combo: " + dummy.Combo);
                             }
                         }
                         break;

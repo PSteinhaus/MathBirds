@@ -28,7 +28,7 @@ namespace CocosSharpMathGame
         {
             get;
             set;
-        } = 1;
+        } = 2;
         const float TRANSITION_TIME = 0.5f;
 
         internal enum HangarState
@@ -46,30 +46,27 @@ namespace CocosSharpMathGame
         private IGameObject RotationSelectedNode;
         internal List<Aircraft> Aircrafts = new List<Aircraft>();
         internal List<Part> Parts = new List<Part>();
-        public HangarLayer() : base(CCColor4B.Black)
+        public HangarLayer(bool keepCurrentMath = false) : base(CCColor4B.Black)
         {
+            float move = 0.5f;
+            Console.WriteLine("COLOR: moved by " + move + " : " + Constants.MoveHue(CCColor4B.Red, move));
+            move = 360f;
+            Console.WriteLine("COLOR: moved by " + move + " : " + Constants.MoveHue(CCColor4B.Red, move));
+            move = 120f;
+            Console.WriteLine("COLOR: moved by " + move + " : " + Constants.MoveHue(CCColor4B.Red, move));
+            move = -360f;
+            Console.WriteLine("COLOR: moved by " + move + " : " + Constants.MoveHue(CCColor4B.Red, move));
+            move = 1.5f;
+            Console.WriteLine("COLOR: moved by " + move + " : " + Constants.MoveHue(CCColor4B.Red, move));
+            move = -1f;
+            Console.WriteLine("COLOR: moved by " + move + " : " + Constants.MoveHue(CCColor4B.Red, move));
+            Console.WriteLine("COLOR HUE: " + (new SKColor(255,0,0)).Hue);
+            Console.WriteLine("COLOR HUE: " + (new SKColor(0, 255, 0)).Hue);
+
             GlobalHangarLayer = this;
             GUILayer = new HangarGUILayer(this);
             var challengeModels = MathChallenge.GetAllChallengeModels();
             ScrapyardButtons = new ScrapyardButton[challengeModels.Length];
-            var rng = new Random();
-            for (int i=0; i<challengeModels.Length; i++)
-            {
-                var button = challengeModels[i].CreateScrapyardButton();
-                ScrapyardButtons[i] = button;
-                button.Position = ScrapyardButtonPosition(i);
-                button.Visible = false;
-                button.RewardEvent += (sender, rewardPart) => { AddPart(rewardPart); };
-                // roll the loot chances
-                if (challengeModels[i] is AddChallenge && !CrappyPartsCheck())
-                {
-                    // make sure that the player can always earn enough parts to go again
-                    button.LootboxCount = 2;
-                }
-                else
-                    button.LootboxCount = (rng.Next(4) == 0) ? rng.Next(1, 3) : 0; 
-                AddChild(button, 2);
-            }
             NewAircraftButton = new NewAircraftButton(this);
             NewAircraftButton.Visible = false;
             AddChild(NewAircraftButton);
@@ -104,11 +101,30 @@ namespace CocosSharpMathGame
             mouseListener.OnMouseScroll = OnMouseScrollZoom;
             AddEventListener(mouseListener, this);
 
-            CameraSizeHangar = new CCSize(MaxCameraWidth, MaxCameraHeight) / 4;
-            CameraPositionHangar = new CCPoint(-CameraSizeHangar.Width / 2, -CameraSizeHangar.Height / 2);
+            CameraSizeHangar = new CCSize(MaxCameraWidth, MaxCameraHeight) / 12;
+            CameraPositionHangar = new CCPoint(CameraSizeHangar.Width * 1.0f, CameraSizeHangar.Height * 1.0f);
 
             // Load the saved state
-            LoadFromFile().Wait();
+            LoadFromFile(keepCurrentMath).Wait();
+
+            var rng = new Random();
+            for (int i = 0; i < challengeModels.Length; i++)
+            {
+                var button = challengeModels[i].CreateScrapyardButton();
+                ScrapyardButtons[i] = button;
+                button.Position = ScrapyardButtonPosition(i);
+                button.Visible = false;
+                button.RewardEvent += (sender, rewardPart) => { AddPart(rewardPart); };
+                // roll the loot chances
+                if (challengeModels[i] is AddChallenge && !CrappyPartsCheck())
+                {
+                    // make sure that the player can always earn enough parts to go again
+                    button.LootboxCount = 2;
+                }
+                else
+                    button.LootboxCount = (rng.Next(4) == 0) ? rng.Next(1, 3) : 0;
+                AddChild(button, 2);
+            }
 
             CameraSize = CameraSizeHangar;
             CameraPosition = CameraPositionHangar;
@@ -161,7 +177,8 @@ namespace CocosSharpMathGame
             // remove the active aircrafts from the hangar
             foreach (var aircraft in activeAircrafts)
                 RemoveAircraft(aircraft);
-
+            // save the hangar
+            SaveToFile();
             HangarLayer.GlobalHangarLayer = null;
             TransitionFadingFromTo(this.GUILayer, playLayer.GUILayer, this, playLayer, 2f);
             //var parent = Parent;
@@ -550,6 +567,7 @@ namespace CocosSharpMathGame
                     // move all aircrafts away
                     foreach (var aircraft in Aircrafts)
                     {
+                        if (aircraft.Parent != this) continue;
                         MoveAircraftOutOfView(aircraft, TransitionTime);
                     }
                     // make visible and fade in the scrapyard buttons
@@ -999,6 +1017,7 @@ namespace CocosSharpMathGame
                         float maxY = float.NegativeInfinity;
                         foreach (var aircraft in Aircrafts)
                         {
+                            if (aircraft.Parent != this) continue;
                             var rect = aircraft.BoundingBoxTransformedToWorld;
                             if (rect.MinX < minX) minX = rect.MinX;
                             if (rect.MinY < minY) minY = rect.MinY;
@@ -1100,6 +1119,7 @@ namespace CocosSharpMathGame
             var sizeArea = 0f;
             foreach (var aircraft in Aircrafts)
             {
+                if (aircraft.Parent != this) continue;
                 var aircraftSize = aircraft.ScaledContentSize;
                 var aircraftSizeArea = aircraftSize.Width * aircraftSize.Height;
                 if (aircraftSizeArea > sizeArea)
@@ -1381,7 +1401,7 @@ namespace CocosSharpMathGame
             }
         }
 
-        public async Task LoadFromFile()
+        public async Task LoadFromFile(bool keepCurrentMath = false)
         {
             bool init = true;
             try
@@ -1417,7 +1437,7 @@ namespace CocosSharpMathGame
                                         int challengeCount = reader.ReadInt32();
                                         for (int i=0; i<challengeCount; i++)
                                         {
-                                            MathChallenge.CreateFromStream(reader);
+                                            MathChallenge.CreateFromStream(reader, keepCurrentMath);
                                         }
                                     }
                                     break;
@@ -1431,13 +1451,19 @@ namespace CocosSharpMathGame
                                         {
                                             case 0:
                                                 {
-                                                    MathChallengeNode.UnlockedAddSubSlot = reader.ReadBoolean();
-                                                    MathChallengeNode.UnlockedMulDivSlot = reader.ReadBoolean();
-                                                    MathChallengeNode.UnlockedSolveSlot  = reader.ReadBoolean();
-                                                    UnlockedPlaneSlots = 1;
-                                                    if (MathChallengeNode.UnlockedAddSubSlot) UnlockedPlaneSlots++;
-                                                    if (MathChallengeNode.UnlockedMulDivSlot) UnlockedPlaneSlots++;
-                                                    if (MathChallengeNode.UnlockedSolveSlot)  UnlockedPlaneSlots++;
+                                                    bool unlockedAddSub = reader.ReadBoolean();
+                                                    bool unlockedMulDiv = reader.ReadBoolean();
+                                                    bool unlockedSolve  = reader.ReadBoolean();
+                                                    if (!keepCurrentMath)
+                                                    {
+                                                        MathChallengeNode.UnlockedAddSubSlot = unlockedAddSub;
+                                                        MathChallengeNode.UnlockedMulDivSlot = unlockedMulDiv;
+                                                        MathChallengeNode.UnlockedSolveSlot  = unlockedSolve;
+                                                        UnlockedPlaneSlots = 2;
+                                                        if (MathChallengeNode.UnlockedAddSubSlot) UnlockedPlaneSlots++;
+                                                        if (MathChallengeNode.UnlockedMulDivSlot) UnlockedPlaneSlots++;
+                                                        if (MathChallengeNode.UnlockedSolveSlot)  UnlockedPlaneSlots++;
+                                                    }
                                                 }
                                                 break;
                                             default:
@@ -1505,12 +1531,10 @@ namespace CocosSharpMathGame
         {
             // add some aircrafts
             AddAircraft(Aircraft.CreateTestAircraft(), CCPoint.Zero);
-            AddAircraft(Aircraft.CreateTestAircraft(1), CCPoint.Zero);
-            AddAircraft(Aircraft.CreateTestAircraft(), CCPoint.Zero);
             AddAircraft(Aircraft.CreateTestAircraft(), CCPoint.Zero);
             AddAircraft(Aircraft.CreateTestAircraft(), CCPoint.Zero);
             // add some parts
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 2; i++)
             {
                 AddPart(new TestBody());
                 AddPart(new TestDoubleWing());

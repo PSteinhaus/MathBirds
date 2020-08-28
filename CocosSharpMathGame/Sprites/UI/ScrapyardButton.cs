@@ -55,7 +55,7 @@ namespace CocosSharpMathGame
                 var frame = UIElement.spriteSheet.Frames.Find(_ => _.TextureFilename.Equals("scrapyardLockedv2.png"));
                 Button.ReplaceTexture(frame.Texture, frame.TextureRectInPixels);
                 Button.Pressable = false;
-                Button.Color = CCColor3B.Gray;
+                Button.Color = CCColor3B.DarkGray;
             }
             else
             {

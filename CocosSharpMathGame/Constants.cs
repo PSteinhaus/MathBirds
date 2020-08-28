@@ -1,5 +1,7 @@
 ﻿using CocosSharp;
+using CSharpMath.Atom.Atoms;
 using MathNet.Numerics.Random;
+using SkiaSharp;
 using System;
 
 namespace CocosSharpMathGame
@@ -14,7 +16,7 @@ namespace CocosSharpMathGame
         public const float STANDARD_SCALE = 4;
         public const float TURN_DURATION = 3f;  // executing orders takes this long
         public const float PI = (float)Math.PI;
-        public const float VERTEX_Z_GROUND = -10000f;
+        public const float VERTEX_Z_GROUND = -16000f;
         public const string SAVE_NAME = "save.sav";
         public enum OS { WINDOWS, ANDROID, IOS };
         public static OS oS;    // holds a value indicating which platfrom the game is running on
@@ -161,6 +163,21 @@ namespace CocosSharpMathGame
         public static CCPoint RandomPointBoxnear(CCPoint point, float range, Random rng)
         {
             return point + new CCPoint((rng.NextBoolean() ? 1 : -1) * (float)rng.NextDouble() * range, (rng.NextBoolean() ? 1 : -1) * (float)rng.NextDouble() * range);
+        }
+
+        public static CCColor4B MoveHue(CCColor4B colorIn, float hueChange)
+        {
+            byte clamp(float v) //define a function to bound and round the input float value to 0-255
+            {
+                if (v < 0)
+                    return 0;
+                if (v > 255)
+                    return 255;
+                return (byte)v;
+            }
+            (new SKColor(colorIn.R, colorIn.G, colorIn.B)).ToHsl(out float h, out float s, out float l);
+            var colorOut = SKColor.FromHsl(h + hueChange, s, l, colorIn.A);
+            return new CCColor4B(colorOut.Red, colorOut.Green, colorOut.Blue, colorOut.Alpha);
         }
     }
 }

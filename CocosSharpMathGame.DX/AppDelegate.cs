@@ -9,7 +9,7 @@ namespace CocosSharpMathGame.DX
     public class AppDelegate : CCApplicationDelegate
     {
         private bool FinishedLoading = false;
-        private HangarLayer CurrentHangarLayer { get; set; }
+        private HangarLayer CurrentHangarLayer { get { return HangarLayer.GlobalHangarLayer; } }
         public override void ApplicationDidFinishLaunching(CCApplication application, CCWindow mainWindow)
         {
             application.ContentRootDirectory = "Content";
@@ -48,11 +48,11 @@ namespace CocosSharpMathGame.DX
             //var playLayer = new PlayLayer();
             //var wreckLayer = new WreckageLayer();
             //wreckLayer.DEBUG = true;
-            CurrentHangarLayer = new HangarLayer();
+            var hangarLayer = new HangarLayer();
             FinishedLoading = true;
 
-            scene.AddChild(CurrentHangarLayer.GUILayer);
-            scene.AddChild(CurrentHangarLayer, zOrder:int.MinValue);
+            scene.AddChild(hangarLayer.GUILayer);
+            scene.AddChild(hangarLayer, zOrder:int.MinValue);
             //scene.AddChild(playLayer.GUILayer);
             //scene.AddChild(playLayer, zOrder:int.MinValue);
             //scene.AddChild(wreckLayer.GUILayer);

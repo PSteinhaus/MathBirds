@@ -24,6 +24,9 @@ namespace CocosSharpMathGame
 
             // give the rotor ManeuverAbility
             ManeuverAbility = new ManeuverAbility((float)Math.Pow(10, 5) * 2.75f, (float)Math.Pow(10, 5) * 16.0f);
+            ManeuverAbility.CloudTailNode.CloudDelay *= 1.5f;
+            ManeuverAbility.CloudTailNode.CloudLifeTime *= 0.75f;
+            ManeuverAbility.CloudTailNode.ReferenceSize = 14f;
         }
     }
 }

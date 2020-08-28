@@ -65,6 +65,8 @@ namespace CocosSharpMathGame
             // recalculate the flight path
             Constants.CCDegreesToDxDy(Aircraft.MyRotation, out float dx, out float dy);
             FlightPathNode.CalculatePath(Aircraft.Position, dx, dy, FlightPathHead.Position);
+            if (Aircraft.ControlledByPlayer)
+                FlightPathNode.DrawPath();
             // rotate the head according to the direction (not the slope itself) at the end of the flight path
             FlightPathHead.MyRotation = FlightPathNode.DirectionAt(FlightPathNode.Path.Length - 1);
         }

@@ -12,9 +12,9 @@ namespace CocosSharpMathGame
     {
         internal PotatoProjectile()
         {
-            Velocity = 1600f;
-            LifeTime = 1.55f;
-            Damage = 3.0f;
+            Velocity = 1200f;
+            LifeTime = 1.35f;
+            Damage = 2.5f;
             TailWidth = 5f;
         }
     }

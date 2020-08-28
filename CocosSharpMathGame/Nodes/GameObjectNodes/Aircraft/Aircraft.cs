@@ -766,6 +766,9 @@ namespace CocosSharpMathGame
             Parent.AddChild(LowNodeWhenDead);
         }
 
+        // don't update the cloud nodes at every frame
+        internal const byte CLOUD_FRAME_COUNTDOWN = 1;
+        internal static byte CloudFrameCountdown = CLOUD_FRAME_COUNTDOWN;
         public void UseDrawNodes(CCDrawNode highNode, CCDrawNode lowNode)
         {
             var correctHighNode = highNode;
@@ -782,12 +785,16 @@ namespace CocosSharpMathGame
             {
                 if (part.ManeuverAbility != null && part.ManeuverAbility.CloudTailNode != null)
                     part.ManeuverAbility.CloudTailNode.UseDrawNodes(correctHighNode, correctLowNode);
+
                 foreach (var damageTail in part.DamageCloudTailNodes)
                     damageTail.UseDrawNodes(correctHighNode, correctLowNode);
+
                 // DEBUG: draw the collision polygon of each part
-                //var poly = (Polygon)((CollisionTypePolygon)part.CollisionType).collisionPolygon.Clone();
-                //poly.TransformAccordingToGameObject(part);
-                //correctHighNode.DrawPolygon(poly.Points, poly.Points.Length, CCColor4B.Transparent, 2f, CCColor4B.Aquamarine);
+                /*
+                var poly = (Polygon)((CollisionTypePolygon)part.CollisionType).collisionPolygon.Clone();
+                poly.TransformAccordingToGameObject(part);
+                correctHighNode.DrawPolygon(poly.Points, poly.Points.Length, CCColor4B.Transparent, 2f, CCColor4B.Aquamarine);
+                */
             }
         }
 
@@ -865,7 +872,7 @@ namespace CocosSharpMathGame
                 part.ExecuteOrders(dt);
             // fall from the sky if dead
             if (MyState == State.SHOT_DOWN)
-                ChangeVertexZ(dt * -500);
+                ChangeVertexZ(dt * (-500 + VertexZ / 4));
             return finished;
         }
 

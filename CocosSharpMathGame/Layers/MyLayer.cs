@@ -47,7 +47,9 @@ namespace CocosSharpMathGame
         {
             if (touches.Count > 0)
             {
+                Console.WriteLine("TouchCount before: " + TouchCount);
                 TouchCount -= touches.Count;
+                Console.WriteLine("TouchCount after: " + TouchCount);
                 touchEvent.IsStopped = false; // workaround for a bug that is created by the swallowing of a touchMoved-event in UIElement(Node)
                 // intercept the event if there are touches remaining (i.e. only the last release will be the "real" release)
                 if (TouchCount > 0)

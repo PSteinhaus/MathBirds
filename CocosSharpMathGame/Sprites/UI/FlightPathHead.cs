@@ -16,8 +16,8 @@ namespace CocosSharpMathGame
         internal const float MAX_DISTANCE_FROM_CENTER = 10000;
         internal FlightPathHead() : base("flightPathHead.png")
         {
-            Scale = Constants.STANDARD_SCALE;
-            RadiusFactor = 1f;  // make the button a bit easier to hit
+            Scale = Constants.STANDARD_SCALE * 1.25f;
+            RadiusFactor = 1.5f;  // make the button a bit easier to hit
             // add a touch listener
             MakeClickable(IsCircleButton: true);
         }

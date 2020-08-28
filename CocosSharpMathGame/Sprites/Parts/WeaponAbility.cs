@@ -240,7 +240,7 @@ namespace CocosSharpMathGame
             double endAngle = 0;
             float totalBulletVelocity = ProjectileBlueprint.Velocity + AircraftVelocityBoost();
             double deltaStart = TargetToMyPart.X - TargetToMyPart.Y / Math.Tan(startAngle) + (TargetToMyPart.Y * TargetAircraft.VelocityVector.Length) / (Math.Sin(startAngle) * totalBulletVelocity);
-            for (int i = 0; i < 4; i++) // iterate 6 times at max
+            for (int i = 0; i < 6; i++) // iterate 6 times at max
             {
                 angle = (startAngle + endAngle) / 2;
                 double delta = TargetToMyPart.X - TargetToMyPart.Y / Math.Tan(angle) + (TargetToMyPart.Y * TargetAircraft.VelocityVector.Length) / (Math.Sin(angle) * totalBulletVelocity);
@@ -324,7 +324,7 @@ namespace CocosSharpMathGame
             var testWeapon = new WeaponAbility(myPart);
             testWeapon.ProjectileBlueprint = new TestProjectile();
             testWeapon.CalcBaseValuesFromProjectile();
-            testWeapon.SpreadAngle = 2f;
+            testWeapon.SpreadAngle = 1f;
             testWeapon.ShootDelay = 0.5f;
             testWeapon.MaxTurningAngle = 15f;
             testWeapon.TurningAnglePerSecond = 20f;
@@ -350,7 +350,7 @@ namespace CocosSharpMathGame
             var weapon = new WeaponAbility(weaponBat);
             weapon.ProjectileBlueprint = new BatProjectile();
             weapon.CalcBaseValuesFromProjectile();
-            weapon.SpreadAngle = 20f;
+            weapon.SpreadAngle = 14f;
             weapon.ShootDelay = 0.25f;
             weapon.MaxTurningAngle = 180f;
             weapon.TurningAnglePerSecond = 90f;
@@ -402,7 +402,7 @@ namespace CocosSharpMathGame
             var weapon = new WeaponAbility(wingJet);
             weapon.ProjectileBlueprint = new FighterProjectile();
             weapon.CalcBaseValuesFromProjectile();
-            weapon.SpreadAngle = 1.5f;
+            weapon.SpreadAngle = 0f;
             weapon.ShootDelay = 1.5f;
             weapon.MaxTurningAngle = 0f;
             weapon.TurningAnglePerSecond = 0f;

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CocosSharp;
+using SkiaSharp;
 
 namespace CocosSharpMathGame
 {
@@ -241,7 +242,7 @@ namespace CocosSharpMathGame
         {
             Health = 0;
             MyState = State.DESTROYED;
-            Color = PlaneToDeathColor(((PlayLayer)Layer).CurrentPlaneColor);
+            Color = Aircraft.ControlledByPlayer ? CCColor3B.DarkGray : PlaneToDeathColor(((PlayLayer)Layer).CurrentPlaneColor);
             // reduce your mass (half it for now)
             for (int i=0; i<MassPoints.Length; i++)
                 MassPoints[i].Mass /= 2;
@@ -266,10 +267,10 @@ namespace CocosSharpMathGame
 
         private void UnDie()
         {
+            Color = CCColor3B.White;
             if (MyState == State.DESTROYED)
             {
                 MyState = State.ACTIVE;
-                Color = CCColor3B.White;
                 // unreduce your mass (it was halfed at death)
                 for (int i = 0; i < MassPoints.Length; i++)
                     MassPoints[i].Mass *= 2;
@@ -315,11 +316,11 @@ namespace CocosSharpMathGame
             // generate a random point near the collisionPos
             // and show an effect there
             Random rng = new Random();
-            while(true)
+            for (int tries=0; tries<5; tries++)
             {
                 CCPoint randomPoint = Constants.RandomPointNear(collisionPos, maxDistanceFromCollision, rng);
                 //CCPoint randomPoint = collisionPos;
-                if (Collisions.CollidePositionPolygon(randomPoint, this))   // check whether the random point is inside the collision polygon
+                if (Collisions.CollidePositionPolygon(randomPoint, this) || tries == 4)   // check whether the random point is inside the collision polygon
                 {
                     CCPoint relativePosition = randomPoint - PositionWorldspace;
                     relativePosition = CCPoint.RotateByAngle(relativePosition, CCPoint.Zero, -Constants.CCDegreesToMathRadians(TotalRotation));
@@ -329,11 +330,10 @@ namespace CocosSharpMathGame
                         damageTail.AutoAddClouds = false;
                     if (Health / MaxHealth < 0.5f)
                     {
-                        byte value = (byte)rng.Next(105, 256);
-                        damageTail.CloudColor = new CCColor4B((byte)rng.Next(value, 256), value, 0);
-                        //damageTail.CloudColor = rng.Next(0, 2) == 0 ? CCColor4B.Yellow : CCColor4B.Red;
-                        //damageTail.CloudColor = rng.Next(0,3) == 0 ? CCColor4B.Black : new CCColor4B(255, 255, 255);
-                        //damageTail.CloudColor = new CCColor4B(255, 255, 255);
+                        var planeColor = ((PlayLayer)Layer).CurrentPlaneColor;
+                        var baseFlameColor = new CCColor4B((byte)rng.Next(0, 256), 0, 0);
+                        var h = (new SKColor(planeColor.R, planeColor.G, planeColor.B)).Hue;
+                        damageTail.CloudColor = Constants.MoveHue(baseFlameColor, h);
                     }
                     DamageCloudTailNodes.Add(damageTail);
                     break;
@@ -400,7 +400,7 @@ namespace CocosSharpMathGame
         private float DamageToReferenceSize(float damage, float maxRefSize = 50f)
         {
             const float baseSize = 6f;
-            float refSize = baseSize + damage * 3;
+            float refSize = baseSize + damage * 2;
             return refSize <= maxRefSize ? refSize : maxRefSize;
         }
 
@@ -624,16 +624,17 @@ namespace CocosSharpMathGame
                 case State.ACTIVE:
                     if (WeaponAbility != null && Aircraft.MyState != Aircraft.State.SHOT_DOWN)
                         WeaponAbility.ExecuteOrders(dt);
-                    if (ManeuverAbility != null)
-                        ManeuverAbility.ExecuteOrders(dt, PositionWorldspace, TotalRotation);
+                    if (ManeuverAbility != null && Aircraft.CloudFrameCountdown == 0)
+                        ManeuverAbility.ExecuteOrders(dt * (Aircraft.CLOUD_FRAME_COUNTDOWN + 1), PositionWorldspace, TotalRotation);
                     break;
                 case State.DESTROYED:
-                    if (ManeuverAbility != null)
-                        ManeuverAbility.ExecuteOrders(dt, PositionWorldspace, TotalRotation, decayOnly: true);
+                    if (ManeuverAbility != null && Aircraft.CloudFrameCountdown == 0)
+                        ManeuverAbility.ExecuteOrders(dt * (Aircraft.CLOUD_FRAME_COUNTDOWN + 1), PositionWorldspace, TotalRotation, decayOnly: true);
                     break;
             }
-            foreach (var damageTail in DamageCloudTailNodes)
-                damageTail.Advance(dt, PositionWorldspace, TotalRotation);
+            if (Aircraft.CloudFrameCountdown == 0)
+                foreach (var damageTail in DamageCloudTailNodes)
+                    damageTail.Advance(dt * (Aircraft.CLOUD_FRAME_COUNTDOWN + 1), PositionWorldspace, TotalRotation);
         }
 
         protected MassPoint[] CreateDiamondMassPoints(float massPerPoint)

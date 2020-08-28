@@ -132,7 +132,7 @@ namespace CocosSharpMathGame
         {
             base.AddedToScene();
             // DEBUG: test out the PopUp
-            PopUp.ShowPopUp(this, "This is a test.");
+            //PopUp.ShowPopUp(this, "This is a test.");
 
             var bounds = VisibleBoundsWorldspace;
             // move the part carousel away as the hangar does not start there

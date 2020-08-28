@@ -78,7 +78,7 @@ namespace CocosSharpMathGame
                 // check for collision
                 foreach (var aircraft in (MyTeam == Team.PlayerTeam ? ((PlayLayer)Parent).Aircrafts : ((PlayLayer)Parent).PlayerAircrafts))
                 {
-                    if (aircraft.Team.IsEnemy(MyTeam))
+                    if (aircraft.MyState == Aircraft.State.ACTIVE && aircraft.Team.IsEnemy(MyTeam))
                     {
                         if (Collisions.CollideBoundingBoxLine(aircraft, (CollisionTypeLine)CollisionType))
                         {

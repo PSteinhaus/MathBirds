@@ -13,8 +13,8 @@ namespace CocosSharpMathGame
         internal BatProjectile()
         {
             Velocity = 1500f;
-            LifeTime = 0.35f;
-            Damage = 0.5f;
+            LifeTime = 0.65f;
+            Damage = 1f;
             TailLifeTime = 0.25f;
             TailWidth = 2f;
         }

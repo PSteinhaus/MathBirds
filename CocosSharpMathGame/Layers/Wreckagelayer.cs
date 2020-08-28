@@ -59,7 +59,7 @@ namespace CocosSharpMathGame
 
         private void ReturnToHangar()
         {
-            var hangarLayer = new HangarLayer();
+            var hangarLayer = new HangarLayer(true);
             foreach (var part in TotalSalvagedParts)
                 hangarLayer.AddPart(part);
             TransitionFadingFromTo(this.GUILayer, hangarLayer.GUILayer, this, hangarLayer, 2f);
@@ -288,7 +288,7 @@ namespace CocosSharpMathGame
             int salvageCount = (int)(GetWreckPercentile(mAircraft) * totalparts.Count());
             if (salvageCount != totalparts.Count() && rng.NextDouble() <= (GetWreckPercentile(mAircraft) * totalparts.Count()) % 1)
                 salvageCount ++;
-            // chose random parts
+            // choose random parts
             for (int i=0; i<salvageCount; i++)
             {
                 var index = rng.Next(totalparts.Count());
@@ -299,7 +299,7 @@ namespace CocosSharpMathGame
             float delaySec = delay / 1000;
             // vibrate
             if (Constants.oS != Constants.OS.WINDOWS)
-                Vibration.Vibrate(delay * 0.8);
+                Vibration.Vibrate(delay * 0.05f);
             // visualize
             var boundsCenter = VisibleBoundsWorldspace.Center;
             CCPoint pointIn = boundsCenter + new CCPoint(0, VisibleBoundsWorldspace.Size.Height * 0.6f);

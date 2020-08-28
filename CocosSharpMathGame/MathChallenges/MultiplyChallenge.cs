@@ -10,7 +10,7 @@ namespace CocosSharpMathGame
 {
     internal class MultiplyChallenge : MathChallenge
     {
-        private static bool locked = false;
+        private static bool locked = true;
         internal override bool Locked
         {
             get { return locked; }
@@ -23,7 +23,7 @@ namespace CocosSharpMathGame
             set { combo = value; }
         }
         private const int STD_MIN_NUM = -5;
-        private const int STD_MAX_NUM = 20;
+        private const int STD_MAX_NUM = 21;
         private protected int NumbersCount { get; set; }
         private protected int MinNum { get; set; }
         private protected int MaxNum { get; set; }

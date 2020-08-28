@@ -55,24 +55,13 @@ namespace CocosSharpMathGame
                 points[i] = CCPoint.RotateByAngle(points[i], pivotPoint, -radians);
             }
         }
-        /// <summary>
-        /// Transforms the polygon.
-        /// </summary>
-        /// <param name="dx">the shift in x direction</param>
-        /// <param name="dy">the shift in y direction</param>
-        /// <param name="degree">the rotation that is applied at the end</param>
-        internal void Transform(float dx, float dy, float degree)
-        {
-            MoveBy(dx, dy);
-            RotateBy(degree);
-        }
 
-        internal void TransformAccordingToGameObject(IGameObject gameObject)
+        internal void TransformAccordingToGameObject(IGameObject gameObject, bool exaggerateSlightly = false)
         {
-            CCPoint anchor = ((CCNode)gameObject).AnchorPointInPoints;
-            MoveBy(-anchor.X, -anchor.Y);
-            Scale(gameObject.GetTotalScale());
+            var scale = gameObject.GetTotalScale();
+            Scale(exaggerateSlightly ? scale * 1.2f : scale);
             RotateBy(gameObject.TotalRotation);
+            MoveBy(-PivotPoint.X, -PivotPoint.Y);
             CCPoint pos = ((CCNode)gameObject).PositionWorldspace;
             MoveBy(pos.X, pos.Y);
         }
@@ -87,7 +76,7 @@ namespace CocosSharpMathGame
             for (int i=0; i<Points.Length; i++)
             {
                 // get the point as vector relative to the pivot point
-                CCPoint relativePoint = new CCPoint(PivotPoint.X - Points[i].X, PivotPoint.Y - Points[i].Y);
+                CCPoint relativePoint = new CCPoint(Points[i].X - PivotPoint.X, Points[i].Y - PivotPoint.Y);
                 // scale it
                 CCPoint newRelativePoint = new CCPoint(relativePoint.X * scale, relativePoint.Y * scale);
                 // reassign it the scaled point as the new point

@@ -6,7 +6,7 @@ namespace CocosSharpMathGame
 {
 	public class App : Application
 	{
-		public HangarLayer CurrentHangarLayer;
+		public HangarLayer CurrentHangarLayer { get { return HangarLayer.GlobalHangarLayer; } }
 		public bool FinishedLoading = false;
 		public App ()
 		{

@@ -9,7 +9,7 @@ namespace CocosSharpMathGame
 {
     internal class SubChallenge : MathChallenge
     {
-        private static bool locked = false;
+        private static bool locked = true;
         internal override bool Locked
         {
             get { return locked; }
