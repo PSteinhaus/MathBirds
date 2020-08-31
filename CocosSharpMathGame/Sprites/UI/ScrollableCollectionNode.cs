@@ -221,7 +221,6 @@ namespace CocosSharpMathGame
 
         private protected override void OnTouchesBeganUI(List<CCTouch> touches, CCEvent touchEvent)
         {
-            Console.WriteLine("REALLY TOUCHED!: "+Pressed);
             switch (touches.Count)
             {
                 case 1:
@@ -236,39 +235,48 @@ namespace CocosSharpMathGame
         }
         private protected override void OnTouchesMovedUI(List<CCTouch> touches, CCEvent touchEvent)
         {
-            Console.WriteLine("REALLY MOVING!: " + Pressed);
             switch (touches.Count)
             {
                 case 1:
                     {
                         var touch = touches[0];
-                        if (Rows == 1 && !BoundingBoxTransformedToWorld.ContainsPoint(touch.Location))
+                        if (Rows == 1)
                         {
-                            var boxSize = BoxSize * GetTotalScale();
-                            foreach (var node in Collection)
+                            var rect = BoundingBoxTransformedToWorld;
+                            rect = new CCRect(rect.MinX, rect.MinY + rect.Size.Height / 4, rect.Size.Width, rect.Size.Height / 2);
+                            if (!rect.ContainsPoint(touch.Location))
                             {
-                                var ccNode = (CCNode)node;
-                                CCRect boxRect = new CCRect(ccNode.PositionWorldspace.X - boxSize.Width / 2, ccNode.PositionWorldspace.Y - boxSize.Height / 2, boxSize.Width, boxSize.Height);
-                                if (boxRect.ContainsPoint(new CCPoint(touch.Location.X, touch.StartLocation.Y)))
+                                var boxSize = BoxSize * GetTotalScale();
+                                foreach (var node in Collection)
                                 {
-                                    RemoveFromCollection(node, touch);
-                                    Pressed = false;
-                                    return;
+                                    var ccNode = (CCNode)node;
+                                    CCRect boxRect = new CCRect(ccNode.PositionWorldspace.X - boxSize.Width / 2, ccNode.PositionWorldspace.Y - boxSize.Height / 2, boxSize.Width, boxSize.Height);
+                                    if (boxRect.ContainsPoint(new CCPoint(touch.Location.X, touch.StartLocation.Y)))
+                                    {
+                                        RemoveFromCollection(node, touch);
+                                        Pressed = false;
+                                        return;
+                                    }
                                 }
                             }
                         }
-                        else if (Columns == 1 && !BoundingBoxTransformedToWorld.ContainsPoint(touch.Location))
+                        else if (Columns == 1)
                         {
-                            var boxSize = BoxSize * GetTotalScale();
-                            foreach (var node in Collection)
+                            var rect = BoundingBoxTransformedToWorld;
+                            rect = new CCRect(rect.MinX + rect.Size.Width / 4, rect.MinY, rect.Size.Width / 2, rect.Size.Height);
+                            if (!rect.ContainsPoint(touch.Location))
                             {
-                                var ccNode = (CCNode)node;
-                                CCRect boxRect = new CCRect(ccNode.PositionWorldspace.X - boxSize.Width / 2, ccNode.PositionWorldspace.Y - boxSize.Height / 2, boxSize.Width, boxSize.Height);
-                                if (boxRect.ContainsPoint(new CCPoint(touch.StartLocation.X, touch.Location.Y)))
+                                var boxSize = BoxSize * GetTotalScale();
+                                foreach (var node in Collection)
                                 {
-                                    RemoveFromCollection(node, touch);
-                                    Pressed = false;
-                                    return;
+                                    var ccNode = (CCNode)node;
+                                    CCRect boxRect = new CCRect(ccNode.PositionWorldspace.X - boxSize.Width / 2, ccNode.PositionWorldspace.Y - boxSize.Height / 2, boxSize.Width, boxSize.Height);
+                                    if (boxRect.ContainsPoint(new CCPoint(touch.StartLocation.X, touch.Location.Y)))
+                                    {
+                                        RemoveFromCollection(node, touch);
+                                        Pressed = false;
+                                        return;
+                                    }
                                 }
                             }
                         }

@@ -46,13 +46,13 @@ namespace CocosSharpMathGame
             // if it is too close run away
             if (closestAircraft != null && (Scared || CCPoint.Distance(Aircraft.Position, closestAircraft.Position) < SCARE_DISTANCE))
             {
-                Console.WriteLine("FLEEING");
+                //Console.WriteLine("FLEEING");
                 Aircraft.TryToSetFlightPathHeadTo(Aircraft.Position + (Aircraft.Position - closestAircraft.Position)*16);
             }
             // else move randomly
             else
             {
-                Console.WriteLine("Moving randomly");
+                //Console.WriteLine("Moving randomly");
                 Aircraft.TryToSetFlightPathHeadTo(Constants.RandomPointBoxnear(Aircraft.Position, 1000f));
             }
         }

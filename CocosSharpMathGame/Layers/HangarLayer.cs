@@ -48,23 +48,9 @@ namespace CocosSharpMathGame
         internal List<Part> Parts = new List<Part>();
         public HangarLayer(bool keepCurrentMath = false) : base(CCColor4B.Black)
         {
-            float move = 0.5f;
-            Console.WriteLine("COLOR: moved by " + move + " : " + Constants.MoveHue(CCColor4B.Red, move));
-            move = 360f;
-            Console.WriteLine("COLOR: moved by " + move + " : " + Constants.MoveHue(CCColor4B.Red, move));
-            move = 120f;
-            Console.WriteLine("COLOR: moved by " + move + " : " + Constants.MoveHue(CCColor4B.Red, move));
-            move = -360f;
-            Console.WriteLine("COLOR: moved by " + move + " : " + Constants.MoveHue(CCColor4B.Red, move));
-            move = 1.5f;
-            Console.WriteLine("COLOR: moved by " + move + " : " + Constants.MoveHue(CCColor4B.Red, move));
-            move = -1f;
-            Console.WriteLine("COLOR: moved by " + move + " : " + Constants.MoveHue(CCColor4B.Red, move));
-            Console.WriteLine("COLOR HUE: " + (new SKColor(255,0,0)).Hue);
-            Console.WriteLine("COLOR HUE: " + (new SKColor(0, 255, 0)).Hue);
-
             GlobalHangarLayer = this;
             GUILayer = new HangarGUILayer(this);
+            TouchCountSource = GUILayer;
             var challengeModels = MathChallenge.GetAllChallengeModels();
             ScrapyardButtons = new ScrapyardButton[challengeModels.Length];
             NewAircraftButton = new NewAircraftButton(this);
@@ -136,6 +122,8 @@ namespace CocosSharpMathGame
         private void UnlockSlot(object sender, EventArgs empty)
         {
             GUILayer.TakeoffCollectionNode.Columns = ++UnlockedPlaneSlots;
+            // show the unlock message
+            PopUp.ShowPopUp(GUILayer, PopUp.Enum.TRIGGERED_SLOTUNLOCK);
         }
 
         /// <summary>
@@ -170,7 +158,7 @@ namespace CocosSharpMathGame
         /// <summary>
         /// Saves and removes the HangarLayer and creates and adds the PlayLayer.
         /// </summary>
-        internal void StartGame()
+        internal async void StartGame()
         {
             var playLayer = new PlayLayer();
             var activeAircrafts = new List<Aircraft>(TakeoffAircrafts);
@@ -178,7 +166,12 @@ namespace CocosSharpMathGame
             foreach (var aircraft in activeAircrafts)
                 RemoveAircraft(aircraft);
             // save the hangar
-            SaveToFile();
+            await SaveToFile();
+            // unsubscribe from all events
+            MathChallengeNode.UnlockedAddSubSlotEvent -= UnlockSlot;
+            MathChallengeNode.UnlockedMulDivSlotEvent -= UnlockSlot;
+            MathChallengeNode.UnlockedSolveSlotEvent  -= UnlockSlot;
+
             HangarLayer.GlobalHangarLayer = null;
             TransitionFadingFromTo(this.GUILayer, playLayer.GUILayer, this, playLayer, 2f);
             //var parent = Parent;
@@ -197,13 +190,13 @@ namespace CocosSharpMathGame
         protected override void AddedToScene()
         {
             base.AddedToScene();
-            if (Aircrafts.Any())
-            {
-                CalcBoundaries();
-            }
+            CalcBoundaries();
             CameraPosition = CameraPosition;
             UpdateCamera();
             CreateActions();
+            // show the welcome popup
+            if (!PopUp.TriggeredWelcome)
+                PopUp.ShowPopUp(GUILayer, PopUp.Enum.TRIGGERED_WELCOME);
         }
 
         public override void Update(float dt)
@@ -450,6 +443,13 @@ namespace CocosSharpMathGame
                 NextCameraSize = new CCSize(Constants.COCOS_WORLD_WIDTH, Constants.COCOS_WORLD_HEIGHT);
                 if (oldState != HangarState.MODIFY_AIRCRAFT)
                 {
+                    // check if this is the first time the player enters the assembly and show the popup if necessary
+                    if (!PopUp.TriggeredAssembly)
+                    {
+                        GUILayer.HangarOptionCarousel.Pressed = false;
+                        GUILayer.HangarOptionCarousel.StopCurrentScrolling();
+                        PopUp.ShowPopUp(GUILayer, PopUp.Enum.TRIGGERED_ASSEMBLY);
+                    }
                     NextCameraPosition = CameraPositionWorkshop;
                 }
                 else
@@ -517,7 +517,7 @@ namespace CocosSharpMathGame
                 // get the workshop configuration positions
                 ModifiedAircraft.InWorkshopConfiguration = true;
                 var totalParts = ModifiedAircraft.TotalParts;
-                // and the workshop configutation size
+                // and the workshop configuration size
                 float newCamWidth = ModifyAircraftWidth();
                 if (totalParts != null)
                 {
@@ -564,6 +564,12 @@ namespace CocosSharpMathGame
                 }
                 else
                 {
+                    if (!PopUp.TriggeredScrapyard)
+                    {
+                        GUILayer.HangarOptionCarousel.Pressed = false;
+                        GUILayer.HangarOptionCarousel.StopCurrentScrolling();
+                        PopUp.ShowPopUp(GUILayer, PopUp.Enum.TRIGGERED_SCRAPYARD);
+                    }
                     // move all aircrafts away
                     foreach (var aircraft in Aircrafts)
                     {
@@ -637,7 +643,7 @@ namespace CocosSharpMathGame
             var vec = aircraft.PositionWorldspace - bounds.Center;
             if (vec.Equals(CCPoint.Zero)) vec = new CCPoint(0, 1);
             vec = CCPoint.Normalize(vec);
-            vec = vec * bounds.Size.Height;
+            vec = vec * bounds.Size.Height * 4;
             // move it
             var moveAction = new CCMoveBy(duration, aircraft.Position + vec);
             moveAction.Tag = MoveAircraftTag;
@@ -690,10 +696,10 @@ namespace CocosSharpMathGame
                     if (box.MinX < xMin) xMin = box.MinX;
                     if (box.MaxX > xMax) xMax = box.MaxX;
                 }
-                return Math.Max(Math.Abs(xMin), Math.Abs(xMax)) * 2 + 200f; // the last value is an additional border to the edge of the screen
+                return Math.Max(Math.Abs(xMin), Math.Abs(xMax)) * 2 + 400f - Math.Abs(Math.Abs(xMin) - Math.Abs(xMax)) * 3f; // the last value is an additional border to the edge of the screen
             }
             else
-                return 300f;
+                return 600f;
         }
 
         internal Aircraft ModifiedAircraft { get; set; }
@@ -1011,27 +1017,36 @@ namespace CocosSharpMathGame
                 case HangarState.HANGAR:
                     {
                         const float BORDER = 300f;
-                        float minX = float.PositiveInfinity;
-                        float minY = float.PositiveInfinity;
-                        float maxX = float.NegativeInfinity;
-                        float maxY = float.NegativeInfinity;
-                        foreach (var aircraft in Aircrafts)
-                        {
-                            if (aircraft.Parent != this) continue;
-                            var rect = aircraft.BoundingBoxTransformedToWorld;
-                            if (rect.MinX < minX) minX = rect.MinX;
-                            if (rect.MinY < minY) minY = rect.MinY;
-                            if (rect.MaxX > maxX) maxX = rect.MaxX;
-                            if (rect.MaxY > maxY) maxY = rect.MaxY;
-                        }
                         float takeoffNodeHeight = GUILayer.TakeoffNode.ContentSize.Height * VisibleBoundsWorldspace.Size.Width / GUILayer.VisibleBoundsWorldspace.Size.Width;
-                        CameraSpace = new CCRect(minX - BORDER, minY - BORDER - takeoffNodeHeight, maxX - minX + BORDER * 2, maxY - minY + BORDER * 2 + takeoffNodeHeight);
-                        var size = LargestAircraftSize();
-                        float widthRel = size.Width / Constants.COCOS_WORLD_WIDTH;
-                        float heightRel = size.Height / Constants.COCOS_WORLD_HEIGHT;
-                        float max = widthRel > heightRel ? widthRel : heightRel;
-                        MaxCameraWidth = Constants.COCOS_WORLD_WIDTH * max * 8;
-                        MaxCameraHeight = Constants.COCOS_WORLD_HEIGHT * max * 8;
+                        if (Aircrafts.Any())
+                        {
+                            float minX = float.PositiveInfinity;
+                            float minY = float.PositiveInfinity;
+                            float maxX = float.NegativeInfinity;
+                            float maxY = float.NegativeInfinity;
+                            foreach (var aircraft in Aircrafts)
+                            {
+                                if (aircraft.Parent != this) continue;
+                                var rect = aircraft.BoundingBoxTransformedToWorld;
+                                if (rect.MinX < minX) minX = rect.MinX;
+                                if (rect.MinY < minY) minY = rect.MinY;
+                                if (rect.MaxX > maxX) maxX = rect.MaxX;
+                                if (rect.MaxY > maxY) maxY = rect.MaxY;
+                            }
+                            CameraSpace = new CCRect(minX - BORDER, minY - BORDER - takeoffNodeHeight, maxX - minX + BORDER * 2, maxY - minY + BORDER * 2 + takeoffNodeHeight);
+                            var size = LargestAircraftSize();
+                            float widthRel = size.Width / Constants.COCOS_WORLD_WIDTH;
+                            float heightRel = size.Height / Constants.COCOS_WORLD_HEIGHT;
+                            float max = widthRel > heightRel ? widthRel : heightRel;
+                            MaxCameraWidth = Constants.COCOS_WORLD_WIDTH * max * 8;
+                            MaxCameraHeight = Constants.COCOS_WORLD_HEIGHT * max * 8;
+                        }
+                        else
+                        {
+                            CameraSpace = new CCRect(0 - BORDER, 0 - BORDER - takeoffNodeHeight, BORDER * 2, BORDER * 3 + takeoffNodeHeight);
+                            MaxCameraWidth = Constants.COCOS_WORLD_WIDTH;
+                            MaxCameraHeight = Constants.COCOS_WORLD_HEIGHT;
+                        }
                     }
                     break;
                 case HangarState.WORKSHOP:
@@ -1183,7 +1198,12 @@ namespace CocosSharpMathGame
                                 {
                                     // if the touch is upon a part unmount it and drag it
                                     foreach (Part part in ModifiedAircraft.TotalParts)
-                                        if (part.BoundingBoxTransformedToWorld.ContainsPoint(touch.Location))
+                                    {
+                                        var rect = part.BoundingBoxTransformedToWorld;
+                                        // grow the rect a little to make it easier to grab
+                                        const float BORDER = 30f;
+                                        rect = new CCRect(rect.MinX - BORDER, rect.MinY - BORDER, rect.Size.Width + 2*BORDER, rect.Size.Height + 2*BORDER);
+                                        if (rect.ContainsPoint(touch.Location))
                                         {
                                             // change into standard state for unmounting first (god knows what would happen else)
                                             CCPoint realPos = part.PositionWorldspace;
@@ -1207,6 +1227,7 @@ namespace CocosSharpMathGame
                                             DrawInModifyAircraftState();
                                             break;
                                         }
+                                    }
                                 }
                                 break;
                             case HangarState.SCRAPYARD_CHALLENGE:
@@ -1226,7 +1247,7 @@ namespace CocosSharpMathGame
         private protected void OnTouchesMoved(List<CCTouch> touches, CCEvent touchEvent)
         {
             if (State != HangarState.TRANSITION)
-                switch (touches.Count)
+                switch (TouchCount)
                 {
                     case 1:
                         {
@@ -1291,7 +1312,7 @@ namespace CocosSharpMathGame
         
         private enum StreamEnum : byte
         {
-            STOP, AIRCRAFTS, PARTS, CAMINFO, UNLOCKS, CHALLENGES
+            STOP, AIRCRAFTS, PARTS, CAMINFO, UNLOCKS, CHALLENGES, POPUPS
         }
         public async Task SaveToFile()
         {
@@ -1375,6 +1396,9 @@ namespace CocosSharpMathGame
                         writer.Write(CameraSizeHangar.Width);
                         writer.Write(CameraSizeHangar.Height);
                     }
+                    // start the popup section
+                    writer.Write((byte)StreamEnum.POPUPS);
+                    PopUp.WriteToStream(writer);
 
                     writer.Write((byte)StreamEnum.STOP);
 
@@ -1490,7 +1514,6 @@ namespace CocosSharpMathGame
                                     {
                                         // load the parts
                                         int partCount = reader.ReadInt32();
-                                        Console.WriteLine("partCount: " + partCount);
                                         for (int i = 0; i < partCount; i++)
                                         {
                                             Part part = Part.CreateFromStream(reader);
@@ -1507,6 +1530,12 @@ namespace CocosSharpMathGame
                                         float camWidth  = reader.ReadSingle();
                                         float camHeight = reader.ReadSingle();
                                         CameraSizeHangar = new CCSize(camWidth, camHeight);
+                                    }
+                                    break;
+                                case StreamEnum.POPUPS:
+                                    {
+                                        // load the popup-info
+                                        PopUp.CreateFromStream(reader, keepCurrentMath);
                                     }
                                     break;
                                 default:
@@ -1527,14 +1556,40 @@ namespace CocosSharpMathGame
             if (init) Init();
         }
 
+        internal override void Clear()
+        {
+            
+            Aircrafts = null;
+            GUILayer = null;
+            this.ModifiedAircraft = null;
+            this.NewAircraftButton = null;
+            
+            foreach (var b in ScrapyardButtons)
+                if (b.CurrentMathChallengeNode != null)
+                    b.CurrentMathChallengeNode.AnswerChosenEvent -= ScrapyardChallengeCallback;
+            
+            ScrapyardButtons = null;
+            
+            this.SelectedAircraft = null;
+            this.FirstTouchListener = null;
+            
+            this.HighDrawNode = null;
+            this.LowDrawNode = null;
+            this.Scroller.MoveFunction = null;
+            this.Scroller = null;
+            
+            this.StopAllActions();
+            this.ResetCleanState();
+        }
+
         private void Init()
         {
             // add some aircrafts
-            AddAircraft(Aircraft.CreateTestAircraft(), CCPoint.Zero);
-            AddAircraft(Aircraft.CreateTestAircraft(), CCPoint.Zero);
-            AddAircraft(Aircraft.CreateTestAircraft(), CCPoint.Zero);
+            AddAircraft(Aircraft.CreateTestAircraft(2, false), CCPoint.Zero);
+            AddAircraft(Aircraft.CreateTestAircraft(2, false), CCPoint.Zero);
+            AddAircraft(Aircraft.CreateTestAircraft(2, false), CCPoint.Zero);
             // add some parts
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < 1; i++)
             {
                 AddPart(new TestBody());
                 AddPart(new TestDoubleWing());

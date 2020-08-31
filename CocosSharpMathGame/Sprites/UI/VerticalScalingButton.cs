@@ -34,14 +34,14 @@ namespace CocosSharpMathGame
         private protected void UpdateSpritePlacement()
         {
             StartSprite.Position = CCPoint.Zero;
-            MiddleSprite.Position = new CCPoint(0, StartSprite.BoundingBoxTransformedToParent.MaxY);
+            MiddleSprite.Position = new CCPoint(0, StartSprite.BoundingBoxTransformedToParent.MaxY - 1f);
             EndSprite.Position = new CCPoint(0, MiddleSprite.Position.Y + MiddleSprite.ScaleY);
             ContentSize = new CCSize(EndSprite.BoundingBoxTransformedToParent.MaxX, EndSprite.BoundingBoxTransformedToParent.MaxY);
         }
 
         new internal void FitToHeight(float height)
         {
-            MiddleSprite.ScaleY = height - StartSprite.ContentSize.Height - EndSprite.ContentSize.Height;
+            MiddleSprite.ScaleY = height - StartSprite.ContentSize.Height - EndSprite.ContentSize.Height + 1f;
             UpdateSpritePlacement();
         }
     }

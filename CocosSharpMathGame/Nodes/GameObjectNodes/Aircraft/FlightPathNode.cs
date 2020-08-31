@@ -260,6 +260,11 @@ namespace CocosSharpMathGame
             AdvancementAsQuasiIndex = 0f;
         }
 
+        internal void ClearPath()
+        {
+            Path = null;
+        }
+
         internal void DrawPath()
         {
             // draw it properly (but only if you need to, i.e. when you belong to a player aircraft)

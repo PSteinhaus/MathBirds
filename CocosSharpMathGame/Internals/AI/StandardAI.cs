@@ -41,7 +41,7 @@ namespace CocosSharpMathGame
             // set path towards where he might be at the end of the next turn
             if (closestAircraft != null)
             {
-                Console.WriteLine("Attacking!");
+                //Console.WriteLine("Attacking!");
                 Aircraft.TryToSetFlightPathHeadTo(closestAircraft.Position + (closestAircraft.VelocityVector * Constants.TURN_DURATION));
             }
         }

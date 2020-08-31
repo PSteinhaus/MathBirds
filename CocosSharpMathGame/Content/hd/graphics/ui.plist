@@ -7,7 +7,7 @@
 			<key>arrow.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{19,105},{14,18}}</string>
+				<string>{{99,109},{14,18}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -21,7 +21,7 @@
 			<key>arrow2.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{0,99},{18,22}}</string>
+				<string>{{0,105},{18,22}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -32,7 +32,21 @@
 				<string>{18,22}</string>
 			</dict>
 
-			<key>flightPathHead.png</key>
+			<key>backTurn.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{132,96},{31,31}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false/>
+				<key>sourceColorRect</key>
+				<string>{{0,0},{31,31}}</string>
+				<key>sourceSize</key>
+				<string>{31,31}</string>
+			</dict>
+
+			<key>boost.png</key>
 			<dict>
 				<key>frame</key>
 				<string>{{122,0},{31,31}}</string>
@@ -46,10 +60,24 @@
 				<string>{31,31}</string>
 			</dict>
 
+			<key>flightPathHead.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{154,0},{31,31}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false/>
+				<key>sourceColorRect</key>
+				<string>{{0,0},{31,31}}</string>
+				<key>sourceSize</key>
+				<string>{31,31}</string>
+			</dict>
+
 			<key>goButton.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{0,72},{32,26}}</string>
+				<string>{{99,82},{32,26}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -63,7 +91,7 @@
 			<key>hangarOptionEnd.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{132,32},{17,50}}</string>
+				<string>{{182,32},{17,50}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -77,7 +105,7 @@
 			<key>hangarOptionMid.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{168,0},{1,50}}</string>
+				<string>{{200,0},{1,50}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -91,7 +119,7 @@
 			<key>hangarOptionStart.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{150,32},{17,50}}</string>
+				<string>{{164,32},{17,50}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -100,6 +128,20 @@
 				<string>{{0,0},{17,50}}</string>
 				<key>sourceSize</key>
 				<string>{17,50}</string>
+			</dict>
+
+			<key>heal.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{132,32},{31,31}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false/>
+				<key>sourceColorRect</key>
+				<string>{{0,0},{31,31}}</string>
+				<key>sourceSize</key>
+				<string>{31,31}</string>
 			</dict>
 
 			<key>newAircraftButton.png</key>
@@ -119,7 +161,7 @@
 			<key>popUpEnd.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{0,0},{91,6}}</string>
+				<string>{{0,2},{91,6}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -133,7 +175,7 @@
 			<key>popUpMid.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{0,7},{91,1}}</string>
+				<string>{{0,0},{91,1}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -161,7 +203,7 @@
 			<key>scrapyardAdd.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{99,49},{32,32}}</string>
+				<string>{{66,82},{32,32}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -175,7 +217,7 @@
 			<key>scrapyardDivide.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{89,16},{32,32}}</string>
+				<string>{{66,49},{32,32}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -189,7 +231,7 @@
 			<key>scrapyardLocked.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{99,82},{32,32}}</string>
+				<string>{{99,49},{32,32}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -203,7 +245,7 @@
 			<key>scrapyardLockedv2.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{66,82},{32,32}}</string>
+				<string>{{33,72},{32,32}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -217,7 +259,7 @@
 			<key>scrapyardMultiply.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{33,72},{32,32}}</string>
+				<string>{{56,16},{32,32}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -231,7 +273,7 @@
 			<key>scrapyardSolve.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{66,49},{32,32}}</string>
+				<string>{{0,72},{32,32}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -245,7 +287,7 @@
 			<key>scrapyardSub.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{56,16},{32,32}}</string>
+				<string>{{89,16},{32,32}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -254,6 +296,20 @@
 				<string>{{0,0},{32,32}}</string>
 				<key>sourceSize</key>
 				<string>{32,32}</string>
+			</dict>
+
+			<key>shield.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{132,64},{31,31}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false/>
+				<key>sourceColorRect</key>
+				<string>{{0,0},{31,31}}</string>
+				<key>sourceSize</key>
+				<string>{31,31}</string>
 			</dict>
 
 		</dict>

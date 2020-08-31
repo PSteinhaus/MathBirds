@@ -14,8 +14,8 @@ namespace CocosSharpMathGame
         {
             Velocity = 1500f;
             LifeTime = 0.65f;
-            Damage = 1f;
-            TailLifeTime = 0.25f;
+            Damage = 2f;
+            TailLifeTime = 0.35f;
             TailWidth = 2f;
         }
     }

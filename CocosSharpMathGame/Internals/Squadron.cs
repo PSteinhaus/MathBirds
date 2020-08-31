@@ -27,7 +27,7 @@ namespace CocosSharpMathGame
         /// </summary>
         internal CCPoint Position { get { return Leader != null ? Leader.Position : CCPoint.Zero; } }
         private CCPoint wayPoint;
-        internal CCPoint WayPoint { get { return wayPoint; } private protected set { wayPoint = value; Console.WriteLine("WayPoint: " + wayPoint); } }
+        internal CCPoint WayPoint { get { return wayPoint; } private protected set { wayPoint = value; /*Console.WriteLine("WayPoint: " + wayPoint); */} }
         /// <summary>
         /// where the leader is supposed to go this turn
         /// </summary>
@@ -95,14 +95,14 @@ namespace CocosSharpMathGame
                 foreach (var aircraft in pl.PlayerAircrafts)
                     if (CCPoint.Distance(aircraft.Position, Position) < AggroRange)
                     {
-                        Console.WriteLine("TRIGGERED - DISTANCE");
+                        //Console.WriteLine("TRIGGERED - DISTANCE");
                         InFormation = false;
                         break;
                     }
                 foreach (var aircraft in AircraftsWithRelPositions.Keys)
                     if (aircraft.Health < aircraft.MaxHealth)
                     {
-                        Console.WriteLine("TRIGGERED - HP");
+                        //Console.WriteLine("TRIGGERED - HP");
                         InFormation = false;
                         break;
                     }

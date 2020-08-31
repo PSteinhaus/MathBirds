@@ -80,7 +80,7 @@ namespace CocosSharpMathGame
         internal static MathChallenge[] GetAllChallengeModels()
         {
             // keep this list updated when adding new major challenge types
-            return new MathChallenge[] { new AddChallenge(), new SubChallenge(), new MultiplyChallenge(), new DivideChallenge(), new SolveChallenge() };
+            return new MathChallenge[] { new AddChallenge(dummy: true), new SubChallenge(dummy: true), new MultiplyChallenge(dummy: true), new DivideChallenge(dummy: true), new SolveChallenge(dummy: true) };
         }
 
         internal abstract ScrapyardButton CreateScrapyardButton();
@@ -101,7 +101,6 @@ namespace CocosSharpMathGame
             // write the current combo
             writer.Write((byte)StreamEnum.COMBO);
             writer.Write(Combo);
-            Console.WriteLine("wrote combo: " + Combo);
             //stop
             writer.Write((byte)StreamEnum.STOP);
         }

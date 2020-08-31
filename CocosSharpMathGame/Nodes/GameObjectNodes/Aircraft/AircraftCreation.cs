@@ -5,12 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 using CocosSharp;
 using MathNet.Numerics.Random;
+using Symbolism;
 
 namespace CocosSharpMathGame
 {
     internal partial class Aircraft
     {
-        internal static Aircraft CreateTestAircraft(int numWeapons = 2)
+        internal static Aircraft CreateTestAircraft(int numWeapons = 2, bool withChallenges = true)
         {
             Aircraft aircraft = new Aircraft();
             //IsManeuverPolygonDrawn = true;
@@ -38,8 +39,12 @@ namespace CocosSharpMathGame
                 wings.MountPart(new TestWeapon());
             }
             // set the math challenges
-            aircraft.WeightedChallenges = new List<Tuple<int, MathChallenge>> { new Tuple<int, MathChallenge>(1, new MultiplyChallenge(4, 2, -20, 5)),
-                                                                                new Tuple<int, MathChallenge>(1, new DivideChallenge()) };
+            if (withChallenges)
+                aircraft.WeightedChallenges = new List<Tuple<int, MathChallenge>> { new Tuple<int, MathChallenge>(1, new MultiplyChallenge(4, 2, -20, 5, dummy: true)),
+                                                                                    new Tuple<int, MathChallenge>(1, new DivideChallenge(dummy: true)) };
+            // set the awarded powerups
+            if (withChallenges)
+                aircraft.WeightedPowerUpsAwarded = new Dictionary<PowerUp.PowerType, int> { { PowerUp.PowerType.HEAL, 1 }, { PowerUp.PowerType.SHIELD, 4 }, { PowerUp.PowerType.BACK_TURN, 5 }, { PowerUp.PowerType.BOOST, 5 } };
             return aircraft;
             /*
             foreach (var part in TotalParts)
@@ -102,8 +107,10 @@ namespace CocosSharpMathGame
                 aircraft.Body.MountPart(new WeaponBalloon());
             }
             // set the math challenges
-            aircraft.WeightedChallenges = new List<Tuple<int, MathChallenge>> { new Tuple<int, MathChallenge>(1, new MultiplyChallenge(4, 3, -5, 9)),
-                                                                                new Tuple<int, MathChallenge>(1, new DivideChallenge()) };
+            aircraft.WeightedChallenges = new List<Tuple<int, MathChallenge>> { new Tuple<int, MathChallenge>(1, new MultiplyChallenge(4, 3, -5, 9, dummy: true)),
+                                                                                new Tuple<int, MathChallenge>(1, new DivideChallenge(dummy: true)) };
+            // set the awarded powerups
+            aircraft.WeightedPowerUpsAwarded = new Dictionary<PowerUp.PowerType, int> { { PowerUp.PowerType.SHIELD, 3 }, { PowerUp.PowerType.BACK_TURN, 2 }, { PowerUp.PowerType.BOOST, 3 } };
             return aircraft;
         }
 
@@ -125,8 +132,10 @@ namespace CocosSharpMathGame
             aircraft.Body.MountPart(new RudderPotato());
             // set the math challenges
             var rng = new Random();
-            aircraft.WeightedChallenges = new List<Tuple<int, MathChallenge>> { new Tuple<int, MathChallenge>(1, new AddChallenge(4, rng.Next(2,4), 0, 51)),
-                                                                                new Tuple<int, MathChallenge>(1, new SubChallenge(4, 2, 0, 50)) };
+            aircraft.WeightedChallenges = new List<Tuple<int, MathChallenge>> { new Tuple<int, MathChallenge>(1, new AddChallenge(4, rng.Next(2,4), 0, 51, dummy: true)),
+                                                                                new Tuple<int, MathChallenge>(1, new SubChallenge(4, 2, 0, 50, dummy: true)) };
+            // set the awarded powerups
+            aircraft.WeightedPowerUpsAwarded = new Dictionary<PowerUp.PowerType, int> { { PowerUp.PowerType.SHIELD, 1 }, { PowerUp.PowerType.BACK_TURN, 5 }, { PowerUp.PowerType.BOOST, 6 } };
             return aircraft;
         }
 
@@ -151,8 +160,10 @@ namespace CocosSharpMathGame
             aircraft.Body.MountPart(new RudderPotato());
             // set the math challenges
             var rng = new Random();
-            aircraft.WeightedChallenges = new List<Tuple<int, MathChallenge>> { new Tuple<int, MathChallenge>(1, new AddChallenge(4, 2, 0, 81)),
-                                                                                new Tuple<int, MathChallenge>(1, new SubChallenge(4, rng.Next(2,4), 0, 50)) };
+            aircraft.WeightedChallenges = new List<Tuple<int, MathChallenge>> { new Tuple<int, MathChallenge>(1, new AddChallenge(4, 2, 0, 81, dummy: true)),
+                                                                                new Tuple<int, MathChallenge>(1, new SubChallenge(4, rng.Next(2,4), 0, 50, dummy: true)) };
+            // set the awarded powerups
+            aircraft.WeightedPowerUpsAwarded = new Dictionary<PowerUp.PowerType, int> { { PowerUp.PowerType.SHIELD, 1 }, { PowerUp.PowerType.BACK_TURN, 9 }, { PowerUp.PowerType.BOOST, 7 } };
             return aircraft;
         }
 
@@ -179,7 +190,9 @@ namespace CocosSharpMathGame
             aircraft.Body.MountPart(new RudderBigBomber());
             aircraft.Body.MountPart(new RudderBigBomber());
             // set the math challenges
-            aircraft.WeightedChallenges = new List<Tuple<int, MathChallenge>> { new Tuple<int, MathChallenge>(1, new SolveChallenge()) };
+            aircraft.WeightedChallenges = new List<Tuple<int, MathChallenge>> { new Tuple<int, MathChallenge>(1, new SolveChallenge(dummy: true)) };
+            // set the awarded powerups
+            aircraft.WeightedPowerUpsAwarded = new Dictionary<PowerUp.PowerType, int> { { PowerUp.PowerType.HEAL, 3 }, { PowerUp.PowerType.SHIELD, 2 }, { PowerUp.PowerType.BOOST, 1 } };
             return aircraft;
         }
 
@@ -212,8 +225,10 @@ namespace CocosSharpMathGame
             aircraft.Body.MountPart(new RudderFighter());
             aircraft.Body.MountPart(new RudderFighter());
             // set the math challenges
-            aircraft.WeightedChallenges = new List<Tuple<int, MathChallenge>> { new Tuple<int, MathChallenge>(1, new SolveChallenge()),
-                                                                                new Tuple<int, MathChallenge>(1, new MultiplyChallenge())};
+            aircraft.WeightedChallenges = new List<Tuple<int, MathChallenge>> { new Tuple<int, MathChallenge>(1, new SolveChallenge(dummy: true)),
+                                                                                new Tuple<int, MathChallenge>(1, new MultiplyChallenge(dummy: true))};
+            // set the awarded powerups
+            aircraft.WeightedPowerUpsAwarded = new Dictionary<PowerUp.PowerType, int> { { PowerUp.PowerType.HEAL, 1 }, { PowerUp.PowerType.SHIELD, 3 }, { PowerUp.PowerType.BACK_TURN, 2 }, { PowerUp.PowerType.BOOST, 3 } };
             return aircraft;
         }
 
@@ -228,8 +243,34 @@ namespace CocosSharpMathGame
             aircraft.Body.MountPart(new RudderJet());
             aircraft.Body.MountPart(new RudderJet());
             // set the math challenges
-            aircraft.WeightedChallenges = new List<Tuple<int, MathChallenge>> { new Tuple<int, MathChallenge>(1, new SolveChallenge(4, 1, 20)) };
+            aircraft.WeightedChallenges = new List<Tuple<int, MathChallenge>> { new Tuple<int, MathChallenge>(1, new SolveChallenge(4, 1, 20, dummy: true)) };
+            // set the awarded powerups
+            aircraft.WeightedPowerUpsAwarded = new Dictionary<PowerUp.PowerType, int> { { PowerUp.PowerType.SHIELD, 3 }, { PowerUp.PowerType.BACK_TURN, 2 }, { PowerUp.PowerType.BOOST, 3 } };
             return aircraft;
+        }
+
+        internal PowerUp GeneratePowerUp()
+        {
+            if (WeightedPowerUpsAwarded != null && WeightedPowerUpsAwarded.Any())
+            {
+                // get the weight sum
+                int sum = WeightedPowerUpsAwarded.Values.Sum();
+                // choose
+                int choice = new Random().Next(sum);
+                sum = 0;
+                foreach (var powerUpTuple in WeightedPowerUpsAwarded)
+                {
+                    if (choice <= sum)
+                        return PowerUp.PowerUpFromType(powerUpTuple.Key);
+                    sum += powerUpTuple.Value;
+                }
+            }
+            return null;
+        }
+
+        internal void FlightPathHeadOnly()
+        {
+            FlightPathControlNode.FlightPathHeadOnly();
         }
     }
 }

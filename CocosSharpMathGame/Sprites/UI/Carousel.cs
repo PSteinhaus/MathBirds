@@ -62,6 +62,10 @@ namespace CocosSharpMathGame
             base.AddedToScene();
             //Parent.AddChild(DrawNode, 99999999);
         }
+        internal void StopCurrentScrolling()
+        {
+            Scroller.ScrollVelocity = CCPoint.Zero;
+        }
         public override void Update(float dt)
         {
             base.Update(dt);

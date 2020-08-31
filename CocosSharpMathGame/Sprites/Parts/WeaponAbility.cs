@@ -265,7 +265,7 @@ namespace CocosSharpMathGame
 
         internal bool CanShoot()
         {
-            return CooldownUntilNextShot <= 0;
+            return CooldownUntilNextShot <= 0 && MyPart.Aircraft.SelectedPower != PowerUp.PowerType.SHIELD;
         }
 
         internal void TryShoot()

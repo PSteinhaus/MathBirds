@@ -30,11 +30,11 @@ namespace CocosSharpMathGame
         { }
         internal DivideChallenge(int answerCount = 4, int minNum = STD_MIN_NUM, int maxNum = STD_MAX_NUM, bool dummy=false)
         {
-            if (dummy) return;
             QuestionNodeHeight = 340f;
             CreateAnswerArrays(answerCount);
             MinNum = minNum;
             MaxNum = maxNum;
+            if (dummy) return;
             int numbersCount = 2;
 
             // prepare the RNG
@@ -46,20 +46,7 @@ namespace CocosSharpMathGame
                   ((numbers[0] == numbers[1] || numbers[0] == 0 || numbers[0] == -numbers[1] || numbers[1] == 1 || numbers[1] == -1) && rng.Next(20) != 0))
                 for (int i=0; i< numbers.Length; i++)
                     numbers[i] = rng.Next(minNum, maxNum);
-            // make sure that no more than one number is greater than 10 (because that's just annoying)
-            /*
-            bool greater10Found = false;
-            for (int i = 0; i < numbers.Length; i++)
-            {
-                if (Math.Abs(numbers[i]) > 10)
-                {
-                    if (greater10Found)
-                        while (Math.Abs(numbers[i])>10)
-                            numbers[i] = rng.Next(minNum, maxNum);
-                    greater10Found = true;
-                }
-            }
-            */
+
             ChallengeLaTeX = @"\frac{" + numbers[0] + "}{" + numbers[1] + "}";
             ChallengeInfix = numbers[0] + "/" + numbers[1];
 
@@ -105,8 +92,8 @@ namespace CocosSharpMathGame
                         break;
                     default:
                         // just roll something in the range of the solution
-                        int range = Math.Abs(solution/2);
-                        wrongAnswer = solution + rng.Next(solution - range, solution + range);
+                        int range = Math.Abs(solution/2) + 5;
+                        wrongAnswer = solution + rng.Next(solution - range, solution + range + 1);
                         break;
                 }
                 // check if the answer is ok
@@ -120,7 +107,10 @@ namespace CocosSharpMathGame
                 }
                 // check if the answer is actually a solution
                 if (IsSolution(wrongAnswer.ToString()))
+                {
                     ok = false;
+                    tries--;
+                }
             }
             return wrongAnswer;
         }

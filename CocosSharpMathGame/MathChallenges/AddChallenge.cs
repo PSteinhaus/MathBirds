@@ -31,11 +31,11 @@ namespace CocosSharpMathGame
         { }
         internal AddChallenge(int answerCount = 4, int summandCount = 2, int minNum = STD_MIN_NUM, int maxNum = STD_MAX_NUM, bool dummy=false)
         {
-            if (dummy) return;
             CreateAnswerArrays(answerCount);
             SummandCount = summandCount;
             MinNum = minNum;
             MaxNum = maxNum;
+            if (dummy) return;
 
             // prepare the RNG
             var rng = new Random();
@@ -78,7 +78,9 @@ namespace CocosSharpMathGame
         {
             int wrongAnswer = 0;
             int solution = (int)((SymbolicExpression)Infix.ParseOrThrow(SolutionInfix)).RealNumberValue;
+            int tries = 0;
         start:
+            tries++;
             int algorithm = rng.Next(0, 3);
             switch (algorithm)
             {
@@ -92,14 +94,14 @@ namespace CocosSharpMathGame
                     break;
                 default:
                     // just roll something in the range of the solution
-                    wrongAnswer = solution + rng.Next(solution - (solution / 4), solution + (solution / 4));
+                    wrongAnswer = solution + rng.Next(solution - (solution / 4) - 3, solution + (solution / 4) + 4);
                     break;
             }
             // check if the answer is identical to another
             foreach (string answer in AnswersInfix)
             {
                 // if it is, begin anew
-                if (answer != null && answer.Equals(wrongAnswer.ToString()))
+                if (answer != null && answer.Equals(wrongAnswer.ToString()) && tries < 20)
                     goto start;
             }
             // check if the answer is actually a solution
@@ -107,7 +109,7 @@ namespace CocosSharpMathGame
                 goto start;
             // check if the answer is larger than each summand (it would be too simple if else)
             for (int i=0; i<summands.Length; i++)
-                if (wrongAnswer <= summands[i])
+                if (wrongAnswer <= summands[i] && tries < 20)
                     goto start;
             return wrongAnswer;
         }

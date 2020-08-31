@@ -136,6 +136,17 @@ namespace CocosSharpMathGame
             }
         }
 
+        internal override void Clear()
+        {
+            WreckageLayer = null;
+            this.mathChallengeNode = null;
+            this.FirstTouchListener = null;
+            //this.Scroller.MoveFunction = null;
+            this.Scroller = null;
+            this.StopAllActions();
+            this.ResetCleanState();
+        }
+
         internal void MoveMathChallengeNodeAway()
         {
             var currentMathChallengeNode = MathChallengeNode;

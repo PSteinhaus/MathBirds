@@ -13,9 +13,9 @@ namespace CocosSharpMathGame
 
         #region Constructors
 
-        public CCCallFiniteTimeFunc(float duration, Action<float,float> myFunction) : base(duration)
+        public CCCallFiniteTimeFunc(float duration, Action<float,float> myFunctionProgDur) : base(duration)
         {
-            MyFunction = myFunction;
+            MyFunction = myFunctionProgDur;
         }
 
         #endregion Constructors

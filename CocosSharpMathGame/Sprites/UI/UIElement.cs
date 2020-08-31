@@ -7,7 +7,7 @@ using CocosSharp;
 
 namespace CocosSharpMathGame
 {
-    abstract internal class UIElement : GameObjectSprite
+    internal class UIElement : GameObjectSprite
     {
         static internal CCSpriteSheet spriteSheet = new CCSpriteSheet("ui.plist");
         internal bool IsCircleButton { get; private set; }
@@ -101,11 +101,11 @@ namespace CocosSharpMathGame
         }
         internal bool TouchStartedOnItCircle(CCTouch touch)
         {
-            return touch.StartLocation.IsNear(BoundingBoxTransformedToWorld.Center, ScaledContentSize.Width * RadiusFactor);
+            return touch.StartLocation.IsNear(BoundingBoxTransformedToWorld.Center, BoundingBoxTransformedToWorld.Size.Width * RadiusFactor);
         }
         internal bool TouchIsOnItCircle(CCTouch touch)
         {
-            return touch.Location.IsNear(BoundingBoxTransformedToWorld.Center, ScaledContentSize.Width * RadiusFactor);
+            return touch.Location.IsNear(BoundingBoxTransformedToWorld.Center, BoundingBoxTransformedToWorld.Size.Width * RadiusFactor);
         }
         internal bool TouchStartedOnItBox(CCTouch touch)
         {

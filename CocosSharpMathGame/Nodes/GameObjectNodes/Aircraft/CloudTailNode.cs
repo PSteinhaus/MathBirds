@@ -100,6 +100,7 @@ namespace CocosSharpMathGame
 
         internal bool AutoAddClouds { get; set; } = true;
         protected List<Cloud> clouds = new List<Cloud>();
+        internal bool HasClouds() { return clouds.Any(); }
 
         /// <summary>
         /// Advance the life cycles of all clouds and possibly add a new cloud
@@ -141,6 +142,23 @@ namespace CocosSharpMathGame
             }
         }
 
+        internal virtual void Advance(float dt)
+        {
+            // decay only
+            // advance the lifecycle of each cloud
+            foreach (var cloud in clouds)
+            {
+                cloud.LifeTime += dt;
+                cloud.MatchLifeCycle();
+            }
+            // remove all clouds that have gone beyond their lifecycle
+            for (int i = 0; i < clouds.Count; i++)
+            {
+                if (clouds[i].LifeTime > clouds[i].TotalLifeTime)
+                    clouds.RemoveAt(i--);
+            }
+        }
+
         internal void AddCloud(Cloud cloud)
         {
             clouds.Add(cloud);
@@ -152,6 +170,13 @@ namespace CocosSharpMathGame
                 if (cloud != null)
                     cloud.UseDrawNode(highNode, lowNode);
             }
+        }
+        /// <summary>
+        /// Remove all clouds.
+        /// </summary>
+        internal void Clear()
+        {
+            clouds.Clear();
         }
     }
 }

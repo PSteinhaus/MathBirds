@@ -30,11 +30,11 @@ namespace CocosSharpMathGame
         { }
         internal SubChallenge(int answerCount = 4, int numbersCount = 2, int minNum = STD_MIN_NUM, int maxNum = STD_MAX_NUM, bool dummy=false)
         {
-            if (dummy) return;
             CreateAnswerArrays(answerCount);
             NumbersCount = numbersCount;
             MinNum = minNum;
             MaxNum = maxNum;
+            if (dummy) return;
 
             // prepare the RNG
             var rng = new Random();
@@ -80,6 +80,7 @@ namespace CocosSharpMathGame
             int wrongAnswer = 0;
             int solution = (int)((SymbolicExpression)Infix.ParseOrThrow(SolutionInfix)).RealNumberValue;
             var rng = new Random();
+            int tries = 0;
         start:
             int method = rng.Next(3);
             switch(method)
@@ -94,22 +95,23 @@ namespace CocosSharpMathGame
                     break;
                 default:
                     // just roll something in the range of the solution
-                    int range = Math.Abs(solution/4);
-                    wrongAnswer = solution + rng.Next(solution - range, solution + range);
+                    int range = Math.Abs(solution/4) + 3;
+                    wrongAnswer = solution + rng.Next(solution - range, solution + range + 1);
                     break;
             }
+            tries++;
             // check if the answer is identical to another
             foreach (string answer in AnswersInfix)
             {
                 // if it is, begin anew
-                if (answer != null && answer.Equals(wrongAnswer.ToString()))
+                if (answer != null && answer.Equals(wrongAnswer.ToString()) && tries < 20)
                     goto start;
             }
             // check if the answer is actually a solution
             if (IsSolution(wrongAnswer.ToString()))
                 goto start;
             // check if the answer is smaller than the first number
-            if (wrongAnswer >= numbers[0])
+            if (wrongAnswer > numbers[0] && tries < 20)
                 goto start;
             return wrongAnswer;
         }

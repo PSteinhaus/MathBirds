@@ -20,17 +20,20 @@ namespace CocosSharpMathGame
         public GUILayer GUILayer { get; set; }
         private readonly CCDrawNode DrawNode = new CCDrawNode();
         private readonly CCDrawNode DrawNodeBG = new CCDrawNode();
+        private readonly CCDrawNode DrawNodeExplosions = new CCDrawNode();
         internal List<Squadron> Squadrons { get; private protected set; } = new List<Squadron>();
         internal List<Aircraft> Aircrafts { get; private protected set; } = new List<Aircraft>();
+        internal List<PowerUp> PowerUps { get; private set; } = new List<PowerUp>();
         internal List<Aircraft> PlayerAircrafts { get; private protected set; }
         internal List<Aircraft> DownedAircrafts { get; private protected set; } = new List<Aircraft>();
-        internal List<Projectile> Projectiles { get; } = new List<Projectile>();
-        internal List<IDrawNodeUser> DrawNodeUsers { get; } = new List<IDrawNodeUser>();
+        internal List<Projectile> Projectiles { get; set; } = new List<Projectile>();
+        internal List<IDrawNodeUser> DrawNodeUsers { get; set; } = new List<IDrawNodeUser>();
         internal CCDrawNode HighDrawNode { get; set; }
         internal CCDrawNode LowDrawNode { get; set; }
         public PlayLayer() : base(CCColor4B.Black)
         {
             GUILayer = new GUILayer(this);
+            TouchCountSource = GUILayer;
             BGNode = new CCNode();
             AddChild(BGNode);
             BGNode.VertexZ = Constants.VERTEX_Z_GROUND;
@@ -40,21 +43,16 @@ namespace CocosSharpMathGame
             BGNode.ZOrder = (int)Constants.VERTEX_Z_GROUND;
             BGNode.Rotation = 10f;
 
+            AddChild(DrawNodeExplosions, -2000);
+            DrawNodeExplosions.VertexZ = Constants.VERTEX_Z_GROUND + 1;
+            DrawNodeExplosions.BlendFunc = CCBlendFunc.NonPremultiplied;
+
             HighDrawNode = new CCDrawNode();
             HighDrawNode.BlendFunc = CCBlendFunc.NonPremultiplied;
             AddChild(HighDrawNode, zOrder: 1000);
             LowDrawNode = new CCDrawNode();
             LowDrawNode.BlendFunc = CCBlendFunc.NonPremultiplied;
             AddChild(LowDrawNode, zOrder: -1000);
-            // for now place some MathSprites as a test
-            //AddChild(mathSprite1);
-            //AddChild(mathSprite2);
-            //AddChild(mathSprite3);
-
-            // a DrawNode is always useful for debugging
-            //AddChild(drawNode);
-            //drawNode.ZOrder = 0;
-            //mathSprite1.ZOrder = 1;
 
             MaxCameraWidth = Constants.COCOS_WORLD_WIDTH * 10;
             MaxCameraHeight = Constants.COCOS_WORLD_HEIGHT * 10;
@@ -110,6 +108,26 @@ namespace CocosSharpMathGame
                 return groundNotAir ? ZoneColorsGround[zone] : ZoneColorsAir[zone];
         }
 
+        internal override void Clear()
+        {
+            Squadrons = null;
+            Aircrafts = null;
+            PlayerAircrafts = null;
+            DownedAircrafts = null;
+            Projectiles = null;
+            DrawNodeUsers = null;
+            GUILayer = null;
+            this.ActiveChunks = null;
+            this.FirstTouchListener = null;
+            this.HighDrawNode = null;
+            this.KnownChunks = null;
+            this.LowDrawNode = null;
+            this.Scroller.MoveFunction = null;
+            this.Scroller = null;
+            this.StopAllActions();
+            this.ResetCleanState();
+        }
+
         internal void InitPlayerAircrafts(List<Aircraft> playerAircrafts)
         {
             const float BORDER = 50f;
@@ -120,6 +138,7 @@ namespace CocosSharpMathGame
                 aircraft.Team = PlayerTeam;
                 aircraft.ControlledByPlayer = true;
                 AddAircraft(aircraft);
+                aircraft.PartsChanged(true);
             }
             PlayerAircrafts = playerAircrafts;
             // place the aircrafts in "v"-formation
@@ -206,73 +225,9 @@ namespace CocosSharpMathGame
         protected override void AddedToScene()
         {
             base.AddedToScene();
-            var bounds = VisibleBoundsWorldspace;
-            /*
-            var testAircraft = Aircraft.CreateTestAircraft();
-            var playerTeam = new Team();
-            testAircraft.Team = playerTeam;
-            testAircraft.ControlledByPlayer = true;
-            AddAircraft(testAircraft);
-            testAircraft.MoveBy(bounds.Size.Width / 2, bounds.Size.Height / 4);
-            testAircraft.RotateBy(-90f);
-            */
-            
-            // add two other planes from different teams
-            /*
-            var secondAircraft = Aircraft.CreateTestAircraft();
-            var secondTeam = new Team();
-            secondAircraft.Team = secondTeam;
-            var color = new CCColor3B(160, 160, 160);
-            secondAircraft.ChangeColor(color);
-            var ai1 = new StandardAI();
-            secondAircraft.AI = ai1;
-            AddAircraft(secondAircraft);
-            secondAircraft.MoveBy(bounds.Size.Width / 5, bounds.Size.Height * 1.3f);
-            secondAircraft.RotateBy(-108f);
-
-            // add two other planes from different teams
-            var thirdAircraft = Aircraft.CreateTestAircraft();
-            thirdAircraft.Team = secondTeam;
-            thirdAircraft.ChangeColor(color);
-            thirdAircraft.AI = new StandardAI();
-            AddAircraft(thirdAircraft);
-            thirdAircraft.MoveBy(bounds.Size.Width / 3, bounds.Size.Height * 1.4f);
-            thirdAircraft.RotateBy(-100f);
-
-            var fourthAircraft = Aircraft.CreateTestAircraft();
-            var thirdTeam = new Team();
-            fourthAircraft.Team = thirdTeam;
-            var colorTeam3 = new CCColor3B(200, 200, 200);
-            fourthAircraft.ChangeColor(colorTeam3);
-            fourthAircraft.AI = new StandardAI();
-            AddAircraft(fourthAircraft);
-            fourthAircraft.MoveBy(bounds.Size.Width * 1.2f, bounds.Size.Height * 0.1f);
-            fourthAircraft.RotateBy(-10f);
-
-            var fifthAircraft = Aircraft.CreateTestAircraft();
-            fifthAircraft.Team = thirdTeam;
-            fifthAircraft.ChangeColor(colorTeam3);
-            fifthAircraft.AI = new StandardAI();
-            AddAircraft(fifthAircraft);
-            fifthAircraft.MoveBy(bounds.Size.Width * 1.3f, bounds.Size.Height * 0.2f);
-            fifthAircraft.RotateBy(-20f);
-            */
-
-            //ExecuteOrdersButton.Position = new CCPoint(bounds.MinX+ExecuteOrdersButton.ScaledContentSize.Width, bounds.MaxY- ExecuteOrdersButton.ScaledContentSize.Height);
-            //AddChild(ExecuteOrdersButton);
-
-            //Console.WriteLine("ZOrder Parent before: " + testAircraft.ZOrder);
-            //Console.WriteLine("ZOrder before: " + testAircraft.wings.ZOrder);
-            //testAircraft.ZOrder = 0;
-            //testAircraft.wings.ZOrder = -1;
-            //Console.WriteLine("ZOrder Parent now: " + testAircraft.ZOrder);
-            //Console.WriteLine("ZOrder now: " + testAircraft.wings.ZOrder);
-            //drawNode.DrawRect(testAircraft.BoundingBoxTransformedToWorld, CCColor4B.Green);
-            //drawNode.DrawSolidCircle( bounds.Center, 50, CCColor4B.Red);
-            //drawNode.DrawSolidCircle(testAircraft.Position, 60, CCColor4B.Blue);
-            //Console.WriteLine("Bounds: "+testAircraft.BoundingBoxTransformedToWorld);
-            //Console.WriteLine("Aircraft Position: " + testAircraft.Position);
-
+            // show the welcome message
+            if (!PopUp.TriggeredPlayLayer)
+                PopUp.ShowPopUp(GUILayer, PopUp.Enum.TRIGGERED_PLAYLAYER);  
             UpdateCamera();
         }
 
@@ -323,6 +278,8 @@ namespace CocosSharpMathGame
         internal void ExecuteOrders()
         {
             State = GameState.EXECUTING_ORDERS;
+            foreach (var aircraft in PlayerAircrafts)
+                aircraft.PrepareForExecuteOrders();
             TimeLeftExecutingOrders = Constants.TURN_DURATION;
         }
         internal bool PlayerIsAlive
@@ -353,6 +310,8 @@ namespace CocosSharpMathGame
             float minY = float.PositiveInfinity;
             float maxX = float.NegativeInfinity;
             float maxY = float.NegativeInfinity;
+            var activeChunksBefore = new CCPointI[ActiveChunks.Count];
+            ActiveChunks.CopyTo(activeChunksBefore);
             ActiveChunks.Clear();
             foreach (var aircraft in PlayerAircrafts)
             {
@@ -369,7 +328,13 @@ namespace CocosSharpMathGame
                             ActiveChunks.Add(activeChunk);
                     }
             }
-            const float BORDER = 4000f;
+            
+            var noLongerActiveChunks = new List<CCPointI>();
+            foreach (CCPointI chunkPoint in activeChunksBefore)
+                if (!ActiveChunks.Contains(chunkPoint))
+                    noLongerActiveChunks.Add(chunkPoint);
+                    
+            const float BORDER = 5500f;
             CameraSpace = new CCRect(minX - BORDER, minY - BORDER, maxX - minX + BORDER * 2, maxY - minY + BORDER * 2);
             // check if there are any new chunks
             // if there are generate their contents (i.e. the enemies that are supposed to be there)
@@ -378,8 +343,14 @@ namespace CocosSharpMathGame
                     InitiateChunk(chunkPoint);
             // prepare the squadrons
             foreach (var squadron in Squadrons)
-                if (ActiveChunks.Contains(PosToWorldChunk(squadron.Position)))
+            {
+                var chunkPoint = PosToWorldChunk(squadron.Position);
+                if (ActiveChunks.Contains(chunkPoint))
                     squadron.PrepareForPlanningPhase(this);
+                else if (noLongerActiveChunks.Contains(chunkPoint))
+                    foreach (var aircraft in squadron.AircraftsWithRelPositions.Keys)
+                        aircraft.PrepareForStandby();
+            }
             // prepare the player-aircrafts
             foreach (var aircraft in PlayerAircrafts)
                 aircraft.PrepareForPlanningPhase();
@@ -398,8 +369,8 @@ namespace CocosSharpMathGame
         }
 
         static readonly float[] ZoneEndRadii = new float[] { 1500f, 7000f, 14000f, 30000f };
-        static readonly CCColor4B[] ZoneColorsGround = new CCColor4B[] { new CCColor4B(0f, 0f, 0f, 0.1f), new CCColor4B(1f, 0f, 0f, 0.1f), new CCColor4B(1f, 1f, 0f, 0.1f), new CCColor4B(0f, 1f, 0f, 0.1f), new CCColor4B(0f, 0f, 1f, 0.1f) };
-        static readonly CCColor4B[] ZoneColorsAir = new CCColor4B[]    { CCColor4B.White, new CCColor4B(1f, 0.0f, 0.0f, 1f), new CCColor4B(1f, 1f, 0.0f, 1f), new CCColor4B(0.0f, 1f, 0.0f, 1f), new CCColor4B(0.0f, 0.0f, 1f, 1f) };
+        static readonly CCColor4B[] ZoneColorsGround = new CCColor4B[] { new CCColor4B(0f, 0f, 0f, 0.1f), new CCColor4B(1f, 0.4f, 0f, 0.1f), new CCColor4B(1f, 1f, 0f, 0.1f), new CCColor4B(0f, 1f, 0f, 0.1f), new CCColor4B(0f, 0f, 1f, 0.1f) };
+        static readonly CCColor4B[] ZoneColorsAir = new CCColor4B[]    { CCColor4B.White, new CCColor4B(1f, 0.4f, 0.0f, 1f), new CCColor4B(1f, 1f, 0.0f, 1f), new CCColor4B(0.0f, 1f, 0.0f, 1f), new CCColor4B(0.0f, 0.0f, 1f, 1f) };
         internal static int RadiusToZoneNum(float radius)
         {
             for (int i = 0; i < ZoneEndRadii.Length; i++)
@@ -574,7 +545,7 @@ namespace CocosSharpMathGame
                                     // create a squad of a BigBomber and some Fighters
                                     newSquadron = new Squadron();
                                     newSquadron.AddAircraft(Aircraft.CreateBigBomber(), CCPoint.Zero);
-                                    int fighterCount = rng.NextBoolean() ? 2 : 4;
+                                    int fighterCount = rng.Next(5) == 0 ? 4 : 2;
                                     Aircraft[] fighter = new Aircraft[fighterCount];
                                     for (int i = 0; i < fighterCount; i++)
                                     {
@@ -626,13 +597,27 @@ namespace CocosSharpMathGame
             const int MAX_SQUADS_PER_CHUNK = 5;
             int squadCount = rng.Next(MIN_SQUADS_PER_CHUNK, MAX_SQUADS_PER_CHUNK + 1);
             */
-            const int squadCount = 7;
+            int squadCount = 7;
             // choose random positions inside of this chunk
             CCPoint chunkMiddle = ChunkToWorldPos(chunkPoint);
             for (int i=0; i<squadCount; i++)
             {
                 var randomPos = Constants.RandomPointBoxnear(chunkMiddle, CHUNK_SIZE / 2, rng);
                 int zone = RadiusToZoneNum(randomPos.Length);
+                // place more squads in zone 1 and less in zone 3 (statistically)
+                switch (zone)
+                {
+                    case 1:
+                        if (rng.Next(3) == 0)
+                            i--;
+                        break;
+                    case 3:
+                        if (rng.Next(3) == 0)
+                            i++;
+                        break;
+                    default:
+                        break;
+                }
                 var newSquadron = GenerateSquadron(zone, rng);
                 if (newSquadron != null)
                 {
@@ -649,6 +634,7 @@ namespace CocosSharpMathGame
         {
             var wreckageLayer = new WreckageLayer();
             TransitionFadingFromTo(this.GUILayer, wreckageLayer.GUILayer, this, wreckageLayer, 0.8f);
+            GUILayer.PlayLayer = null;
             /*
             var parent = Parent;
             RemoveAllListeners();
@@ -659,7 +645,8 @@ namespace CocosSharpMathGame
             parent.AddChild(wreckageLayer, zOrder: int.MinValue);
             */
             // place the aircrafts and add them as children
-            wreckageLayer.AddAction(new CCCallFunc(() => wreckageLayer.InitWreckage(DownedAircrafts)));
+            var list = DownedAircrafts.ToArray().ToList();
+            wreckageLayer.AddAction(new CCCallFunc(() => { wreckageLayer.InitWreckage(list); wreckageLayer.CheckForWelcome(); }));
         }
 
         internal override void UpdateCamera()
@@ -701,6 +688,11 @@ namespace CocosSharpMathGame
             }
         }
 
+        private int powerUpCheckCountDown = 0;
+        private const int PU_CHECK_COUNTDOWN = 10;
+
+        internal List<CloudTailNode> ExplosionNodes { get; private set; } = new List<CloudTailNode>();
+
         public override void Update(float dt)
         {
             base.Update(dt);
@@ -713,6 +705,31 @@ namespace CocosSharpMathGame
                         TimeLeftExecutingOrders -= dt;
                         if (Aircraft.CloudFrameCountdown != 0) Aircraft.CloudFrameCountdown--;
                         else Aircraft.CloudFrameCountdown = Aircraft.CLOUD_FRAME_COUNTDOWN;
+                        if (powerUpCheckCountDown != 0) powerUpCheckCountDown--;
+                        else
+                        {
+                            powerUpCheckCountDown = PU_CHECK_COUNTDOWN;
+                            // check if any powerup is close enough to be picked up
+                            foreach (var aircraft in PlayerAircrafts)
+                            {
+                                if (aircraft.MyState == Aircraft.State.SHOT_DOWN) continue;
+                                CCPoint aPos = aircraft.Position;
+                                foreach (var powerUp in PowerUps)
+                                {
+                                    // only pick up power-ups that are close in x-y but also in z direction
+                                    if (powerUp.VertexZ > -10f && CCPoint.Distance(powerUp.Position, aPos) < PowerUp.PICKUP_DISTANCE)
+                                    {
+                                        // pick up the powerup
+                                        if (!PopUp.TriggeredPowerUp)
+                                            PopUp.ShowPopUp(GUILayer, PopUp.Enum.TRIGGERED_POWERUP);
+                                        powerUp.StartPickupAnimation();
+                                        aircraft.ChangePowerUpCount(powerUp.Power, 1);
+                                        PowerUps.Remove(powerUp);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
                         // DEBUG: Console.WriteLine("EXECUTING ORDERS; dt: " + dt);
                         // go through all aircrafts and let them execute their orders
                         List<Aircraft> aircraftToBeRemoved = new List<Aircraft>();
@@ -737,8 +754,25 @@ namespace CocosSharpMathGame
                         // remove aircrafts that have to be removed
                         foreach (var aircraft in aircraftToBeRemoved)
                         {
-                            if (!PlayerAircrafts.Contains(aircraft))
-                                DownedAircrafts.Add(aircraft);
+                            if (!aircraft.ControlledByPlayer)
+                            {
+                                // add a powerup
+                                if ((new Random()).Next(3) < 2)
+                                {
+                                    var powerUp = aircraft.GeneratePowerUp();
+                                    if (powerUp != null)
+                                    {
+                                        powerUp.Position = aircraft.Position;
+                                        AddPowerUp(powerUp);
+                                    }
+                                }
+                            }
+                            // add an explosion
+                            var cloudNode = new CloudTailNode();
+                            cloudNode.AddCloud(new CircleCloud(aircraft.Position, 0, CCColor4B.White, true, aircraft.ContentSize.Width * 16, 6f));
+                            ExplosionNodes.Add(cloudNode);
+
+                            DownedAircrafts.Add(aircraft);
                             RemoveAircraft(aircraft);
                         }
                         // go through all projectiles and let them advance
@@ -749,14 +783,27 @@ namespace CocosSharpMathGame
                            projectile.Advance(dt);
                             if (projectile.CanBeRemoved()) projectilesToBeRemoved.Add(projectile);
                         }
-                        foreach (var projectile in projectilesToBeRemoved)
-                            RemoveProjectile(projectile);
+                        // go through all clouds that are directly bounds to you
+                        List<CloudTailNode> cloudsToBeRemoved = new List<CloudTailNode>();
+                        foreach (var cloudNode in ExplosionNodes)
+                        {
+                            cloudNode.Advance(dt);
+                            if (!cloudNode.HasClouds()) cloudsToBeRemoved.Add(cloudNode);
+                        }
+                        foreach (var cloudNode in cloudsToBeRemoved)
+                            ExplosionNodes.Remove(cloudNode);
                         UpdateDrawNodes();
                         if (TimeLeftExecutingOrders <= 0)
                             StartPlanningPhase();
                     }
                     break;
             }
+        }
+
+        private void AddPowerUp(PowerUp powerUp)
+        {
+            PowerUps.Add(powerUp);
+            AddChild(powerUp, -30);
         }
 
         internal bool PosIsActive(CCPoint position)
@@ -771,13 +818,26 @@ namespace CocosSharpMathGame
         {
             HighDrawNode.Clear();
             LowDrawNode.Clear();
+            DrawNodeExplosions.Clear();
             // draw the projectiles
             foreach (var drawNodeUser in DrawNodeUsers)
                 drawNodeUser.UseDrawNodes(HighDrawNode, LowDrawNode);
+            // draw the clouds
+            foreach (var cloudNode in ExplosionNodes)
+                cloudNode.UseDrawNodes(DrawNodeExplosions, DrawNodeExplosions);
             // draw everything directly related to the aircrafts
             foreach (var aircraft in Aircrafts)
                 if (PosIsActive(aircraft.Position))
                     aircraft.UseDrawNodes(HighDrawNode, LowDrawNode);
+        }
+
+        internal void TellFlightPathHeadsToShowHeadsOnly(Aircraft exceptedOne = null)
+        {
+            // tell all player aircrafts flight-path-heads to no longer draw their options (in case they do)
+            // since something different than them was clicked
+            foreach (var aircraft in PlayerAircrafts)
+                if (aircraft != exceptedOne)
+                    aircraft.FlightPathHeadOnly();
         }
 
         new void OnTouchesBegan(List<CCTouch> touches, CCEvent touchEvent)
@@ -785,13 +845,7 @@ namespace CocosSharpMathGame
             base.OnTouchesBegan(touches, touchEvent);
             if (touches.Count > 0)
             {
-                //var touch = touches[0];
-                //var startLoc = touch.StartLocation;
-                //Console.WriteLine(startLoc);
-                //if (testAircraft.BoundingBoxTransformedToWorld.ContainsPoint(startLoc))
-                //    drawNode.Visible = false;
-                //if (testAircraft.ManeuverPolygon.ContainsPoint(startLoc))
-                //   testAircraft.IsManeuverPolygonDrawn = false;
+                TellFlightPathHeadsToShowHeadsOnly();
             }
         }
 

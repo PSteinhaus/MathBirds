@@ -12,6 +12,7 @@ namespace CocosSharpMathGame
         internal ExecuteOrdersButton() : base("flightPathHead.png", true)
         {
             Scale = 6f;
+            RadiusFactor = 0.7f;
         }
 
         private protected override void ButtonEnded(CCTouch touch)

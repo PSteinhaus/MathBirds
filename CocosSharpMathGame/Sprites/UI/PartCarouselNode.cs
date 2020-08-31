@@ -17,6 +17,7 @@ namespace CocosSharpMathGame
             PartType = partType;
             Scale = 1f;
             BGNode = new PartCollectionBG();
+            BGNode.ScaleY = 6f;
             AddChild(BGNode, -1);
             var box = BGNode.BoundingBoxTransformedToParent;
             ContentSize = box.Size;

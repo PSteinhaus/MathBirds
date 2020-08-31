@@ -54,10 +54,32 @@ namespace CocosSharpMathGame
         }
         internal State MyState = State.ACTIVE;
         public CollisionType CollisionType { get; set; } = new CollisionTypeBoundingBox();
+        private int[] PowerUps = new int[Enum.GetNames(typeof(PowerUp.PowerType)).Length];
+        internal int GetPowerUpCount(PowerUp.PowerType pType)
+        {
+            return PowerUps[(byte)pType];
+        }
+        internal void ChangePowerUpCount(PowerUp.PowerType pType, int diff)
+        {
+            PowerUps[(byte)pType] += diff;
+        }
+        internal List<PowerUp.PowerType> AvailablePowerUps()
+        {
+            var avPowUps = new List<PowerUp.PowerType>();
+            for (int i = 0; i < PowerUps.Length; i++)
+                if (PowerUps[i] != 0)
+                    avPowUps.Add((PowerUp.PowerType)i);
+            // at last always add the normal move option
+            if (!avPowUps.Contains(PowerUp.PowerType.NORMAL))
+                avPowUps.Add(PowerUp.PowerType.NORMAL);
+            return avPowUps;
+        }
+        internal PowerUp.PowerType SelectedPower { get { return FlightPathControlNode.SelectedPower; } }
+        internal Dictionary<PowerUp.PowerType, int> WeightedPowerUpsAwarded { get; private set; }
         /// <summary>
         /// the minimal velocity that any aircraft needs to have to not fall out of the sky
         /// </summary>
-        internal const float V_MIN = 150f;
+        internal const float V_MIN = 40f;
         /// <summary>
         /// Calculate and return the maximum (straight) velocity that this aircraft can reach, based upon its ManeuverPolygon
         /// </summary>
@@ -103,23 +125,96 @@ namespace CocosSharpMathGame
         }
         protected FlightPathControlNode FlightPathControlNode { get; set; }
         internal Team Team { get; set; }
+        internal void PrepareForExecuteOrders()
+        {
+            switch (SelectedPower)
+            {
+                case PowerUp.PowerType.HEAL:
+                    Heal();
+                    break;
+                default:
+                    break;
+            }
+            if (SelectedPower != PowerUp.PowerType.NORMAL)
+                ChangePowerUpCount(SelectedPower, -1);
+        }
+        internal void PowerChanged(PowerUp.PowerType oldPower)
+        {
+            UpdateManeuverPolygon();
+            if (oldPower == PowerUp.PowerType.BACK_TURN || oldPower == PowerUp.PowerType.BOOST)
+                FlightPathControlNode.ResetHeadPosition();
+            //shieldDrawNode.Clear();
+            switch (SelectedPower)
+            {
+                case PowerUp.PowerType.BOOST:
+                    {
+                        // increase the size of the maneuver polygon
+                        const float BOOST_SCALE = 2f;
+                        ManeuverPolygon.Scale(BOOST_SCALE);
+                        FlightPathControlNode.ResetHeadPosition();
+                    }
+                    break;
+                case PowerUp.PowerType.BACK_TURN:
+                    {
+                        // change the maneuver polygon to a special back-turn one 
+                        ChangeManeuverPolygonToBackTurn();
+                        FlightPathControlNode.ResetHeadPosition();
+                    }
+                    break;
+                case PowerUp.PowerType.SHIELD:
+                    {
+                        // draw the shield using a workaround for line width
+                        //shieldDrawNode.DrawSolidCircle(CCPoint.Zero, ContentSize.Width + 5f, CCColor4B.White);
+                        //shieldDrawNode.DrawSolidCircle(CCPoint.Zero, ContentSize.Width + 4f, CCColor4B.Black);
+                    }
+                    break;
+            }
+        }
+
+        private void ChangeManeuverPolygonToBackTurn()
+        {
+            const float BACK_DISTANCE = 140f;
+            ManeuverPolygon = new PolygonWithSplines(new CCPoint[] { new CCPoint(-40, BACK_DISTANCE), new CCPoint(-41f, BACK_DISTANCE), new CCPoint(-41, BACK_DISTANCE+1), new CCPoint(-40, BACK_DISTANCE+1) });
+            ManeuverPolygon.RotateBy(MyRotation);
+            ManeuverPolygon.MoveBy(PositionX, PositionY);
+        }
+
+        internal void Heal()
+        {
+            foreach (var part in TotalParts)
+                part.Repair(part.MaxHealth);
+        }
         private protected List<Tuple<int,MathChallenge>> WeightedChallenges { get; set; }
         internal MathChallenge GetChallenge()
         {
-            // get the weight sum
-            int sum = 0;
-            foreach (var tuple in WeightedChallenges)
+            if (WeightedChallenges != null && WeightedChallenges.Any())
             {
-                sum += tuple.Item1;
+                // get the weight sum
+                int sum = 0;
+                foreach (var tuple in WeightedChallenges)
+                {
+                    sum += tuple.Item1;
+                }
+                // choose
+                int choice = new Random().Next(sum);
+                sum = 0;
+                foreach (var tuple in WeightedChallenges)
+                {
+                    if (choice <= sum)
+                        return tuple.Item2.CreateFromSelf();
+                    sum += tuple.Item1;
+                }
             }
-            // choose
-            int choice = new Random().Next(sum);
-            sum = 0;
-            foreach (var tuple in WeightedChallenges)
+            else
             {
-                if (choice <= sum)
-                    return tuple.Item2.CreateFromSelf();
-                sum += tuple.Item1;
+                // generate a random unlocked challenge
+                var challenges = MathChallenge.GetAllChallengeModels();
+                while (true)
+                {
+                    var challenge = challenges[(new Random()).Next(challenges.Length)];
+                    if (!challenge.Locked)
+                        return challenge.CreateFromSelf();
+                }
             }
             return null;
         }
@@ -154,6 +249,8 @@ namespace CocosSharpMathGame
         /// DEBUG
         /// This drawnode draws the manveuver polygon (if IsManeuverPolygonDrawn == true)
         /// </summary>
+        ///
+        /*
         private CCDrawNode maneuverPolygonDrawNode = new CCDrawNode();
         internal bool IsManeuverPolygonDrawn {
             get
@@ -165,6 +262,7 @@ namespace CocosSharpMathGame
                 maneuverPolygonDrawNode.Visible = value;
             }
         }
+        */
 
         /// <summary>
         /// defines where the aircraft can move to this turn
@@ -383,11 +481,13 @@ namespace CocosSharpMathGame
             ManeuverPolygonUntransformed = untransformedPolygon;
             UpdateManeuverPolygon();
             // draw it (DEBUG)
+            /*
             if (IsManeuverPolygonDrawn)
             {
                 maneuverPolygonDrawNode.Clear();
                 maneuverPolygonDrawNode.DrawPolygon(untransformedPolygon.Points, untransformedPolygon.Points.Length, CCColor4B.Transparent ,2f, CCColor4B.White);
             }
+            */
         }
 
         /// <summary>
@@ -739,10 +839,13 @@ namespace CocosSharpMathGame
             // special case: not enough points found
             // in this case set the maneuverPolygon to a small predefined square in front of the aircraft
             // and this also means that the aircraft lost its ability to fly, so kill it
-            if (controlPoints.Count() < 3)
+            if (controlPoints.Count() < 5)
             {
                 controlPoints.Clear();
-                float range = Velocity * Constants.TURN_DURATION * 0.8f;
+                var vel = Velocity;
+                if (Velocity < V_MIN)
+                    vel = V_MIN;
+                float range = vel * Constants.TURN_DURATION * 0.4f;
                 controlPoints.Add(new CCPoint(range, 1));
                 controlPoints.Add(new CCPoint(range + 1, 1));
                 controlPoints.Add(new CCPoint(range + 1, -1));
@@ -753,6 +856,20 @@ namespace CocosSharpMathGame
             // now create the polygon and update
             var newManeuverPolygon = new PolygonWithSplines(controlPoints.ToArray());
             UpdateManeuverPolygonToThis(newManeuverPolygon);
+        }
+
+        /// <summary>
+        /// When an enemy aircraft is no longer inside an active chunk it calls this function.
+        /// This function causes it to deallocate unnecessary memory (clouds, pathpoints).
+        /// </summary>
+        internal void PrepareForStandby()
+        {
+            foreach (var part in TotalParts)
+            {
+                if (part.ManeuverAbility != null && part.ManeuverAbility.CloudTailNode != null)
+                    part.ManeuverAbility.CloudTailNode.Clear();
+            }
+            FlightPathControlNode.ClearPathPoints();
         }
 
         internal void Die()
@@ -780,6 +897,12 @@ namespace CocosSharpMathGame
                 // clear the nodes before using them
                 HighNodeWhenDead.Clear();
                 LowNodeWhenDead.Clear();
+            }
+            else if (SelectedPower == PowerUp.PowerType.SHIELD)
+            {
+                // draw the shield bubble
+                lowNode.DrawSolidCircle(Position, ScaledContentSize.Width * 0.85f, CCColor4B.White);
+                lowNode.DrawSolidCircle(Position, ScaledContentSize.Width * 0.85f - 16f, CCColor4B.Black);
             }
             foreach (var part in TotalParts)
             {
@@ -867,12 +990,12 @@ namespace CocosSharpMathGame
             // advance dt seconds on the path
             bool finished = FlightPathControlNode.Advanche(dt);
             VelocityVector = new CCPoint((PositionX - oldPosition.X) / dt, (PositionY - oldPosition.Y) / dt);
-            // let your parts act
+            // let your parts act 
             foreach (var part in TotalParts)
                 part.ExecuteOrders(dt);
             // fall from the sky if dead
             if (MyState == State.SHOT_DOWN)
-                ChangeVertexZ(dt * (-500 + VertexZ / 4));
+                ChangeVertexZ(dt * (-500 + VertexZ / 2));
             return finished;
         }
 
@@ -910,7 +1033,13 @@ namespace CocosSharpMathGame
         {
             ControlledByPlayer = false;
             PartsChanged();
-            // DEBUG
+            // DEBUG:
+            /*
+            ChangePowerUpCount(PowerUp.PowerType.SHIELD, 2);
+            ChangePowerUpCount(PowerUp.PowerType.HEAL, 2);
+            ChangePowerUpCount(PowerUp.PowerType.BOOST, 2);
+            ChangePowerUpCount(PowerUp.PowerType.BACK_TURN, 2);
+            */
             /*
             AddChild(maneuverPolygonDrawNode);
             maneuverPolygonDrawNode.Scale = 1 / Constants.STANDARD_SCALE;
@@ -927,7 +1056,7 @@ namespace CocosSharpMathGame
         {
             FlightPathControlNode.ResetHeadPosition();
             // DEBUG
-            Console.WriteLine("ZOrder: " + FlightPathControlNode.ZOrder);
+           // Console.WriteLine("ZOrder: " + FlightPathControlNode.ZOrder);
         }
 
         internal void ChangeColor(CCColor3B newColor)
@@ -947,11 +1076,16 @@ namespace CocosSharpMathGame
             }
         }
 
+        //private CCDrawNode shieldDrawNode = new CCDrawNode();
+
         protected override void AddedToScene()
         {
             base.AddedToScene();
             // DrawNodes have no Size, therefore we need to position them correctly at the center of the node
-            maneuverPolygonDrawNode.Position = new CCPoint(ContentSize.Width/2, ContentSize.Height / 2);
+            //maneuverPolygonDrawNode.Position = new CCPoint(ContentSize.Width/2, ContentSize.Height / 2);
+            //shieldDrawNode.Position = new CCPoint(ContentSize.Width / 2, ContentSize.Height / 2);
+            //AddChild(shieldDrawNode, 2000);
+            //shieldDrawNode.BlendFunc = CCBlendFunc.Additive; // additive mode is necessary to properly draw circles with line width using a workaround
             // add the FlightPathControlNode as a brother below you
             FlightPathControlNode = new FlightPathControlNode(this);
             if (Parent is PlayLayer pl)
@@ -988,6 +1122,7 @@ namespace CocosSharpMathGame
         internal void PrepareForPlanningPhase()
         {
             UpdateManeuverPolygon();
+            FlightPathControlNode.ResetHead();  // reset the chosen powerup back to normal mode
             FlightPathControlNode.ResetHeadPosition();
             if (AI != null && MyState != State.SHOT_DOWN && (Squadron == null || !Squadron.InFormation))
             {

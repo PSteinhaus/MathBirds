@@ -30,7 +30,7 @@ namespace CocosSharpMathGame
             // manage size
             //ContentSize = Texture.ContentSizeInPixels;
             Scale = 1f;
-            Console.WriteLine(ContentSize);
+            //Console.WriteLine(ContentSize);
             IsAntialiased = false;
             // set the anchor
             AnchorPoint = CCPoint.AnchorMiddle;

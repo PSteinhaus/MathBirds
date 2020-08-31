@@ -11,7 +11,8 @@ namespace CocosSharpMathGame
     {
         private FlightPathNode FlightPathNode { get; set; }
         private FlightPathHead FlightPathHead { get; set; }
-        private Aircraft Aircraft { get; set; }
+        internal PowerUp.PowerType SelectedPower { get { return FlightPathHead.SelectedPower; } }
+        internal Aircraft Aircraft { get; set; }
         internal CCPoint FlightPathHeadPos
         {
             get
@@ -86,6 +87,21 @@ namespace CocosSharpMathGame
             Aircraft.MoveTo(destination);
             Aircraft.RotateTo(CCfinalDirection);
             return destination.Equals(FlightPathNode.EndPoint);
+        }
+
+        internal void ClearPathPoints()
+        {
+            FlightPathNode.ClearPath();
+        }
+
+        internal void FlightPathHeadOnly()
+        {
+            FlightPathHead.ShowOnlyHead();
+        }
+
+        internal void ResetHead()
+        {
+            FlightPathHead.Head = PowerUp.FlightPathHeadOptionFromType(PowerUp.PowerType.NORMAL);
         }
     }
 }

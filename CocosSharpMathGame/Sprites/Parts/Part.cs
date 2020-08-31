@@ -230,6 +230,8 @@ namespace CocosSharpMathGame
 
         internal void TakeDamage(float damage)
         {
+            if (Aircraft != null && Aircraft.SelectedPower == PowerUp.PowerType.SHIELD)
+                return;
             Health -= damage;
             if (Health <= 0)
                 Die();
@@ -326,21 +328,28 @@ namespace CocosSharpMathGame
                     relativePosition = CCPoint.RotateByAngle(relativePosition, CCPoint.Zero, -Constants.CCDegreesToMathRadians(TotalRotation));
                     // react differently depending upon how damaged you now are
                     var damageTail = new DamageCloudTailNode(DamageToReferenceSize(damage), relativePosition);
-                    if (Health / MaxHealth > 0.7f)
-                        damageTail.AutoAddClouds = false;
-                    if (Health / MaxHealth < 0.5f)
+                    if (Aircraft.SelectedPower != PowerUp.PowerType.SHIELD)
                     {
-                        var planeColor = ((PlayLayer)Layer).CurrentPlaneColor;
-                        var baseFlameColor = new CCColor4B((byte)rng.Next(0, 256), 0, 0);
-                        var h = (new SKColor(planeColor.R, planeColor.G, planeColor.B)).Hue;
-                        damageTail.CloudColor = Constants.MoveHue(baseFlameColor, h);
+                        if (Health / MaxHealth > 0.7f)
+                            damageTail.AutoAddClouds = false;
+                        if (Health / MaxHealth < 0.5f)
+                        {
+                            var planeColor = ((PlayLayer)Layer).CurrentPlaneColor;
+                            var baseFlameColor = new CCColor4B((byte)rng.Next(0, 256), 0, 0);
+                            var h = (new SKColor(planeColor.R, planeColor.G, planeColor.B)).Hue;
+                            damageTail.CloudColor = Constants.MoveHue(baseFlameColor, h);
+                        }
+                    }
+                    else
+                    {
+                        damageTail.AutoAddClouds = false;
                     }
                     DamageCloudTailNodes.Add(damageTail);
                     break;
                 }
             }
             // shake!
-            if (Aircraft.ControlledByPlayer)
+            if (Aircraft.ControlledByPlayer && Aircraft.SelectedPower != PowerUp.PowerType.SHIELD)
             {
                 // the shake amount depends on the damage, but mostly on how the damage relates to the max health
                 float baseRefSize = DamageToReferenceSize(damage, 10f);

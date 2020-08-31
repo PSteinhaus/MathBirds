@@ -31,11 +31,11 @@ namespace CocosSharpMathGame
         { }
         internal MultiplyChallenge(int answerCount = 4, int numbersCount = 2, int minNum = STD_MIN_NUM, int maxNum = STD_MAX_NUM, bool dummy=false)
         {
-            if (dummy) return;
             CreateAnswerArrays(answerCount);
             NumbersCount = numbersCount;
             MinNum = minNum;
             MaxNum = maxNum;
+            if (dummy) return;
 
             // prepare the RNG
             var rng = new Random();
@@ -118,8 +118,8 @@ namespace CocosSharpMathGame
                         break;
                     default:
                         // just roll something in the range of the solution
-                        int range = Math.Abs(solution/4);
-                        wrongAnswer = solution + rng.Next(solution - range, solution + range);
+                        int range = Math.Abs(solution/4) + 3;
+                        wrongAnswer = solution + rng.Next(solution - range, solution + range + 1);
                         break;
                 }
                 // check if the answer is ok
@@ -133,7 +133,10 @@ namespace CocosSharpMathGame
                 }
                 // check if the answer is actually a solution
                 if (IsSolution(wrongAnswer.ToString()))
+                {
                     ok = false;
+                    tries--;
+                }
             }
             return wrongAnswer;
         }

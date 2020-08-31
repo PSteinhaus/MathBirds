@@ -29,10 +29,10 @@ namespace CocosSharpMathGame
         { }
         internal SolveChallenge(int answerCount = 4, int minNum = STD_MIN_NUM, int maxNum = STD_MAX_NUM, bool dummy=false)
         {
-            if (dummy) return;
             QuestionNodeHeight = 340f;
             NodeHeight = 320f;
             CreateAnswerArrays(answerCount);
+            if (dummy) return;
 
             // prepare the RNG
             var rng = new Random();
@@ -458,7 +458,10 @@ namespace CocosSharpMathGame
                     }
                     // check if the answer is actually a solution
                     if (IsSolution(infix))
+                    {
                         ok = false;
+                        tries--;
+                    }
                 }
                 AnswersInfix[i] = infix;
                 AnswersLaTeX[i] = "x = " + LaTeX.Format(Infix.ParseOrThrow(AnswersInfix[i]));

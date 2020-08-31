@@ -16,10 +16,10 @@ namespace CocosSharpMathGame
     [Serializable]
     public class HangarGUILayer : MyLayer
     {
-        internal Carousel HangarOptionCarousel { get; private protected set; }
-        internal ScrollableCollectionNode TakeoffCollectionNode { get; private protected set; }
-        internal NonScalingCarousel PartCarousel { get; private protected set; }
-        internal CCNode TakeoffNode { get; private protected set; } = new CCNode();
+        internal Carousel HangarOptionCarousel { get; set; }
+        internal ScrollableCollectionNode TakeoffCollectionNode { get; set; }
+        internal NonScalingCarousel PartCarousel { get; set; }
+        internal CCNode TakeoffNode { get; set; } = new CCNode();
         private MathChallengeNode challengeNode;
         internal MathChallengeNode ChallengeNode
         {
@@ -39,13 +39,13 @@ namespace CocosSharpMathGame
                 }
             }
         }
-        internal GOButton GOButton { get; private protected set; }
+        internal GOButton GOButton { get; set; }
         internal readonly CCPoint GOButtonOutPosition = new CCPoint(Constants.COCOS_WORLD_WIDTH / 2, Constants.COCOS_WORLD_HEIGHT * 1.5f);
         internal readonly CCPoint GOButtonInPosition  = new CCPoint(Constants.COCOS_WORLD_WIDTH / 2, Constants.COCOS_WORLD_HEIGHT * 0.87f);
         private HangarLayer HangarLayer { get; set; }
-        internal GameObjectNode HangarOptionHangar { get; private protected set; }
-        internal GameObjectNode HangarOptionWorkshop { get; private protected set; }
-        internal GameObjectNode HangarOptionScrapyard { get; private protected set; }
+        internal GameObjectNode HangarOptionHangar { get; set; }
+        internal GameObjectNode HangarOptionWorkshop { get; set; }
+        internal GameObjectNode HangarOptionScrapyard { get; set; }
         private IGameObject dragAndDropObject;
         private CCPoint dragAndDropRelativePos;
         internal IGameObject DragAndDropObject
@@ -215,7 +215,7 @@ namespace CocosSharpMathGame
             }
         }
 
-        internal const float MOUNT_DISTANCE = 100f;
+        internal const float MOUNT_DISTANCE = 200f;
         new private protected void OnTouchesEnded(List<CCTouch> touches, CCEvent touchEvent)
         {
             base.OnTouchesEnded(touches, touchEvent);
@@ -341,6 +341,34 @@ namespace CocosSharpMathGame
                 TakeoffCollectionNode.Pressable = true;
             if (state != HangarLayer.HangarState.MODIFY_AIRCRAFT && state != HangarLayer.HangarState.SCRAPYARD_CHALLENGE)
                 HangarOptionCarousel.Pressable = true;
+        }
+
+        internal override void Clear()
+        {
+            
+            HangarLayer = null;
+            
+            this.PartCarousel = null;
+            this.TakeoffCollectionNode = null;
+            
+            this.TakeoffNode = null;
+            this.HangarOptionWorkshop = null;
+            this.HangarOptionScrapyard = null;
+            this.HangarOptionHangar = null;
+            this.HangarOptionCarousel = null;
+            
+            this.GOButton = null;
+            //this.DragAndDropObject = null;
+            
+            this.challengeNode = null;
+            
+            this.FirstTouchListener = null;
+            //this.Scroller.MoveFunction = null;
+            this.Scroller = null;
+            
+            
+            this.StopAllActions();
+            this.ResetCleanState();
         }
     }
 }

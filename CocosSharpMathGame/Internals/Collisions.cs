@@ -472,8 +472,8 @@ namespace CocosSharpMathGame
         {
             var collisionPoly = new Polygon(gameObject.DiamondCollisionPoints());
             collisionPoly.PivotPoint = ((CCNode)gameObject).AnchorPointInPoints;// new CCPoint(ContentSize.Width / 2, ContentSize.Height / 2);
-            Console.WriteLine("Name: " + gameObject.GetType().Name);
-            Console.WriteLine("AnchorPointInPoints: " + ((CCNode)gameObject).AnchorPointInPoints);
+            //Console.WriteLine("Name: " + gameObject.GetType().Name);
+            //Console.WriteLine("AnchorPointInPoints: " + ((CCNode)gameObject).AnchorPointInPoints);
             return new CollisionTypePolygon(collisionPoly);
         }
 

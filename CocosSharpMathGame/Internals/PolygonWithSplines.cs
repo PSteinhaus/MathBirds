@@ -41,7 +41,7 @@ namespace CocosSharpMathGame
         private Polygon ControlPolygon { get; set; }
         internal PolygonWithSplines(CCPoint[] controlPoints, int[] splineControl = null) : base(controlPoints)
         {
-            SplineControl = splineControl!=null ? splineControl : new int[controlPoints.Length];
+            SplineControl = splineControl != null ? splineControl : new int[controlPoints.Length];
             ControlPolygon = new Polygon(controlPoints);
             ConstructPolygon();
         }

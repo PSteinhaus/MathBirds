@@ -33,6 +33,7 @@ namespace CocosSharpMathGame
 
             // add a special maneuver ability! (jet propulsion :) )
             ManeuverAbility = new ManeuverAbility((float)Math.Pow(10, 5) * 2.75f, (float)Math.Pow(10, 5) * 35.0f);
+            ManeuverAbility.CloudTailNode.ReferenceSize *= 2f;
         }
     }
 }

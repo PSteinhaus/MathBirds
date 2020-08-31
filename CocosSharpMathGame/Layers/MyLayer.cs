@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using CocosSharp;
@@ -11,7 +12,7 @@ namespace CocosSharpMathGame
     /// <summary>
     /// A general purpose layer class that adds some functionality to CCLayerColor
     /// </summary>
-    public class MyLayer : CCLayerColor
+    public abstract class MyLayer : CCLayerColor
     {
         private protected Scroller Scroller { get; set; } = new Scroller();
         private protected CCEventListenerTouchAllAtOnce FirstTouchListener { get; set; }
@@ -24,15 +25,39 @@ namespace CocosSharpMathGame
                 TouchCount = 0; // for CountTouches
                 FirstTouchListener = new CCEventListenerTouchAllAtOnce();
                 FirstTouchListener.OnTouchesBegan = OnTouchesBeganDoAccounting;
+                FirstTouchListener.OnTouchesMoved = OnTouchesMovedDoAccounting;
                 FirstTouchListener.OnTouchesEnded = OnTouchesEndedDoAccounting;
                 FirstTouchListener.OnTouchesCancelled = OnTouchesEndedDoAccounting;
                 AddEventListener(FirstTouchListener, int.MinValue); // intercept everything
             }
         }
-        public bool CountsTouches { get { return TouchCount != -1; } }
-        public int TouchCount { get; private set; } = -1; // -1 means this layer does not count touches
+        internal MyLayer TouchCountSource { get; set; } = null;
+        public bool CountsTouches { get { return TouchCount != -25; } }
+        private int touchCount = -25; // -25 means this layer does not count touches;
+        public int TouchCount
+        { 
+            get
+            {
+                if (TouchCountSource != null)
+                    return TouchCountSource.TouchCount;
+                else
+                    return touchCount;
+            }
+            private set
+            {
+                touchCount = value;
+            }
+        }
         private protected void OnTouchesBeganDoAccounting(List<CCTouch> touches, CCEvent touchEvent)
         {
+            foreach (var touch in touches)
+            {
+                if (!ActiveTouches.ContainsKey(touch))
+                {
+                    Console.WriteLine("TOUCH ADDED, ID: " + touch.Id);
+                    ActiveTouches.Add(touch, touch.Location);
+                }
+            }
             if (touches.Count > 0)
             {
                 TouchCount += touches.Count;
@@ -43,21 +68,42 @@ namespace CocosSharpMathGame
                 }
             }
         }
+
+        private protected void OnTouchesMovedDoAccounting(List<CCTouch> touches, CCEvent touchEvent)
+        {
+            foreach (var touch in touches)
+            {
+                if (ActiveTouches.ContainsKey(touch))
+                {
+                    ActiveTouches[touch] = touch.Location;
+                    Console.WriteLine("touch "+touch.Id+" location updated: " + touch.Location);
+                }
+            }
+        }
+
         private protected void OnTouchesEndedDoAccounting(List<CCTouch> touches, CCEvent touchEvent)
         {
+            foreach (var touch in touches)
+            {
+                ActiveTouches.Remove(touch);
+                Console.WriteLine("TOUCH REMOVED, ID: " + touch.Id);
+                Console.WriteLine("ActiveTouches.Count: " + ActiveTouches.Count);
+            }
             if (touches.Count > 0)
             {
-                Console.WriteLine("TouchCount before: " + TouchCount);
                 TouchCount -= touches.Count;
-                Console.WriteLine("TouchCount after: " + TouchCount);
+                if (TouchCount < 0) TouchCount = 0;
                 touchEvent.IsStopped = false; // workaround for a bug that is created by the swallowing of a touchMoved-event in UIElement(Node)
                 // intercept the event if there are touches remaining (i.e. only the last release will be the "real" release)
                 if (TouchCount > 0)
                 {
                     touchEvent.StopPropogation();
                 }
+                Console.WriteLine("TouchCount: " + TouchCount);
             }
         }
+
+        internal abstract void Clear();
 
         /// <summary>
         /// Since layer (and scene) opacity is broken this implements a workaround for a creating a fading transition.
@@ -82,18 +128,46 @@ namespace CocosSharpMathGame
             fadeNode.AddAction(new CCSequence(new CCCallFiniteTimeFunc(duration / 2, FadeIn),
                                               new CCCallFunc(() =>
                                               {
-                                                  layer1.RemoveAllListeners();
-                                                  guiLayer1.RemoveAllListeners();
-                                                  var parent = layer1.Parent;
-                                                  layer1.RemoveFromParent();
-                                                  guiLayer1.RemoveFromParent();
-                                                  parent.AddChild(guiLayer2);
-                                                  parent.AddChild(layer2, int.MinValue);
-                                                  fadeNode.RemoveFromParent();
-                                                  guiLayer2.AddChild(fadeNode, int.MaxValue);
-                                                  fadeNode.AddAction(new CCSequence(new CCCallFiniteTimeFunc(duration / 2, FadeOut),
-                                                                     new CCRemoveSelf()));
+                                                    var director = layer1.Director;
+                                                    var scene = director.RunningScene;
+                                                    var gv = scene.GameView;
+
+                                                    fadeNode.RemoveFromParent();
+                                                    layer1.RemoveAllListeners();
+                                                    guiLayer1.RemoveAllListeners();
+                                                    scene.RemoveAllListeners();
+                                                    scene.RemoveAllChildren();
+                                                    scene.RemoveFromParent();
+                                                    layer1.Clear();
+                                                    guiLayer1.Clear();
+
+                                                    var scene2 = new CCScene(gv);
+                                                    scene2.AddChild(guiLayer2);
+                                                    scene2.AddChild(layer2, int.MinValue);
+                                                    guiLayer2.AddChild(fadeNode, int.MaxValue);
+                                                    director.ResetSceneStack();
+                                                    director.ReplaceScene(scene2);
+                                                    fadeNode.AddAction(new CCSequence(new CCCallFiniteTimeFunc(duration / 2, FadeOut),
+                                                                        new CCRemoveSelf()));
+                                                  
+                                                    // this part is how it needs to be done in order to work on the old CocosSharp version
+                                                    // where GameView.Get fails (i.e. the DX-version)
+                                                    /*
+                                                    layer1.RemoveAllListeners();
+                                                    guiLayer1.RemoveAllListeners();
+                                                    var parent = layer1.Parent;
+                                                    layer1.RemoveFromParent();
+                                                    guiLayer1.RemoveFromParent();
+                                                    parent.AddChild(guiLayer2);
+                                                    parent.AddChild(layer2, int.MinValue);
+                                                    fadeNode.RemoveFromParent();
+                                                    guiLayer2.AddChild(fadeNode, int.MaxValue);
+                                                    fadeNode.AddAction(new CCSequence(new CCCallFiniteTimeFunc(duration / 2, FadeOut),
+                                                                        new CCRemoveSelf()));
+                                                    */ 
                                               })));
+        
+                                              
         }
 
         private CCPoint ShakeAmount { get; set; }
@@ -227,6 +301,7 @@ namespace CocosSharpMathGame
         private DateTime TimeLastTap { get; set; } = DateTime.MinValue;
         internal float DoubleTapInterval { get; set; } = 0.25f;
         internal bool Pressed { get; set; } = false;
+        private protected Dictionary<CCTouch, CCPoint> ActiveTouches { get; set; } = new Dictionary<CCTouch, CCPoint>();
         private protected void OnTouchesBegan(List<CCTouch> touches, CCEvent touchEvent)
         {
             Pressed = true;
@@ -251,28 +326,48 @@ namespace CocosSharpMathGame
         private protected void OnTouchesMovedMoveAndZoom(List<CCTouch> touches, CCEvent touchEvent)
         {
             if (!Pressed) return;
+            Console.WriteLine("touches.Count: " + touches.Count);
+            Console.WriteLine("TouchCount: " + TouchCount);
             switch (touches.Count)
             {
                 case 1:
                     {
+                        if (TouchCount == 2)
+                            goto zoom;
                         // move the camera
                         if (Scroller != null)
                             Scroller.OnTouchesMoved(touches, touchEvent);
                     }
                     break;
                 case 2:
+                zoom:
                     {
                         // check for zoom
-                        var touch1 = touches[0];
-                        var touch2 = touches[1];
-                        float zoomFactor = MyTouchExtensions.GetZoom(touch1, touch2);
+                        float zoomFactor = 1f;
+                        CCTouch touch1 = touches[0];
+                        CCTouch touch2 = null;
+                        CCPoint touch1Loc = touch1.Location;
+                        CCPoint touch2Loc = CCPoint.Zero;
+                        if (touches.Count == 2)
+                        { 
+                            touch2 = touches[1];
+                            touch2Loc = touch2.Location;
+                            zoomFactor = MyTouchExtensions.GetZoom(touch1, touch2);
+                        }
+                        else
+                        {
+                            foreach (var touch in ActiveTouches.Keys)
+                                if (touch != touch1)
+                                    touch2Loc = ActiveTouches[touch];
+                            zoomFactor = MyTouchExtensions.GetZoomOneTouchMoving(touch1, touch2Loc);
+                        }
                         if (!float.IsNaN(zoomFactor))
                         {
                             var oldCameraSize = new CCSize(CameraSize.Width, CameraSize.Height);
                             CameraSize = new CCSize(oldCameraSize.Width * zoomFactor, oldCameraSize.Height * zoomFactor);
                             float dw = CameraSize.Width - oldCameraSize.Width;
                             float dh = CameraSize.Height - oldCameraSize.Height;
-                            CCPoint touchCenter = new CCPoint((touch1.Location.X + touch2.Location.X) / 2, (touch1.Location.Y + touch2.Location.Y) / 2);
+                            CCPoint touchCenter = new CCPoint((touch1Loc.X + touch2Loc.X) / 2, (touch1Loc.Y + touch2Loc.Y) / 2);
                             float relativeX = (touchCenter.X - CameraPosition.X) / oldCameraSize.Width;
                             float relativeY = (touchCenter.Y - CameraPosition.Y) / oldCameraSize.Height;
                             CameraPosition = new CCPoint(CameraPosition.X - dw * relativeX, CameraPosition.Y - dh * relativeY);

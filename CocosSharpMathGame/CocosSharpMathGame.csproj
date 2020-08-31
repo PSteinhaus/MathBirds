@@ -63,6 +63,9 @@
     <Content Include="Data\sprites\parts\wingFighter.png" />
     <Content Include="Data\sprites\parts\wingJet.png" />
     <Content Include="Data\sprites\parts\wingPotato.png" />
+    <Content Include="Data\sprites\ui\icon-big.png" />
+    <Content Include="Data\sprites\ui\icon.png" />
+    <Content Include="Data\sprites\ui\shield.png" />
     <None Include="App.config" />
     <Content Include="Content\hd\fonts\alphbeta-16.xnb">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -285,6 +288,7 @@
     <Compile Include="Sprites\UI\PartCarouselNode.cs" />
     <Compile Include="Sprites\UI\PartCollectionBG.cs" />
     <Compile Include="Sprites\UI\PopUp.cs" />
+    <Compile Include="Sprites\UI\PowerUp.cs" />
     <Compile Include="Sprites\UI\ScrapyardButton.cs" />
     <Compile Include="Sprites\UI\ScrollableCollectionNode.cs" />
     <Compile Include="Sprites\UI\UIElement.cs" />
@@ -306,11 +310,14 @@
     <Content Include="Data\sprites\ui\arrow2.png" />
     <Content Include="Data\sprites\parts\bodyBalloon.png" />
     <Content Include="Data\sprites\parts\bodyPotato.png" />
+    <Content Include="Data\sprites\ui\backTurn.png" />
+    <Content Include="Data\sprites\ui\boost.png" />
     <Content Include="Data\sprites\ui\flightPathHead.png" />
     <Content Include="Data\sprites\ui\goButton.png" />
     <Content Include="Data\sprites\ui\hangarOptionEnd.png" />
     <Content Include="Data\sprites\ui\hangarOptionMid.png" />
     <Content Include="Data\sprites\ui\hangarOptionStart.png" />
+    <Content Include="Data\sprites\ui\heal.png" />
     <Content Include="Data\sprites\ui\newAircraftButton.png" />
     <Content Include="Data\sprites\ui\popUpEnd.png" />
     <Content Include="Data\sprites\ui\popUpMid.png" />

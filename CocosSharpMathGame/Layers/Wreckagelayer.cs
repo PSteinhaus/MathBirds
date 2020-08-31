@@ -15,7 +15,7 @@ namespace CocosSharpMathGame
     {
         internal enum WreckageState
         {
-            CAROUSEL, SALVAGING, SALVAGED, REPAIR
+            CAROUSEL, SALVAGING, SALVAGED, REPAIR, WELCOME, SLOT_UNLOCK
         }
         private WreckageState state = WreckageState.CAROUSEL;
         internal WreckageState State
@@ -36,18 +36,6 @@ namespace CocosSharpMathGame
                                 ReturnToHangar();
                             break;
                         }
-                    case WreckageState.SALVAGING:
-                        {
-                            break;
-                        }
-                    case WreckageState.SALVAGED:
-                        {
-                            break;
-                        }
-                    case WreckageState.REPAIR:
-                        {
-                            break;
-                        }
                     default:
                         break;
                 }
@@ -63,6 +51,11 @@ namespace CocosSharpMathGame
             foreach (var part in TotalSalvagedParts)
                 hangarLayer.AddPart(part);
             TransitionFadingFromTo(this.GUILayer, hangarLayer.GUILayer, this, hangarLayer, 2f);
+
+            // unsubscribe from all events
+            MathChallengeNode.UnlockedAddSubSlotEvent -= UnlockSlot;
+            MathChallengeNode.UnlockedMulDivSlotEvent -= UnlockSlot;
+            MathChallengeNode.UnlockedSolveSlotEvent  -= UnlockSlot;
             /*
             var parent = Parent;
             RemoveAllListeners();
@@ -91,35 +84,36 @@ namespace CocosSharpMathGame
             private protected set
             {
                 WreckCarousel.ClearCollection();
-                foreach (var aircraft in value)
-                {
+                if (value != null)
+                    foreach (var aircraft in value)
+                    {
                     
-                    // create a container node
-                    var container = new GameObjectNode();
-                    container.Scale = 1f;
-                    aircraft.AnchorPoint = CCPoint.AnchorMiddle;
-                    //aircraft.Position = CCPoint.Zero;
-                    container.AddChild(aircraft);
-                    container.ContentSize = aircraft.ContentSize;
-                    aircraft.Position = (CCPoint)container.ContentSize / 2;
-                    container.AnchorPoint = CCPoint.AnchorMiddle;
-                    // add a label displaying the percentage
-                    var label = new CCLabel("100%", "alphbeta", 16, CCLabelFormat.SpriteFont);
-                    container.AddChild(label);
-                    label.AnchorPoint = CCPoint.AnchorMiddleTop;
-                    label.Position = aircraft.Position;
-                    label.Position -= new CCPoint(0, aircraft.ContentSize.Height / 2 + 100f);
-                    label.Color = CCColor3B.White;
-                    label.Scale = 2f;
-                    label.IsAntialiased = false;
-                    // DEBUG
-                    //var drawNode = new CCDrawNode();
-                    //container.AddChild(drawNode, 1000);
-                    //drawNode.DrawSolidCircle(CCPoint.Zero, 10f, CCColor4B.Red);
-                    //drawNode.DrawSolidCircle(container.BoundingBox.Center, 10f, CCColor4B.Red);
-                    //drawNode.DrawSolidCircle((CCPoint)container.ContentSize/2, 10f, CCColor4B.Red);
-                    WreckCarousel.AddToCollection(container);
-                }
+                        // create a container node
+                        var container = new GameObjectNode();
+                        container.Scale = 1f;
+                        aircraft.AnchorPoint = CCPoint.AnchorMiddle;
+                        //aircraft.Position = CCPoint.Zero;
+                        container.AddChild(aircraft);
+                        container.ContentSize = aircraft.ContentSize;
+                        aircraft.Position = (CCPoint)container.ContentSize / 2;
+                        container.AnchorPoint = CCPoint.AnchorMiddle;
+                        // add a label displaying the percentage
+                        var label = new CCLabel("100%", "alphbeta", 16, CCLabelFormat.SpriteFont);
+                        container.AddChild(label);
+                        label.AnchorPoint = CCPoint.AnchorMiddleTop;
+                        label.Position = aircraft.Position;
+                        label.Position -= new CCPoint(0, aircraft.ContentSize.Height / 2 + 100f);
+                        label.Color = CCColor3B.White;
+                        label.Scale = 2f;
+                        label.IsAntialiased = false;
+                        // DEBUG
+                        //var drawNode = new CCDrawNode();
+                        //container.AddChild(drawNode, 1000);
+                        //drawNode.DrawSolidCircle(CCPoint.Zero, 10f, CCColor4B.Red);
+                        //drawNode.DrawSolidCircle(container.BoundingBox.Center, 10f, CCColor4B.Red);
+                        //drawNode.DrawSolidCircle((CCPoint)container.ContentSize/2, 10f, CCColor4B.Red);
+                        WreckCarousel.AddToCollection(container);
+                    }
             }
         }
         internal const float MIN_START_WRECKAGE_PERCENTILE = 0.1f;
@@ -147,7 +141,7 @@ namespace CocosSharpMathGame
                                          new CCCallFunc(() => { State = WreckageState.CAROUSEL; })));
         }
 
-        internal const float MIN_END_WRECKAGE_BONUS_PERCENTILE = 0.5f;
+        internal const float MIN_END_WRECKAGE_BONUS_PERCENTILE = 0.3f;
         internal const float MAX_END_WRECKAGE_PERCENTILE   = 1.0f;
         private Dictionary<Aircraft, float> wreckPercentile = new Dictionary<Aircraft, float>();
         internal float GetWreckPercentile(Aircraft aircraft)
@@ -201,6 +195,7 @@ namespace CocosSharpMathGame
         public WreckageLayer() : base(CCColor4B.Black)
         {
             GUILayer = new WreckageGUILayer(this);
+            TouchCountSource = GUILayer;
             Scroller = null;
             // add a touch Listener
             var touchListener = new CCEventListenerTouchAllAtOnce();
@@ -209,6 +204,10 @@ namespace CocosSharpMathGame
             touchListener.OnTouchesEnded = OnTouchesEnded;
             touchListener.OnTouchesCancelled = OnTouchesEnded;
             AddEventListener(touchListener, int.MaxValue);
+            // listen to the MathChallengeNode class for possible plane slot unlocks
+            MathChallengeNode.UnlockedAddSubSlotEvent += UnlockSlot;
+            MathChallengeNode.UnlockedMulDivSlotEvent += UnlockSlot;
+            MathChallengeNode.UnlockedSolveSlotEvent  += UnlockSlot;
         }
 
         protected override void AddedToScene()
@@ -241,6 +240,37 @@ namespace CocosSharpMathGame
 
             if (DEBUG)
                 InitWreckage(new List<Aircraft>() { Aircraft.CreateTestAircraft(), Aircraft.CreateTestAircraft() });
+        }
+
+        internal void CheckForWelcome()
+        {
+            // show the welcome message
+            if (PopUp.TriggeredWreckLayer == false && Wrecks.Any())
+            {
+                State = WreckageState.WELCOME;
+                var popUp = PopUp.ShowPopUp(GUILayer, PopUp.Enum.TRIGGERED_WRECKAGELAYER);
+                popUp.ClickedEvent += (sender, args) =>
+                    {
+                        var popUp2 = PopUp.ShowPopUp(GUILayer, PopUp.Enum.TRIGGERED_WRECKAGELAYER2);
+                        popUp2.ClickedEvent += (sender2, args2) => { State = WreckageState.CAROUSEL; };
+                    };
+            }
+        }
+
+        /// <summary>
+        /// Unlock a new plane slot (allowing the player to take one more plane into battle).
+        /// </summary>
+        private void UnlockSlot(object sender, EventArgs empty)
+        {
+            HangarLayer.UnlockedPlaneSlots++;
+            // show the unlock message
+            State = WreckageState.SLOT_UNLOCK;
+            var popUp = PopUp.ShowPopUp(GUILayer, PopUp.Enum.TRIGGERED_SLOTUNLOCK);
+            popUp.ClickedEvent += (sender2, args) =>
+            {
+                State = WreckageState.CAROUSEL;
+            };
+            
         }
 
         internal void InitWreckage(List<Aircraft> downedAircrafts)
@@ -295,11 +325,11 @@ namespace CocosSharpMathGame
                 SalvagedParts.Add(totalparts.ElementAt(index));
                 totalparts.RemoveAt(index);
             }
-            float delay = SalvagedParts.Count * 1000;
+            float delay = SalvagedParts.Count * SalvagedParts.Count * 150 + 100;
             float delaySec = delay / 1000;
             // vibrate
             if (Constants.oS != Constants.OS.WINDOWS)
-                Vibration.Vibrate(delay * 0.05f);
+                Vibration.Vibrate(delay * 0.015f);
             // visualize
             var boundsCenter = VisibleBoundsWorldspace.Center;
             CCPoint pointIn = boundsCenter + new CCPoint(0, VisibleBoundsWorldspace.Size.Height * 0.6f);
@@ -400,6 +430,22 @@ namespace CocosSharpMathGame
             }
             else
                 EndRepair(false);
+        }
+
+        internal override void Clear()
+        {
+            this.Wrecks = null;
+            this.WreckCarousel = null;
+            this.WreckMaxPercentile = null;
+            this.SalvagedParts = null;
+            this.Hints = null;
+            this.FirstTouchListener = null;
+            if (Scroller != null)
+              this.Scroller.MoveFunction = null;
+            this.Scroller = null;
+            GUILayer = null;
+            this.StopAllActions();
+            this.ResetCleanState();
         }
 
         private void AnswerChosen(object sender, bool answerIsCorrect)

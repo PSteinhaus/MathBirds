@@ -39,7 +39,7 @@ namespace CocosSharpMathGame
             {
                 if (SwallowTouch)
                 {
-                    Console.WriteLine("SWALLOWED: "+touches[0].Location);
+                    //Console.WriteLine("SWALLOWED: "+touches[0].Location);
                     touchEvent.StopPropogation();
                 }
                 Pressed = true;

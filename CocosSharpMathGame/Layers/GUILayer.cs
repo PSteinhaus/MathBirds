@@ -13,8 +13,8 @@ namespace CocosSharpMathGame
     /// </summary>
     public class GUILayer : MyLayer
     {
-        internal ExecuteOrdersButton ExecuteOrdersButton { get; private set; } = new ExecuteOrdersButton();
-        private PlayLayer PlayLayer { get; set; }
+        internal ExecuteOrdersButton ExecuteOrdersButton { get; set; } = new ExecuteOrdersButton();
+        internal PlayLayer PlayLayer { get; set; }
         public GUILayer(PlayLayer playLayer) : base(CCColor4B.Transparent, countTouches: true)
         {
             PlayLayer = playLayer;
@@ -30,6 +30,16 @@ namespace CocosSharpMathGame
         internal void ExecuteOrders()
         {
             PlayLayer.ExecuteOrders();
+        }
+
+        internal override void Clear()
+        {
+            PlayLayer = null;
+            this.ExecuteOrdersButton = null;
+            this.FirstTouchListener = null;
+            this.Scroller = null;
+            this.StopAllActions();
+            this.ResetCleanState();
         }
     }
 }
