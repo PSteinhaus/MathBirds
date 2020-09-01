@@ -23,7 +23,26 @@ namespace CocosSharpMathGame
             CollisionType = Collisions.CreateDiamondCollisionPolygon(this);
 
             // give the rudder ManeuverAbility
-            ManeuverAbility = new ManeuverAbility(0,0, (float)Math.Pow(10, 5) * 10f, (float)Math.Pow(10, 5) * 15f);
+            ManeuverAbility = new ManeuverAbility(0, 0, (float)Math.Pow(10, 5) * 5f, (float)Math.Pow(10, 5) * 10f);
         }
     }
+        internal class RudderBigBomberShiny : Part
+        {
+            public RudderBigBomberShiny() : base("rudderBigBomberShiny.png")
+            {
+                SetHealthAndMaxHealth(30);
+                // set your types
+                Types = new Type[] { Type.RUDDER };
+                NormalAnchorPoint = new CCPoint(0.5f, 0f);
+
+                // specify the mass points
+                MassPoints = CreateDiamondMassPoints(35f);
+
+                // specify the collision type
+                CollisionType = Collisions.CreateDiamondCollisionPolygon(this);
+
+                // give the rudder ManeuverAbility
+                ManeuverAbility = new ManeuverAbility(0, 0, (float)Math.Pow(10, 5) * 5f, (float)Math.Pow(10, 5) * 10f);
+            }
+        }
 }

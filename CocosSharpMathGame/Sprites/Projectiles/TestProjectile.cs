@@ -17,4 +17,15 @@ namespace CocosSharpMathGame
             Damage = 2f;
         }
     }
+
+    internal class TestProjectileShiny : Projectile
+    {
+        internal TestProjectileShiny()
+        {
+            Velocity = 2000f;
+            LifeTime = 0.8f;
+            Damage = 2f;
+            SetTailColor(new CCColor4B(1.0f, 0.7f, 0.7f, 1.0f));
+        }
+    }
 }

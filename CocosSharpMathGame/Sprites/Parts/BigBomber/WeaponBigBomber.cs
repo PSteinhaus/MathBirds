@@ -26,4 +26,24 @@ namespace CocosSharpMathGame
             WeaponAbility = WeaponAbility.CreateBigBomberWeapon(this);
         }
     }
+
+    internal class WeaponBigBomberShiny : Part
+    {
+        public WeaponBigBomberShiny() : base("weaponBigBomberShiny.png")
+        {
+            SetHealthAndMaxHealth(26);
+            // set your types
+            Types = new Type[] { Type.GUN };
+            NormalAnchorPoint = new CCPoint(1.5f / ContentSize.Width, 0.5f);
+
+            // specify the mass points
+            MassPoints = CreateDiamondMassPoints(35f);
+
+            // specify the collision polygon
+            CollisionType = Collisions.CreateDiamondCollisionPolygon(this);
+
+            // give the gun a WeaponAbility
+            WeaponAbility = WeaponAbility.CreateBigBomberWeaponShiny(this);
+        }
+    }
 }

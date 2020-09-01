@@ -29,6 +29,7 @@ namespace CocosSharpMathGame
 
         internal float ShootingRange { get; set; }
         internal float SpreadAngle { get; set; } // doesn't do anything yet
+
         internal bool FireAtWill { get; set; } = true;
         internal float ToleratedError { get; set; } = 2f;
         /// <summary>
@@ -335,12 +336,38 @@ namespace CocosSharpMathGame
             return testWeapon;
         }
 
+        internal static WeaponAbility CreateTestWeaponShiny(Part myPart)
+        {
+            var testWeapon = new WeaponAbility(myPart);
+            testWeapon.ProjectileBlueprint = new TestProjectileShiny();
+            testWeapon.CalcBaseValuesFromProjectile();
+            testWeapon.SpreadAngle = 1f;
+            testWeapon.ShootDelay = 0.3f;
+            testWeapon.MaxTurningAngle = 25f;
+            testWeapon.TurningAnglePerSecond = 80f;
+            testWeapon.CalcAttentionAngle();
+            return testWeapon;
+        }
+
         internal static WeaponAbility CreateBalloonWeapon(Part weaponBalloon)
         {
             var weapon = new WeaponAbility(weaponBalloon);
             weapon.ProjectileBlueprint = new BalloonProjectile();
             weapon.CalcBaseValuesFromProjectile();
             weapon.SpreadAngle = 5f;
+            weapon.ShootDelay = 2f;
+            weapon.MaxTurningAngle = 180f;
+            weapon.TurningAnglePerSecond = 25f;
+            weapon.CalcAttentionAngle();
+            return weapon;
+        }
+
+        internal static WeaponAbility CreateBalloonWeaponShiny(Part weaponBalloon)
+        {
+            var weapon = new WeaponAbility(weaponBalloon);
+            weapon.ProjectileBlueprint = new BalloonProjectileShiny();
+            weapon.CalcBaseValuesFromProjectile();
+            weapon.SpreadAngle = 0f;
             weapon.ShootDelay = 2f;
             weapon.MaxTurningAngle = 180f;
             weapon.TurningAnglePerSecond = 25f;
@@ -361,6 +388,19 @@ namespace CocosSharpMathGame
             return weapon;
         }
 
+        internal static WeaponAbility CreateBatWeaponShiny(Part weaponBat)
+        {
+            var weapon = new WeaponAbility(weaponBat);
+            weapon.ProjectileBlueprint = new BatProjectileShiny();
+            weapon.CalcBaseValuesFromProjectile();
+            weapon.SpreadAngle = 25f;
+            weapon.ShootDelay = 0.1f;
+            weapon.MaxTurningAngle = 180f;
+            weapon.TurningAnglePerSecond = 360f;
+            weapon.CalcAttentionAngle();
+            return weapon;
+        }
+
         internal static WeaponAbility CreatePotatoWeapon(Part weaponPotato)
         {
             var weapon = new WeaponAbility(weaponPotato);
@@ -370,6 +410,19 @@ namespace CocosSharpMathGame
             weapon.ShootDelay = 1.5f;
             weapon.MaxTurningAngle = 35f;
             weapon.TurningAnglePerSecond = 55f;
+            weapon.CalcAttentionAngle();
+            return weapon;
+        }
+
+        internal static WeaponAbility CreatePotatoWeaponShiny(Part weaponPotato)
+        {
+            var weapon = new WeaponAbility(weaponPotato);
+            weapon.ProjectileBlueprint = new PotatoProjectileShiny();
+            weapon.CalcBaseValuesFromProjectile();
+            weapon.SpreadAngle = 0f;
+            weapon.ShootDelay = 2.5f;
+            weapon.MaxTurningAngle = 35f;
+            weapon.TurningAnglePerSecond = 125f;
             weapon.CalcAttentionAngle();
             return weapon;
         }
@@ -387,6 +440,19 @@ namespace CocosSharpMathGame
             return weapon;
         }
 
+        internal static WeaponAbility CreateBigBomberWeaponShiny(Part weaponBigBomber)
+        {
+            var weapon = new WeaponAbility(weaponBigBomber);
+            weapon.ProjectileBlueprint = new BigBomberProjectileShiny();
+            weapon.CalcBaseValuesFromProjectile();
+            weapon.SpreadAngle = 3.5f;
+            weapon.ShootDelay = 0.15f;
+            weapon.MaxTurningAngle = 180f;
+            weapon.TurningAnglePerSecond = 15f;
+            weapon.CalcAttentionAngle();
+            return weapon;
+        }
+
         internal static WeaponAbility CreateFighterWeapon(Part weaponFighter)
         {
             var weapon = new WeaponAbility(weaponFighter);
@@ -396,6 +462,19 @@ namespace CocosSharpMathGame
             weapon.ShootDelay = 0.5f;
             weapon.MaxTurningAngle = 10f;
             weapon.TurningAnglePerSecond = 60f;
+            weapon.CalcAttentionAngle();
+            return weapon;
+        }
+
+        internal static WeaponAbility CreateFighterWeaponShiny(Part weaponFighter)
+        {
+            var weapon = new WeaponAbility(weaponFighter);
+            weapon.ProjectileBlueprint = new FighterProjectileShiny();
+            weapon.CalcBaseValuesFromProjectile();
+            weapon.SpreadAngle = 2.5f;
+            weapon.ShootDelay = 0.25f;
+            weapon.MaxTurningAngle = 10f;
+            weapon.TurningAnglePerSecond = 120f;
             weapon.CalcAttentionAngle();
             return weapon;
         }

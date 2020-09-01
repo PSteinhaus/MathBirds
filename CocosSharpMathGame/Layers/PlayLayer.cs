@@ -389,7 +389,7 @@ namespace CocosSharpMathGame
             
         }
 
-        static readonly float[] ZoneEndRadii = new float[] { 1500f, 7000f, 14000f, 20000f };
+        static readonly float[] ZoneEndRadii = new float[] { 1800f, 9000f, 20000f, 35000f };
         static readonly CCColor4B[] ZoneColorsGround = new CCColor4B[] { new CCColor4B(0f, 0f, 0f, 0.1f), new CCColor4B(1f, 0.4f, 0f, 0.1f), new CCColor4B(1f, 1f, 0f, 0.1f), new CCColor4B(0f, 1f, 0f, 0.1f), new CCColor4B(0f, 0f, 1f, 0.1f) };
         static readonly CCColor4B[] ZoneColorsAir = new CCColor4B[]    { CCColor4B.White, new CCColor4B(1f, 0.4f, 0.0f, 1f), new CCColor4B(1f, 1f, 0.0f, 1f), new CCColor4B(0.0f, 1f, 0.0f, 1f), new CCColor4B(0.0f, 0.0f, 1f, 1f) };
         internal static int RadiusToZoneNum(float radius)
@@ -450,7 +450,7 @@ namespace CocosSharpMathGame
                             case 0:
                                 {
                                     // create a peaceful Potato
-                                    var leader = Aircraft.CreatePotato();
+                                    var leader = Aircraft.CreatePotato(rng: rng);
                                     leader.AI = new PeacefulFleeingAI();
                                     newSquadron = new Squadron();
                                     newSquadron.AddAircraft(leader, CCPoint.Zero);
@@ -459,7 +459,7 @@ namespace CocosSharpMathGame
                             case 1:
                                 {
                                     // create a non-peaceful Potato
-                                    var leader = Aircraft.CreatePotato(true);
+                                    var leader = Aircraft.CreatePotato(true, rng: rng);
                                     leader.AI = new StandardAI();
                                     newSquadron = new Squadron();
                                     newSquadron.AddAircraft(leader, CCPoint.Zero);
@@ -468,7 +468,7 @@ namespace CocosSharpMathGame
                             case 2:
                                 {
                                     // create a bat
-                                    var leader = Aircraft.CreateBat();
+                                    var leader = Aircraft.CreateBat(rng: rng);
                                     leader.AI = new StandardAI();
                                     newSquadron = new Squadron();
                                     newSquadron.AddAircraft(leader, CCPoint.Zero);
@@ -477,9 +477,9 @@ namespace CocosSharpMathGame
                             case 3:
                                 {
                                     // create a 3-potato squad
-                                    var leader = Aircraft.CreatePotato(true);
-                                    var ally1 = Aircraft.CreatePotato();
-                                    var ally2 = Aircraft.CreatePotato();
+                                    var leader = Aircraft.CreatePotato(true, rng);
+                                    var ally1 = Aircraft.CreatePotato(rng: rng);
+                                    var ally2 = Aircraft.CreatePotato(rng: rng);
                                     leader.AI = new StandardAI();
                                     ally1.AI = new PeacefulFleeingAI();
                                     ally2.AI = new PeacefulFleeingAI();
@@ -500,7 +500,7 @@ namespace CocosSharpMathGame
                             case 0:
                                 {
                                     // create a lone TestAircraft
-                                    var leader = Aircraft.CreateTestAircraft();
+                                    var leader = Aircraft.CreateTestAircraft(rng: rng);
                                     leader.AI = new StandardAI();
                                     newSquadron = new Squadron();
                                     newSquadron.AddAircraft(leader, CCPoint.Zero);
@@ -509,7 +509,7 @@ namespace CocosSharpMathGame
                             case 1:
                                 {
                                     // create a Balloon
-                                    var leader = Aircraft.CreateBalloon(true);
+                                    var leader = Aircraft.CreateBalloon(true, rng: rng);
                                     leader.AI = new StandardAI();
                                     newSquadron = new Squadron();
                                     newSquadron.AddAircraft(leader, CCPoint.Zero);
@@ -523,7 +523,7 @@ namespace CocosSharpMathGame
                                     for (int i = 0; i < 3; i++)
                                     {
                                         int weaponNum = rng.Next(3);
-                                        planes[i] = Aircraft.CreateTestAircraft(weaponNum);
+                                        planes[i] = Aircraft.CreateTestAircraft(weaponNum, rng: rng);
                                         planes[i].AI = weaponNum != 0 ? (AI)(new StandardAI()) : (AI)(new PeacefulFleeingAI());
                                     }
                                     newSquadron.AddAircraft(planes[0], CCPoint.Zero);
@@ -543,7 +543,7 @@ namespace CocosSharpMathGame
                             case 1:
                                 {
                                     // create a lone Fighter
-                                    var leader = Aircraft.CreateFighter();
+                                    var leader = Aircraft.CreateFighter(rng: rng);
                                     leader.AI = new StandardAI();
                                     newSquadron = new Squadron();
                                     newSquadron.AddAircraft(leader, CCPoint.Zero);
@@ -552,9 +552,9 @@ namespace CocosSharpMathGame
                             case 2:
                                 {
                                     // create a Fighter Squad of 2 Fighters
-                                    var leader = Aircraft.CreateFighter();
+                                    var leader = Aircraft.CreateFighter(rng: rng);
                                     leader.AI = new StandardAI();
-                                    var plane2 = Aircraft.CreateFighter();
+                                    var plane2 = Aircraft.CreateFighter(rng: rng);
                                     plane2.Team = Team.EnemyTeam;
                                     plane2.AI = new StandardAI();
                                     newSquadron = new Squadron();
@@ -566,12 +566,12 @@ namespace CocosSharpMathGame
                                 {
                                     // create a squad of a BigBomber and some Fighters
                                     newSquadron = new Squadron();
-                                    newSquadron.AddAircraft(Aircraft.CreateBigBomber(), CCPoint.Zero);
+                                    newSquadron.AddAircraft(Aircraft.CreateBigBomber(rng: rng), CCPoint.Zero);
                                     int fighterCount = rng.Next(5) == 0 ? 4 : 2;
                                     Aircraft[] fighter = new Aircraft[fighterCount];
                                     for (int i = 0; i < fighterCount; i++)
                                     {
-                                        fighter[i] = Aircraft.CreateFighter();
+                                        fighter[i] = Aircraft.CreateFighter(rng: rng);
                                         fighter[i].AI = new StandardAI();
                                     }
                                     if (fighterCount >= 2)
@@ -593,7 +593,7 @@ namespace CocosSharpMathGame
                 default:    // this is also the default case because this is the last zone
                     {
                         // fifth zone: Jets, Jets and more Jets
-                        var leader = Aircraft.CreateJet();
+                        var leader = Aircraft.CreateJet(rng);
                         leader.Team = Team.EnemyTeam;
                         leader.AI = new StandardAI();
                         newSquadron = new Squadron();

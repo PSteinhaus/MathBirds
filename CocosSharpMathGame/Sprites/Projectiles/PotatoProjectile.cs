@@ -18,4 +18,15 @@ namespace CocosSharpMathGame
             TailWidth = 5f;
         }
     }
+    internal class PotatoProjectileShiny : Projectile
+    {
+        internal PotatoProjectileShiny()
+        {
+            Velocity = 1000f;
+            LifeTime = 1.95f;
+            Damage = 14f;
+            TailWidth = 10f;
+            TailLifeTime = 2f;
+        }
+    }
 }

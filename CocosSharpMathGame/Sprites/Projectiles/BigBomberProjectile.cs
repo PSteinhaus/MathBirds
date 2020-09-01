@@ -17,4 +17,16 @@ namespace CocosSharpMathGame
             Damage = 3.5f;
         }
     }
+
+    internal class BigBomberProjectileShiny : Projectile
+    {
+        internal BigBomberProjectileShiny()
+        {
+            Velocity = 4000f;
+            LifeTime = 0.70f;
+            Damage = 13.5f;
+            TailWidth = 5f;
+            SetTailColor(new CCColor4B(0.7f, 1f, 0.7f, 1f));
+        }
+    }
 }

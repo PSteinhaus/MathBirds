@@ -16,19 +16,28 @@ namespace CocosSharpMathGame
             Types = new Type[] { Type.SINGLE_WING };
             NormalAnchorPoint = CCPoint.AnchorMiddleBottom;
 
-            // add a mount point for a gun at the center of the wing
-            /*
-            var gunMount = new PartMount(this, new CCPoint(ContentSize.Width / 2, (ContentSize.Height / 2)), Type.GUN);
-            gunMount.NullRotation = -5f;
-            gunMount.Dz = 1;
-            PartMounts = new PartMount[] { gunMount };
-            */
-
             // specify the collision polygon
             CollisionType = Collisions.CreateDiamondCollisionPolygon(this);
 
             // specify the mass points
             MassPoints = CreateDiamondMassPoints(12f);
+        }
+    }
+
+    internal class WingBatShiny : Part
+    {
+        public WingBatShiny() : base("wingBatShiny.png")
+        {
+            SetHealthAndMaxHealth(18);
+            // set your types
+            Types = new Type[] { Type.SINGLE_WING };
+            NormalAnchorPoint = CCPoint.AnchorMiddleBottom;
+
+            // specify the collision polygon
+            CollisionType = Collisions.CreateDiamondCollisionPolygon(this);
+
+            // specify the mass points
+            MassPoints = CreateDiamondMassPoints(6f);
         }
     }
 }

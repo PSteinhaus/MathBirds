@@ -19,4 +19,17 @@ namespace CocosSharpMathGame
             TailWidth = 2f;
         }
     }
+
+    internal class BatProjectileShiny : Projectile
+    {
+        internal BatProjectileShiny()
+        {
+            Velocity = 2500f;
+            LifeTime = 0.65f;
+            Damage = 2f;
+            TailLifeTime = 0.35f;
+            TailWidth = 2f;
+            SetTailColor(CCColor4B.Magenta);
+        }
+    }
 }

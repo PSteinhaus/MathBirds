@@ -28,4 +28,26 @@ namespace CocosSharpMathGame
             MassPoints = CreateDiamondMassPoints(18f);
         }
     }
+
+    internal class WingFighterShiny : Part
+    {
+        public WingFighterShiny() : base("wingFighterShiny.png")
+        {
+            SetHealthAndMaxHealth(25);
+            // set your types
+            Types = new Type[] { Type.SINGLE_WING };
+            NormalAnchorPoint = new CCPoint(0.5f, 1 / ContentSize.Height);
+
+            // add a mount point for a gun
+            var gunMount = new PartMount(this, new CCPoint(ContentSize.Width / 2, ContentSize.Height / 2), Type.GUN);
+            gunMount.Dz = -1;
+            PartMounts = new PartMount[] { gunMount };
+
+            // specify the collision polygon
+            CollisionType = Collisions.CreateDiamondCollisionPolygon(this);
+
+            // specify the mass points
+            MassPoints = CreateDiamondMassPoints(18f);
+        }
+    }
 }
