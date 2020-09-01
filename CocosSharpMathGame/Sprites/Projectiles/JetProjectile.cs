@@ -8,13 +8,13 @@ using CSharpMath;
 
 namespace CocosSharpMathGame
 {
-    internal class BigBomberProjectile : Projectile
+    internal class JetProjectile : Projectile
     {
-        internal BigBomberProjectile()
+        internal JetProjectile()
         {
-            Velocity = 3000f;
-            LifeTime = 0.70f;
-            Damage = 3.5f;
+            Velocity = 3600f;
+            LifeTime = 0.55f;
+            Damage = 10f;
         }
     }
 }

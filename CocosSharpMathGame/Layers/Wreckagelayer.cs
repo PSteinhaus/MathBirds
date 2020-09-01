@@ -36,21 +36,12 @@ namespace CocosSharpMathGame
                                 ReturnToHangar();
                             break;
                         }
-                    case WreckageState.SALVAGED:
-                        {
-                            // if no parts could be salvaged end the salvaged state immediately
-                            if (!SalvagedParts.Any())
-                                EndSalvage();
-                            return;
-                        }
                     default:
                         break;
                 }
                 state = value;
             }
         }
-
-
 
         private void ReturnToHangar()
         {
@@ -408,7 +399,11 @@ namespace CocosSharpMathGame
             float startP = GetWreckPercentile(mAircraft);
             CCLabel percentLabel = GetPercentLabel(mAircraft);
             AddAction(new CCSequence(new CCEaseIn(new CCCallFiniteTimeFunc(delaySec, (progress, duration) => { SetWreckPercentile(mAircraft, startP*(1 - progress)); }), 4f), new CCCallFunc(() => { percentLabel.Visible = false; })));
-            AddAction(new CCSequence(new CCDelayTime(delaySec + inMoveTime), new CCCallFunc(() => { State = WreckageState.SALVAGED; })));
+            // if no parts could be salvaged end the salvaged state immediately
+            if (!SalvagedParts.Any())
+                AddAction(new CCSequence(new CCDelayTime(delaySec + inMoveTime), new CCCallFunc(() => { State = WreckageState.SALVAGED; EndSalvage(); })));
+            else
+                AddAction(new CCSequence(new CCDelayTime(delaySec + inMoveTime), new CCCallFunc(() => { State = WreckageState.SALVAGED; })));
         }
 
         CCLabel GetPercentLabel(Aircraft wreck)

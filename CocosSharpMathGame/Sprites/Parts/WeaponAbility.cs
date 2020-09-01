@@ -145,22 +145,25 @@ namespace CocosSharpMathGame
             if (TargetPart != null)
             {
                 float angleToAimFor = AngleToAimFor();
-                float angleToTurnTo = angleToAimFor;
-                float angleTurn = Constants.AngleFromToDeg(MyPart.NullRotation, angleToTurnTo);
-                // make sure you don't rotate further than your MountPoint allows
-                if (angleTurn > MyPart.MountPoint.MaxTurningAngle)
-                    angleToTurnTo = MyPart.NullRotation + MyPart.MountPoint.MaxTurningAngle;
-                else if (angleTurn < -MyPart.MountPoint.MaxTurningAngle)
-                    angleToTurnTo = MyPart.NullRotation - MyPart.MountPoint.MaxTurningAngle;
-                // make sure you don't rotate further than this weapons MaxTurningAngle allows
-                if (MaxTurningAngle < MyPart.MountPoint.MaxTurningAngle)
+                if (!(MyPart is WingJet))   // a dirty fix to make sure jet wings don't rotate since rotation screws up the flip state; for other weapons this effect can be neglected since it is only visual
                 {
-                    if (angleTurn > MaxTurningAngle)
-                        angleToTurnTo = MyPart.NullRotation + MaxTurningAngle;
-                    else if (angleTurn < -MaxTurningAngle)
-                        angleToTurnTo = MyPart.NullRotation - MaxTurningAngle;
+                    float angleToTurnTo = angleToAimFor;
+                    float angleTurn = Constants.AngleFromToDeg(MyPart.NullRotation, angleToTurnTo);
+                    // make sure you don't rotate further than your MountPoint allows
+                    if (angleTurn > MyPart.MountPoint.MaxTurningAngle)
+                        angleToTurnTo = MyPart.NullRotation + MyPart.MountPoint.MaxTurningAngle;
+                    else if (angleTurn < -MyPart.MountPoint.MaxTurningAngle)
+                        angleToTurnTo = MyPart.NullRotation - MyPart.MountPoint.MaxTurningAngle;
+                    // make sure you don't rotate further than this weapons MaxTurningAngle allows
+                    if (MaxTurningAngle < MyPart.MountPoint.MaxTurningAngle)
+                    {
+                        if (angleTurn > MaxTurningAngle)
+                            angleToTurnTo = MyPart.NullRotation + MaxTurningAngle;
+                        else if (angleTurn < -MaxTurningAngle)
+                            angleToTurnTo = MyPart.NullRotation - MaxTurningAngle;
+                    }
+                    MyPart.RotateTowards(angleToTurnTo, TurningAnglePerSecond * dt);
                 }
-                MyPart.RotateTowards(angleToTurnTo, TurningAnglePerSecond * dt);
                 // if you're now close enough to the perfect angle (and in range) start shooting
                 if (CanShoot()
                     && CCPoint.Distance(MyPart.PositionWorldspace, TargetPart.PositionWorldspace) <= ShootingRange
@@ -171,7 +174,7 @@ namespace CocosSharpMathGame
                     
             }
             // and if you have no target try to get back to NullRotation
-            else
+            else if (!(MyPart is WingJet))
             {
                 MyPart.RotateTowards(MyPart.NullRotation, TurningAnglePerSecond * dt);
             }
@@ -376,8 +379,8 @@ namespace CocosSharpMathGame
             var weapon = new WeaponAbility(weaponBigBomber);
             weapon.ProjectileBlueprint = new BigBomberProjectile();
             weapon.CalcBaseValuesFromProjectile();
-            weapon.SpreadAngle = 15.5f;
-            weapon.ShootDelay = 0.35f;
+            weapon.SpreadAngle = 10.5f;
+            weapon.ShootDelay = 0.15f;
             weapon.MaxTurningAngle = 180f;
             weapon.TurningAnglePerSecond = 35f;
             weapon.CalcAttentionAngle();
@@ -400,14 +403,14 @@ namespace CocosSharpMathGame
         internal static WeaponAbility CreateJetWeapon(Part wingJet)
         {
             var weapon = new WeaponAbility(wingJet);
-            weapon.ProjectileBlueprint = new FighterProjectile();
+            weapon.ProjectileBlueprint = new JetProjectile();
             weapon.CalcBaseValuesFromProjectile();
             weapon.SpreadAngle = 0f;
-            weapon.ShootDelay = 1.5f;
+            weapon.ShootDelay = 0.1f;
             weapon.MaxTurningAngle = 0f;
             weapon.TurningAnglePerSecond = 0f;
             weapon.AttentionAngle = 45f;
-            weapon.ToleratedError = 7f;
+            weapon.ToleratedError = 3f;
             return weapon;
         }
 

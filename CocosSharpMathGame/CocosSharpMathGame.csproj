@@ -264,6 +264,7 @@
     <Compile Include="Sprites\Parts\TestPlane\TestWing.cs" />
     <Compile Include="Sprites\Parts\TestPlane\TestWings.cs" />
     <Compile Include="Sprites\Parts\WeaponAbility.cs" />
+    <Compile Include="Sprites\Projectiles\JetProjectile.cs" />
     <Compile Include="Sprites\Projectiles\BigBomberProjectile.cs" />
     <Compile Include="Sprites\Projectiles\PotatoProjectile.cs" />
     <Compile Include="Sprites\Projectiles\BatProjectile.cs" />

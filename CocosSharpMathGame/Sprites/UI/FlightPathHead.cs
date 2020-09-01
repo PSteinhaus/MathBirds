@@ -14,7 +14,7 @@ namespace CocosSharpMathGame
     /// </summary>
     internal class FlightPathHead : UIElementNode
     {
-        internal const float MAX_DISTANCE_FROM_CENTER = 14000;
+        internal const float MAX_DISTANCE_FROM_CENTER = 11000;
         private CCLabel PowerUpAmountLabel = new CCLabel("", "EarlyGameBoy", 12, CCLabelFormat.SpriteFont);
         private FlightPathHeadOption head = new FlightPathHeadOption("flightPathHead.png", PowerUp.PowerType.NORMAL);
         internal FlightPathHeadOption Head

@@ -251,6 +251,7 @@ namespace CocosSharpMathGame
 
         internal PowerUp GeneratePowerUp()
         {
+            Console.WriteLine("CALLED GENERATOR!");
             if (WeightedPowerUpsAwarded != null && WeightedPowerUpsAwarded.Any())
             {
                 // get the weight sum

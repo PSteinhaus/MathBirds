@@ -183,6 +183,7 @@ namespace CocosSharpMathGame
         {
             foreach (var part in TotalParts)
                 part.Repair(part.MaxHealth);
+            PartsChanged();
         }
         private protected List<Tuple<int,MathChallenge>> WeightedChallenges { get; set; }
         internal MathChallenge GetChallenge()
@@ -350,7 +351,7 @@ namespace CocosSharpMathGame
                     CCPoint LeftLowerCornerOfPart = part.PosLeftLower;
                     // check whether left or right side
                     // Y is used because unrotated all things face east and so "left" means "higher than the center of mass".
-                    if (part.PositionY > centerOfMass.Y)
+                    if (part.PositionY > Body.Position.Y/*centerOfMass.Y*/)
                         ((List<Part>)leftSide).Add(part);
                     else
                         ((List<Part>)rightSide).Add(part);
@@ -383,6 +384,13 @@ namespace CocosSharpMathGame
             ErotBonusMin = part.ManeuverAbility.RotationBonusMin;
             ErotBonusMax = part.ManeuverAbility.RotationBonusMax;
         }
+        internal void RestrictChildrenToTotalParts()
+        {
+            RemoveAllChildren();
+            // remove all children that are not contained in the current parts
+            foreach (var part in TotalParts)
+                AddChild(part, part.CalcZOrder());
+        }
         /// <summary>
         /// You lost/gained a part, some parts moved, or something else happened that entails the need to recalculate part-emergent-data.
         /// </summary>
@@ -390,10 +398,9 @@ namespace CocosSharpMathGame
         {
             TotalParts = Body == null ? new List<Part>() : Body.TotalParts;
             var oldContentSize = ScaledContentSize;
+            // recalculate all part-emergent data
             // update the ContentSize and move all parts to fit into it
             UpdateContentSize();
-
-            // recalculate all part-emergent data
             Mass = 0;
             foreach (var part in TotalParts)
                 Mass += part.MassSingle;
@@ -894,6 +901,14 @@ namespace CocosSharpMathGame
             }
             // now create the polygon and update
             var newManeuverPolygon = new PolygonWithSplines(controlPoints.ToArray());
+            CalcBaseValues();
+            // make sure the maneuverPolygon isn't too close to CCPoint.Zero
+            if (EnergyToDestination(CalcEkin(), 0).Length < 30f)
+            {
+                var oldPivot = newManeuverPolygon.PivotPoint;
+                newManeuverPolygon.MoveBy(10f, 0);
+                newManeuverPolygon.PivotPoint = oldPivot;
+            }
             UpdateManeuverPolygonToThis(newManeuverPolygon);
         }
 
@@ -940,8 +955,8 @@ namespace CocosSharpMathGame
             else if (SelectedPower == PowerUp.PowerType.SHIELD)
             {
                 // draw the shield bubble
-                lowNode.DrawSolidCircle(Position, ScaledContentSize.Width * 0.85f, CCColor4B.White);
-                lowNode.DrawSolidCircle(Position, ScaledContentSize.Width * 0.85f - 16f, CCColor4B.Black);
+                lowNode.DrawSolidCircle(Position, ScaledContentSize.Width * 0.95f, CCColor4B.White);
+                lowNode.DrawSolidCircle(Position, ScaledContentSize.Width * 0.95f - 16f, CCColor4B.Black);
             }
             foreach (var part in TotalParts)
             {

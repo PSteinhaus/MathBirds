@@ -1219,6 +1219,7 @@ namespace CocosSharpMathGame
                                                 // the part is the body (as only the body has no MountParent)
                                                 part.Aircraft.Body = null;
                                             }
+                                            ModifiedAircraft.RestrictChildrenToTotalParts();
                                             if (flipped) part.Flip();
                                             part.Position = GUILayer.HangarCoordinatesToGUI(realPos);// + (flipped ? new CCPoint(0, (part.AnchorPoint.Y - 0.5f) * 8 * part.BoundingBoxTransformedToWorld.Size.Height) : CCPoint.Zero));
                                             part.Scale = GUILayer.HangarScaleToGUI() * Constants.STANDARD_SCALE;
@@ -1583,6 +1584,11 @@ namespace CocosSharpMathGame
             AddAircraft(Aircraft.CreateTestAircraft(2, false), CCPoint.Zero);
             AddAircraft(Aircraft.CreateTestAircraft(2, false), CCPoint.Zero);
             AddAircraft(Aircraft.CreateTestAircraft(2, false), CCPoint.Zero);
+            AddAircraft(Aircraft.CreateBalloon(), CCPoint.Zero);
+            AddAircraft(Aircraft.CreateBat(), CCPoint.Zero);
+            AddAircraft(Aircraft.CreateBigBomber(), CCPoint.Zero);
+            AddAircraft(Aircraft.CreateFighter(), CCPoint.Zero);
+            AddAircraft(Aircraft.CreateJet(), CCPoint.Zero);
             // add some parts
             for (int i = 0; i < 1; i++)
             {

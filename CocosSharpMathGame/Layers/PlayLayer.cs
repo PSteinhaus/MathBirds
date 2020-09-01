@@ -71,7 +71,7 @@ namespace CocosSharpMathGame
             AddEventListener(mouseListener, int.MaxValue);
         }
 
-        const float CHUNK_SIZE = 8000f;
+        const float CHUNK_SIZE = 6500f;
         internal static CCPointI PosToWorldChunk(CCPoint position)
         {
             var scaled = position / CHUNK_SIZE;
@@ -140,6 +140,7 @@ namespace CocosSharpMathGame
             {
                 aircraft.Team = PlayerTeam;
                 aircraft.ControlledByPlayer = true;
+                aircraft.Scale = Constants.STANDARD_SCALE;
                 AddAircraft(aircraft);
                 aircraft.PartsChanged(true);
             }
@@ -222,12 +223,6 @@ namespace CocosSharpMathGame
             }
             CameraPosition = -(CCPoint)CameraSize / 2;
             UpdateCamera();
-            StartPlanningPhase();
-        }
-
-        protected override void AddedToScene()
-        {
-            base.AddedToScene();
             // show the welcome message
             if (!PopUp.TriggeredPlayLayer)
             {
@@ -236,6 +231,12 @@ namespace CocosSharpMathGame
                 foreach (var aircraft in PlayerAircrafts)
                     aircraft.ResetPowerUps();
             }
+            StartPlanningPhase();
+        }
+
+        protected override void AddedToScene()
+        {
+            base.AddedToScene();
             UpdateCamera();
         }
 
@@ -254,6 +255,7 @@ namespace CocosSharpMathGame
                     RemoveSquadron(squadron);
             }
             Aircrafts.Remove(aircraft);
+            ActiveAircrafts.Remove(aircraft);
             aircraft.VertexZ = 0f;  // reset vertexZ
             if (PlayerAircrafts.Contains(aircraft))
             {
@@ -387,7 +389,7 @@ namespace CocosSharpMathGame
             
         }
 
-        static readonly float[] ZoneEndRadii = new float[] { 1500f, 7000f, 14000f, 30000f };
+        static readonly float[] ZoneEndRadii = new float[] { 1500f, 7000f, 14000f, 20000f };
         static readonly CCColor4B[] ZoneColorsGround = new CCColor4B[] { new CCColor4B(0f, 0f, 0f, 0.1f), new CCColor4B(1f, 0.4f, 0f, 0.1f), new CCColor4B(1f, 1f, 0f, 0.1f), new CCColor4B(0f, 1f, 0f, 0.1f), new CCColor4B(0f, 0f, 1f, 0.1f) };
         static readonly CCColor4B[] ZoneColorsAir = new CCColor4B[]    { CCColor4B.White, new CCColor4B(1f, 0.4f, 0.0f, 1f), new CCColor4B(1f, 1f, 0.0f, 1f), new CCColor4B(0.0f, 1f, 0.0f, 1f), new CCColor4B(0.0f, 0.0f, 1f, 1f) };
         internal static int RadiusToZoneNum(float radius)
@@ -422,6 +424,7 @@ namespace CocosSharpMathGame
                 RemoveAircraft(entry.Key);
             }
             Squadrons.Remove(squadron);
+            ActiveSquadrons.Remove(squadron);
         }
 
         /// <summary>

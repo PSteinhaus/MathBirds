@@ -13,7 +13,7 @@ namespace CocosSharpMathGame
         internal FighterProjectile()
         {
             Velocity = 2500f;
-            LifeTime = 1.0f;
+            LifeTime = 0.6f;
             Damage = 3.5f;
         }
     }

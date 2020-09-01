@@ -17,7 +17,7 @@ namespace CocosSharpMathGame
             NormalAnchorPoint = CCPoint.AnchorMiddle;
 
             // specify the mass points
-            MassPoints = CreateDiamondMassPoints(12f);
+            MassPoints = CreateDiamondMassPoints(11f);
 
             // specify the collision polygon
             CollisionType = Collisions.CreateDiamondCollisionPolygon(this);

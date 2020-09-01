@@ -36,7 +36,7 @@ namespace CocosSharpMathGame
             CollisionType = Collisions.CreateDiamondCollisionPolygon(this);
 
             // specify the mass points
-            MassPoints = CreateDiamondMassPoints(70);
+            MassPoints = CreateDiamondMassPoints(55);
         }
     }
 }

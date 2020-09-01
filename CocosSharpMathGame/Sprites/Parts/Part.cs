@@ -327,7 +327,8 @@ namespace CocosSharpMathGame
                     CCPoint relativePosition = randomPoint - PositionWorldspace;
                     relativePosition = CCPoint.RotateByAngle(relativePosition, CCPoint.Zero, -Constants.CCDegreesToMathRadians(TotalRotation));
                     // react differently depending upon how damaged you now are
-                    var damageTail = new DamageCloudTailNode(DamageToReferenceSize(damage), relativePosition);
+                    float refSize = DamageToReferenceSize(damage);
+                    var damageTail = new DamageCloudTailNode(refSize, relativePosition);
                     if (Aircraft.SelectedPower != PowerUp.PowerType.SHIELD)
                     {
                         if (Health / MaxHealth > 0.7f)
@@ -339,6 +340,7 @@ namespace CocosSharpMathGame
                             var h = (new SKColor(planeColor.R, planeColor.G, planeColor.B)).Hue;
                             damageTail.CloudColor = Constants.MoveHue(baseFlameColor, h);
                         }
+                        damageTail.CloudLifeTime += (refSize - 8f) * 0.1f;
                     }
                     else
                     {
@@ -406,10 +408,10 @@ namespace CocosSharpMathGame
                 return MountParent.NumOfMountParents() + 1;
         }
 
-        private float DamageToReferenceSize(float damage, float maxRefSize = 50f)
+        private float DamageToReferenceSize(float damage, float maxRefSize = 25f)
         {
             const float baseSize = 6f;
-            float refSize = baseSize + damage * 2;
+            float refSize = baseSize + damage * 10 / (MaxHealth + 4f) + MaxHealth / 8;
             return refSize <= maxRefSize ? refSize : maxRefSize;
         }
 
