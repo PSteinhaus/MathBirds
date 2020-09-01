@@ -124,7 +124,8 @@ namespace CocosSharpMathGame
             this.HighDrawNode = null;
             this.KnownChunks = null;
             this.LowDrawNode = null;
-            this.Scroller.MoveFunction = null;
+            if (Scroller != null)
+                this.Scroller.MoveFunction = null;
             this.Scroller = null;
             this.StopAllActions();
             this.ResetCleanState();
