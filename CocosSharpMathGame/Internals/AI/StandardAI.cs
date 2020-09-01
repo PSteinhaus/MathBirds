@@ -24,7 +24,7 @@ namespace CocosSharpMathGame
             var myTeam = Aircraft.Team;
             IEnumerable<Aircraft> aircrafts;
             if (myTeam == Team.PlayerTeam)
-                aircrafts = Aircraft.AircraftsInLevel();
+                aircrafts = Aircraft.ActiveAircraftsInLevel();
             else
                 aircrafts = Aircraft.PlayerAircraftsInLevel();
             Aircraft closestAircraft = null;

@@ -36,6 +36,13 @@ namespace CocosSharpMathGame
                                 ReturnToHangar();
                             break;
                         }
+                    case WreckageState.SALVAGED:
+                        {
+                            // if no parts could be salvaged end the salvaged state immediately
+                            if (!SalvagedParts.Any())
+                                EndSalvage();
+                            return;
+                        }
                     default:
                         break;
                 }
@@ -141,7 +148,7 @@ namespace CocosSharpMathGame
                                          new CCCallFunc(() => { State = WreckageState.CAROUSEL; })));
         }
 
-        internal const float MIN_END_WRECKAGE_BONUS_PERCENTILE = 0.3f;
+        internal const float MIN_END_WRECKAGE_BONUS_PERCENTILE = 0.4f;
         internal const float MAX_END_WRECKAGE_PERCENTILE   = 1.0f;
         private Dictionary<Aircraft, float> wreckPercentile = new Dictionary<Aircraft, float>();
         internal float GetWreckPercentile(Aircraft aircraft)

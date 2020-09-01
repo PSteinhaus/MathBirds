@@ -76,7 +76,7 @@ namespace CocosSharpMathGame
                 ((CollisionTypeLine)CollisionType).StartPoint = oldPos;
                 ((CollisionTypeLine)CollisionType).EndPoint = Position;
                 // check for collision
-                foreach (var aircraft in (MyTeam == Team.PlayerTeam ? ((PlayLayer)Parent).Aircrafts : ((PlayLayer)Parent).PlayerAircrafts))
+                foreach (var aircraft in (MyTeam == Team.PlayerTeam ? ((PlayLayer)Parent).ActiveAircrafts : ((PlayLayer)Parent).PlayerAircrafts))
                 {
                     if (aircraft.MyState == Aircraft.State.ACTIVE && aircraft.Team.IsEnemy(MyTeam))
                     {

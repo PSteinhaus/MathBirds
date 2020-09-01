@@ -181,7 +181,7 @@ namespace CocosSharpMathGame
         {
             // collect aircrafts that are near enough to have parts which could be targets
             List<Aircraft> aircraftsInRange = new List<Aircraft>();
-            foreach (var aircraft in (MyPart.Aircraft.Team == Team.PlayerTeam ? ((PlayLayer)MyPart.Layer).Aircrafts : ((PlayLayer)MyPart.Layer).PlayerAircrafts))   // a bit dirty since technically NPC allies to the player could exist (someday), which would not be contained in PlayerAircrafts, but which would still (maybe) be part of the player team
+            foreach (var aircraft in (MyPart.Aircraft.Team == Team.PlayerTeam ? ((PlayLayer)MyPart.Layer).ActiveAircrafts : ((PlayLayer)MyPart.Layer).PlayerAircrafts))   // a bit dirty since technically NPC allies to the player could exist (someday), which would not be contained in PlayerAircrafts, but which would still (maybe) be part of the player team
             {
                 // check if it is considered an enemy
                 if (!MyPart.Aircraft.Team.IsEnemy(aircraft.Team) || aircraft.MyState.Equals(Aircraft.State.SHOT_DOWN))

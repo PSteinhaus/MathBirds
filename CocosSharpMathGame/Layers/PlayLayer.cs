@@ -114,6 +114,8 @@ namespace CocosSharpMathGame
             Aircrafts = null;
             PlayerAircrafts = null;
             DownedAircrafts = null;
+            ActiveAircrafts = null;
+            ActiveSquadrons = null;
             Projectiles = null;
             DrawNodeUsers = null;
             GUILayer = null;
@@ -227,7 +229,12 @@ namespace CocosSharpMathGame
             base.AddedToScene();
             // show the welcome message
             if (!PopUp.TriggeredPlayLayer)
-                PopUp.ShowPopUp(GUILayer, PopUp.Enum.TRIGGERED_PLAYLAYER);  
+            {
+                PopUp.ShowPopUp(GUILayer, PopUp.Enum.TRIGGERED_PLAYLAYER);
+                // also remove all power-ups from the aircrafts since this is the first time the player is playing
+                foreach (var aircraft in PlayerAircrafts)
+                    aircraft.ResetPowerUps();
+            }
             UpdateCamera();
         }
 
@@ -299,6 +306,8 @@ namespace CocosSharpMathGame
 
         internal List<CCPointI> ActiveChunks { get; private protected set; } = new List<CCPointI>();
         internal List<CCPointI> KnownChunks { get; private protected set; } = new List<CCPointI>();
+        internal List<Aircraft> ActiveAircrafts { get; private protected set; } = new List<Aircraft>();
+        internal List<Squadron> ActiveSquadrons { get; private protected set; } = new List<Squadron>();
 
         internal void StartPlanningPhase()
         {
@@ -342,11 +351,20 @@ namespace CocosSharpMathGame
                 if (!KnownChunks.Contains(chunkPoint))
                     InitiateChunk(chunkPoint);
             // prepare the squadrons
+            // also find all currently active squadrons and aircrafts
+            ActiveAircrafts.Clear();
+            ActiveSquadrons.Clear();
             foreach (var squadron in Squadrons)
             {
                 var chunkPoint = PosToWorldChunk(squadron.Position);
                 if (ActiveChunks.Contains(chunkPoint))
+                {
                     squadron.PrepareForPlanningPhase(this);
+                    // add the squadron and the aircrafts to the active lists
+                    ActiveSquadrons.Add(squadron);
+                    foreach (var aircraft in squadron.AircraftsWithRelPositions.Keys)
+                        ActiveAircrafts.Add(aircraft);
+                }
                 else if (noLongerActiveChunks.Contains(chunkPoint))
                     foreach (var aircraft in squadron.AircraftsWithRelPositions.Keys)
                         aircraft.PrepareForStandby();
@@ -589,7 +607,6 @@ namespace CocosSharpMathGame
 
         private protected void InitiateChunk(CCPointI chunkPoint)
         {
-            
             // add some squadrons randomly
             var rng = new Random();
             /*
@@ -672,10 +689,8 @@ namespace CocosSharpMathGame
             DrawNodeBG.DrawRect(new CCRect(-999999999f, -999999999f, 999999999f * 2, 999999999f * 2), bgColor);
             // now the planes
             // only color the enemies
-            foreach (var squadron in Squadrons)
-                if (squadron.IsActive(this))
-                    foreach (var aircraft in squadron.AircraftsWithRelPositions.Keys)
-                        aircraft.ColorByPlayLayer(planeColor);
+            foreach (var aircraft in ActiveAircrafts)
+                aircraft.ColorByPlayLayer(planeColor);
         }
 
         internal CCColor4B CurrentPlaneColor
@@ -734,16 +749,12 @@ namespace CocosSharpMathGame
                         // go through all aircrafts and let them execute their orders
                         List<Aircraft> aircraftToBeRemoved = new List<Aircraft>();
                         // first the enemies (organized into squadrons)
-                        foreach (var squadron in Squadrons)
-                            if (squadron.IsActive(this))
-                            {
-                                foreach (var aircraft in squadron.AircraftsWithRelPositions.Keys)
-                                {
-                                    aircraft.ExecuteOrders(dt);
-                                    if (aircraft.ToBeRemoved)
-                                        aircraftToBeRemoved.Add(aircraft);
-                                }
-                            }
+                        foreach (var aircraft in ActiveAircrafts)
+                        {
+                            aircraft.ExecuteOrders(dt);
+                            if (aircraft.ToBeRemoved)
+                                aircraftToBeRemoved.Add(aircraft);
+                        }
                         // then the player aircrafts
                         foreach (var aircraft in PlayerAircrafts)
                         {
@@ -826,9 +837,10 @@ namespace CocosSharpMathGame
             foreach (var cloudNode in ExplosionNodes)
                 cloudNode.UseDrawNodes(DrawNodeExplosions, DrawNodeExplosions);
             // draw everything directly related to the aircrafts
-            foreach (var aircraft in Aircrafts)
-                if (PosIsActive(aircraft.Position))
-                    aircraft.UseDrawNodes(HighDrawNode, LowDrawNode);
+            foreach (var aircraft in ActiveAircrafts)
+                aircraft.UseDrawNodes(HighDrawNode, LowDrawNode);
+            foreach (var aircraft in PlayerAircrafts)
+                aircraft.UseDrawNodes(HighDrawNode, LowDrawNode);
         }
 
         internal void TellFlightPathHeadsToShowHeadsOnly(Aircraft exceptedOne = null)

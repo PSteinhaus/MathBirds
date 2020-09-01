@@ -1558,21 +1558,16 @@ namespace CocosSharpMathGame
 
         internal override void Clear()
         {
-            
             Aircrafts = null;
             GUILayer = null;
             this.ModifiedAircraft = null;
             this.NewAircraftButton = null;
-            
             foreach (var b in ScrapyardButtons)
                 if (b.CurrentMathChallengeNode != null)
                     b.CurrentMathChallengeNode.AnswerChosenEvent -= ScrapyardChallengeCallback;
-            
             ScrapyardButtons = null;
-            
             this.SelectedAircraft = null;
             this.FirstTouchListener = null;
-            
             this.HighDrawNode = null;
             this.LowDrawNode = null;
             this.Scroller.MoveFunction = null;

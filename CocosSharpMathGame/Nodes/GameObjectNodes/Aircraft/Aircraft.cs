@@ -441,7 +441,11 @@ namespace CocosSharpMathGame
             {
                 // first remove the old body (and everything connected to it) if there is one
                 if (body != null)
+                {
                     RemoveAllChildren();
+                    // reset any possibly awarded power-ups
+                    ResetPowerUps();
+                }
                 body = value;
                 if (value != null)
                 {
@@ -449,9 +453,44 @@ namespace CocosSharpMathGame
                         AddChild(part, part.CalcZOrder());
                     foreach (var mount in body.PartMounts)
                         mount.UpdateMountedPartPosition();
+                    // award some power-ups depending on the body type
+                    switch (body)
+                    {
+                        case BodyBalloon b:
+                            ChangePowerUpCount(PowerUp.PowerType.HEAL, 2);
+                            ChangePowerUpCount(PowerUp.PowerType.BOOST, 3);
+                            break;
+                        case BodyBat b:
+                            ChangePowerUpCount(PowerUp.PowerType.BACK_TURN, 2);
+                            break;
+                        case BodyPotato b:
+                            ChangePowerUpCount(PowerUp.PowerType.BOOST, 2);
+                            break;
+                        case TestBody b:
+                            ChangePowerUpCount(PowerUp.PowerType.SHIELD, 1);
+                            ChangePowerUpCount(PowerUp.PowerType.BOOST, 1);
+                            break;
+                        case BodyBigBomber b:
+                            ChangePowerUpCount(PowerUp.PowerType.HEAL, 1);
+                            ChangePowerUpCount(PowerUp.PowerType.SHIELD, 2);
+                            ChangePowerUpCount(PowerUp.PowerType.BOOST, 1);
+                            break;
+                        case BodyFighter b:
+                            ChangePowerUpCount(PowerUp.PowerType.SHIELD, 2);
+                            ChangePowerUpCount(PowerUp.PowerType.BOOST, 2);
+                            break;
+                        default:
+                            break;
+                    }
                 }
                 PartsChanged();
             }
+        }
+
+        internal void ResetPowerUps()
+        {
+            for (int i = 0; i < PowerUps.Length; i++)
+                PowerUps[i] = 0;
         }
 
         internal void RotateBy(float degree)
@@ -1146,11 +1185,11 @@ namespace CocosSharpMathGame
             return ControlledByPlayer || (Squadron != null ? Squadron.IsActive((PlayLayer)Layer) : ((PlayLayer)Layer).PosIsActive(Position));
         }
 
-        internal IEnumerable<Aircraft> AircraftsInLevel()
+        internal IEnumerable<Aircraft> ActiveAircraftsInLevel()
         {
             var playLayer = (Layer as PlayLayer);
             if (playLayer != null)
-                return playLayer.Aircrafts;
+                return playLayer.ActiveAircrafts;
             else
                 return null;
         }
