@@ -1584,11 +1584,13 @@ namespace CocosSharpMathGame
             AddAircraft(Aircraft.CreateTestAircraft(2, false), CCPoint.Zero);
             AddAircraft(Aircraft.CreateTestAircraft(2, false), CCPoint.Zero);
             AddAircraft(Aircraft.CreateTestAircraft(2, false), CCPoint.Zero);
+            /*
             AddAircraft(Aircraft.CreateBalloon(), CCPoint.Zero);
             AddAircraft(Aircraft.CreateBat(), CCPoint.Zero);
             AddAircraft(Aircraft.CreateBigBomber(), CCPoint.Zero);
             AddAircraft(Aircraft.CreateFighter(), CCPoint.Zero);
             AddAircraft(Aircraft.CreateJet(), CCPoint.Zero);
+            */
             // add some parts
             for (int i = 0; i < 1; i++)
             {

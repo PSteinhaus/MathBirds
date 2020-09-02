@@ -618,7 +618,7 @@ namespace CocosSharpMathGame
             const int MAX_SQUADS_PER_CHUNK = 5;
             int squadCount = rng.Next(MIN_SQUADS_PER_CHUNK, MAX_SQUADS_PER_CHUNK + 1);
             */
-            int squadCount = 7;
+            int squadCount = 5;
             // choose random positions inside of this chunk
             CCPoint chunkMiddle = ChunkToWorldPos(chunkPoint);
             for (int i=0; i<squadCount; i++)

@@ -18,7 +18,7 @@ namespace CocosSharpMathGame
         /// <returns></returns>
         internal static bool ShinyCoinThrow(Random rng)
         {
-            return rng.Next(100) < 3;
+            return rng.Next(1000) < 5;
         }
         internal static Aircraft CreateTestAircraft(int numWeapons = 2, bool withChallenges = true, Random rng = null)
         {
