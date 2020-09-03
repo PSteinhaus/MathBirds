@@ -1552,7 +1552,7 @@ namespace CocosSharpMathGame
             {
                 // something went wrong, simply initialize the hangar instead
                 Console.WriteLine("loading failed");
-                if (!PopUp.TriggeredWelcome)    // only trigger it once at best
+                if (!PopUp.TriggeredWelcome && !keepCurrentMath)    // only trigger it once at best
                     init = true;
             }
             if (init) Init();

@@ -134,7 +134,7 @@ namespace CocosSharpMathGame
         internal void InitPlayerAircrafts(List<Aircraft> playerAircrafts)
         {
             const float BORDER = 50f;
-            const float theta = (float)Math.PI / 8;
+            const float theta = (float)Math.PI / 4;
             // add the aircrafts
             foreach (var aircraft in playerAircrafts)
             {
@@ -595,7 +595,7 @@ namespace CocosSharpMathGame
                         // fifth zone: Jets, Jets and more Jets
                         var leader = Aircraft.CreateJet(rng);
                         leader.Team = Team.EnemyTeam;
-                        leader.AI = new StandardAI();
+                        leader.AI = leader.TotalParts.OfType<WingAngel>().Any() ? (AI)(new PeacefulFleeingAI()) : new StandardAI(); // angels should flee
                         newSquadron = new Squadron();
                         newSquadron.AddAircraft(leader, CCPoint.Zero);
                     }

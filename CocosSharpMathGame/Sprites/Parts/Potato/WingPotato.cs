@@ -9,7 +9,7 @@ namespace CocosSharpMathGame
 {
     internal class WingPotato : Part
     {
-        public WingPotato(bool shiny = false) : base("wingPotato" + (shiny ? "Shiny" : "") + ".png")
+        public WingPotato() : base("wingPotato.png")
         {
             SetHealthAndMaxHealth(3);
             // set your types
@@ -37,13 +37,11 @@ namespace CocosSharpMathGame
             Types = new Type[] { Type.SINGLE_WING };
             NormalAnchorPoint = new CCPoint(0.6f, 2 / ContentSize.Height);
 
-            // SHINY: add mount points for two weapons
-            var weaponMount1 = new PartMount(this, new CCPoint(2f, (ContentSize.Height / 2) + 1), Type.GUN);
-            var weaponMount2 = new PartMount(this, new CCPoint(2f, (ContentSize.Height / 2) - 1), Type.GUN);
-            weaponMount1.MaxTurningAngle = 90f;
-            weaponMount2.MaxTurningAngle = 90f;
+            // SHINY: add a mount point for a weapons
+            var weaponMount = new PartMount(this, new CCPoint(ContentSize.Width - 6, ContentSize.Height - 7), Type.GUN);
+            weaponMount.MaxTurningAngle = 90f;
 
-            PartMounts = new PartMount[] { weaponMount1, weaponMount2 };
+            PartMounts = new PartMount[] { weaponMount };
 
             // specify the collision polygon
             CollisionType = Collisions.CreateDiamondCollisionPolygon(this);

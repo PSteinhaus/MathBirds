@@ -11,7 +11,7 @@ namespace CocosSharpMathGame
     /// The usual AI for planes.
     /// It simply follows and attacks the next enemy for now.
     /// </summary>
-    class PeacefulFleeingAI : AI
+    internal class PeacefulFleeingAI : AI
     {
         internal const float SCARE_DISTANCE = 800f;
         internal bool Scared { get; set; } = false;

@@ -25,7 +25,7 @@ namespace CocosSharpMathGame
             Velocity = 2000f;
             LifeTime = 0.8f;
             Damage = 2f;
-            SetTailColor(new CCColor4B(1.0f, 0.7f, 0.7f, 1.0f));
+            TailColor = new CCColor4B(1.0f, 0.4f, 0.4f, 1.0f);  // I don't use "SetTailColor" here on purpose to create a color change from head to tail
         }
     }
 }
