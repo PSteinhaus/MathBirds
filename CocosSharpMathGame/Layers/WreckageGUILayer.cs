@@ -138,6 +138,7 @@ namespace CocosSharpMathGame
 
         internal override void Clear()
         {
+            TouchCountSource = null;
             WreckageLayer = null;
             this.mathChallengeNode = null;
             this.FirstTouchListener = null;

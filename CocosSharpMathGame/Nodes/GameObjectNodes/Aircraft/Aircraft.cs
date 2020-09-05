@@ -486,6 +486,10 @@ namespace CocosSharpMathGame
                             ChangePowerUpCount(PowerUp.PowerType.SHIELD, 2);
                             ChangePowerUpCount(PowerUp.PowerType.BOOST, 2);
                             break;
+                        case BodyScrap b:
+                            ChangePowerUpCount(PowerUp.PowerType.SHIELD, 1);
+                            ChangePowerUpCount(PowerUp.PowerType.BACK_TURN, 1);
+                            break;
                         default:
                             break;
                     }

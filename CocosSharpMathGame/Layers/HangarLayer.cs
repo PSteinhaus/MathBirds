@@ -127,7 +127,7 @@ namespace CocosSharpMathGame
         }
 
         /// <summary>
-        /// Check whether the player owns a complete potato-set
+        /// Check whether the player owns a (somewhat) complete potato-set
         /// </summary>
         /// <returns></returns>
         internal bool CrappyPartsCheck()
@@ -138,6 +138,36 @@ namespace CocosSharpMathGame
                    parts.OfType<RudderPotato>().Any() &&
                    parts.OfType<WeaponPotato>().Any() &&
                    parts.OfType<WingPotato>().Any();
+        }
+
+        /// <summary>
+        /// Check whether the player owns a complete scrap-set.
+        /// This check also checks all aircrafts for parts.
+        /// </summary>
+        /// <returns></returns>
+        internal void ScrapPartsCheck(out bool hasBody, out bool hasDoubleWing, out bool hasRotor, out int rudders, out bool hasWeapon)
+        {
+            var parts = GetParts();
+            rudders = 0;
+            hasBody       = parts.OfType<BodyScrap>().Any();
+            hasDoubleWing = parts.OfType<DoubleWingScrap>().Any();
+            hasRotor      = parts.OfType<RotorScrap>().Any();
+            rudders       = parts.OfType<RudderScrap>().Count();
+            bool hasRudders    = rudders >= 2;
+            hasWeapon     = parts.OfType<WeaponScrap>().Any();
+            foreach (var aircraft in Aircrafts)
+            {
+                if (hasBody && hasDoubleWing && hasRotor && hasRudders && hasWeapon) return;
+                if (!hasBody       && aircraft.TotalParts.OfType<BodyScrap>().Any()) hasBody = true;
+                if (!hasDoubleWing && aircraft.TotalParts.OfType<DoubleWingScrap>().Any()) hasDoubleWing = true;
+                if (!hasRotor      && aircraft.TotalParts.OfType<RotorScrap>().Any()) hasRotor = true;
+                if (!hasWeapon     && aircraft.TotalParts.OfType<WeaponScrap>().Any()) hasWeapon = true;
+                if (!hasRudders    && aircraft.TotalParts.OfType<RudderScrap>().Any())
+                {
+                    rudders += aircraft.TotalParts.OfType<RudderScrap>().Count();
+                    hasRudders = rudders >= 2;
+                }
+            }
         }
 
         private CCPoint ScrapyardButtonPosition(int i)
@@ -190,6 +220,18 @@ namespace CocosSharpMathGame
         protected override void AddedToScene()
         {
             base.AddedToScene();
+            // if there are no aircrafts and no scrap parts add a weak scrap-aircraft
+            ScrapPartsCheck(out bool hasBody, out bool hasDoubleWing, out bool hasRotor, out int rudders, out bool hasWeapon);
+            if (!Aircrafts.Any() && !hasBody && !hasDoubleWing && !hasRotor && rudders == 0 && !hasWeapon)
+                AddAircraft(Aircraft.CreateScrapAircraft(), CCPoint.Zero);
+            else  // if there are aircrafts add all missing scrap parts
+            {
+                if (!hasBody)       AddPart(new BodyScrap());
+                if (!hasDoubleWing) AddPart(new DoubleWingScrap());
+                if (!hasRotor)      AddPart(new RotorScrap());
+                if (!hasWeapon)     AddPart(new WeaponScrap());
+                for (; rudders < 2; rudders++)  AddPart(new RudderScrap());
+            }
             CalcBoundaries();
             CameraPosition = CameraPosition;
             UpdateCamera();
@@ -1562,6 +1604,7 @@ namespace CocosSharpMathGame
         {
             Aircrafts = null;
             GUILayer = null;
+            TouchCountSource = null;
             this.ModifiedAircraft = null;
             this.NewAircraftButton = null;
             foreach (var b in ScrapyardButtons)
@@ -1583,8 +1626,8 @@ namespace CocosSharpMathGame
         {
             // add some aircrafts
             AddAircraft(Aircraft.CreateTestAircraft(2, false), CCPoint.Zero);
-            AddAircraft(Aircraft.CreateTestAircraft(2, false), CCPoint.Zero);
-            AddAircraft(Aircraft.CreateTestAircraft(2, false), CCPoint.Zero);
+            //AddAircraft(Aircraft.CreateTestAircraft(2, false), CCPoint.Zero);
+            //AddAircraft(Aircraft.CreateTestAircraft(2, false), CCPoint.Zero);
             /*
             AddAircraft(Aircraft.CreateBalloon(), CCPoint.Zero);
             AddAircraft(Aircraft.CreateBat(), CCPoint.Zero);

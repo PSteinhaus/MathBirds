@@ -339,6 +339,23 @@ namespace CocosSharpMathGame
             return aircraft;
         }
 
+        internal static Aircraft CreateScrapAircraft()
+        {
+            Aircraft aircraft = new Aircraft();
+            
+                aircraft.Body = new BodyScrap();
+                // mount the wings
+                aircraft.Body.MountPart(new DoubleWingScrap());
+                // mount the rotor
+                aircraft.Body.MountPart(new RotorScrap());
+                // and the rudders
+                aircraft.Body.MountPart(new RudderScrap());
+                aircraft.Body.MountPart(new RudderScrap());
+                aircraft.Body.MountPart(new WeaponScrap());
+
+            return aircraft;
+        }
+
         internal PowerUp GeneratePowerUp()
         {
             if (WeightedPowerUpsAwarded != null && WeightedPowerUpsAwarded.Any())

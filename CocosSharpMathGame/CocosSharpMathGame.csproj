@@ -48,7 +48,9 @@
     <Content Include="Data\sprites\parts\bodyFighterShiny.png" />
     <Content Include="Data\sprites\parts\bodyJet.png" />
     <Content Include="Data\sprites\parts\bodyPotatoShiny.png" />
+    <Content Include="Data\sprites\parts\bodyScrap.png" />
     <Content Include="Data\sprites\parts\bodyTestShiny.png" />
+    <Content Include="Data\sprites\parts\doubleWingScrap.png" />
     <Content Include="Data\sprites\parts\doubleWingsTestShiny.png" />
     <Content Include="Data\sprites\parts\rotorBalloon.png" />
     <Content Include="Data\sprites\parts\rotorBalloonShiny.png" />
@@ -60,6 +62,7 @@
     <Content Include="Data\sprites\parts\rotorFighterShiny.png" />
     <Content Include="Data\sprites\parts\rotorPotato.png" />
     <Content Include="Data\sprites\parts\rotorPotatoShiny.png" />
+    <Content Include="Data\sprites\parts\rotorScrap.png" />
     <Content Include="Data\sprites\parts\rotorTestShiny.png" />
     <Content Include="Data\sprites\parts\rudderBatShiny.png" />
     <Content Include="Data\sprites\parts\rudderBigBomber.png" />
@@ -69,6 +72,7 @@
     <Content Include="Data\sprites\parts\rudderJet.png" />
     <Content Include="Data\sprites\parts\rudderPotato.png" />
     <Content Include="Data\sprites\parts\rudderPotatoShiny.png" />
+    <Content Include="Data\sprites\parts\rudderScrap.png" />
     <Content Include="Data\sprites\parts\rudderTestShiny.png" />
     <Content Include="Data\sprites\parts\weaponBalloon.png" />
     <Content Include="Data\sprites\parts\weaponBalloonShiny.png" />
@@ -80,6 +84,7 @@
     <Content Include="Data\sprites\parts\weaponFighterShiny.png" />
     <Content Include="Data\sprites\parts\weaponPotato.png" />
     <Content Include="Data\sprites\parts\weaponPotatoShiny.png" />
+    <Content Include="Data\sprites\parts\weaponScrap.png" />
     <Content Include="Data\sprites\parts\weaponTestShiny.png" />
     <Content Include="Data\sprites\parts\wingAngel.png" />
     <Content Include="Data\sprites\parts\wingBat.png" />
@@ -283,6 +288,11 @@
     <Compile Include="Sprites\Parts\Potato\RudderPotato.cs" />
     <Compile Include="Sprites\Parts\Potato\WeaponPotato.cs" />
     <Compile Include="Sprites\Parts\Potato\WingPotato.cs" />
+    <Compile Include="Sprites\Parts\Scrap\BodyScrap.cs" />
+    <Compile Include="Sprites\Parts\Scrap\DoubleWingScrap.cs" />
+    <Compile Include="Sprites\Parts\Scrap\RotorScrap.cs" />
+    <Compile Include="Sprites\Parts\Scrap\RudderScrap.cs" />
+    <Compile Include="Sprites\Parts\Scrap\WeaponScrap.cs" />
     <Compile Include="Sprites\Parts\TestPlane\TestBody.cs" />
     <Compile Include="Sprites\Parts\TestPlane\TestDoubleWing.cs" />
     <Compile Include="Sprites\Parts\TestPlane\TestEngineStrong.cs" />
@@ -300,6 +310,7 @@
     <Compile Include="Sprites\Projectiles\Projectile.cs" />
     <Compile Include="Sprites\Projectiles\BalloonProjectile.cs" />
     <Compile Include="Sprites\Projectiles\FighterProjectile.cs" />
+    <Compile Include="Sprites\Projectiles\ScrapProjectile.cs" />
     <Compile Include="Sprites\Projectiles\TestProjectile.cs" />
     <Compile Include="Sprites\UI\Button.cs" />
     <Compile Include="Sprites\UI\Carousel.cs" />

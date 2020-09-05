@@ -43,7 +43,7 @@ namespace CocosSharpMathGame
             CollisionType = Collisions.CreateDiamondCollisionPolygon(this);
 
             // give the rudder ManeuverAbility
-            ManeuverAbility = new ManeuverAbility(0, 0, (float)Math.Pow(10, 5) * 0.5f, (float)Math.Pow(10, 5) * 2.25f);
+            ManeuverAbility = new ManeuverAbility(0, 0, (float)Math.Pow(10, 5) * 0.5f, (float)Math.Pow(10, 5) * 2.0f);
         }
     }
 

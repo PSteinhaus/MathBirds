@@ -436,6 +436,7 @@ namespace CocosSharpMathGame
 
         internal override void Clear()
         {
+            TouchCountSource = null;
             this.Wrecks = null;
             this.WreckCarousel = null;
             this.WreckMaxPercentile = null;

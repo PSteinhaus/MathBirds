@@ -53,7 +53,8 @@ namespace CocosSharpMathGame
             // add mount points for two single wings (and a rivaling double wing mount)
             var wingMount1 = new PartMount(this, new CCPoint((ContentSize.Width * 0.75f), (ContentSize.Height / 2) + 5), Type.SINGLE_WING);
             var wingMount2 = new PartMount(this, new CCPoint((ContentSize.Width * 0.75f), (ContentSize.Height / 2) - 5), Type.SINGLE_WING);
-            var doubleWingMount = new PartMount(this, new CCPoint((ContentSize.Width * 0.72f), ContentSize.Height / 2), Type.WINGS);
+            var doubleWingMount = new PartMount(this, new CCPoint((ContentSize.Width * 0.65f), ContentSize.Height / 2), Type.WINGS);
+            doubleWingMount.Dz = 2;
             doubleWingMount.PossiblyBlockingPartMounts.Add(wingMount1);
             doubleWingMount.PossiblyBlockingPartMounts.Add(wingMount2);
             wingMount1.PossiblyBlockingPartMounts.Add(doubleWingMount);

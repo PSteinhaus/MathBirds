@@ -34,6 +34,7 @@ namespace CocosSharpMathGame
 
         internal override void Clear()
         {
+            TouchCountSource = null;
             PlayLayer = null;
             this.ExecuteOrdersButton = null;
             this.FirstTouchListener = null;

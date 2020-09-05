@@ -134,17 +134,31 @@ namespace CocosSharpMathGame
                                                     var gv = scene.GameView;
 
                                                     fadeNode.RemoveFromParent();
+                                                    // the following are attempts at fixing the memory leak (which all mostly failed)
+                                                    // created by the fact that layers are not released for some reason
                                                     layer1.RemoveAllListeners();
                                                     guiLayer1.RemoveAllListeners();
-                                                    scene.RemoveAllListeners();
-                                                    scene.RemoveAllChildren();
-                                                    scene.RemoveFromParent();
+                                                    layer1.RemoveEventListeners();
+                                                    guiLayer1.RemoveEventListeners();
+                                                    layer1.RemoveFromParent();
+                                                    guiLayer1.RemoveFromParent();
                                                     layer1.Clear();
                                                     guiLayer1.Clear();
+                                                    layer1.Cleanup();
+                                                    guiLayer1.Cleanup();
+                                                    layer1.Dispose();
+                                                    guiLayer1.Dispose();
+                                                    scene.RemoveAllListeners();
+                                                    scene.RemoveAllChildren();
+                                                    scene.StopAllActions();
+                                                    scene.UnscheduleAll();
+                                                    scene.RemoveFromParent();
+                                                    scene.Cleanup();
+                                                    scene.Dispose();
 
                                                     var scene2 = new CCScene(gv);
-                                                    scene2.AddChild(guiLayer2);
-                                                    scene2.AddChild(layer2, int.MinValue);
+                                                    scene2.AddLayer(guiLayer2);
+                                                    scene2.AddLayer(layer2, int.MinValue);
                                                     guiLayer2.AddChild(fadeNode, int.MaxValue);
                                                     director.ResetSceneStack();
                                                     director.ReplaceScene(scene2);

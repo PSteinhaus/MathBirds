@@ -69,7 +69,7 @@ namespace CocosSharpMathGame
             if (Leader == null)
                 Leader = aircraft;
             // check if you have to adapt the velocity
-            float v = aircraft.MaxVelocity * 0.85f;
+            float v = aircraft.MaxVelocity * 0.9f;
             if (v < Velocity)
                 Velocity = v;
         }

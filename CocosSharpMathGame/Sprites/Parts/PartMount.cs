@@ -175,6 +175,8 @@ namespace CocosSharpMathGame
                 part.MountParent = MyPart;
                 // make sure the part is actually at the position of the mount
                 UpdateMountedPartPosition();
+                // rotate it into the null rotation
+                part.MyRotation = NullRotation;
                 //Console.WriteLine("MyPart Position: " + MyPart.Position);
                 //Console.WriteLine("Mount: " + part.Position);
                 // if it was sucessfully mounted add it as a child of your parts parent (the aircraft)

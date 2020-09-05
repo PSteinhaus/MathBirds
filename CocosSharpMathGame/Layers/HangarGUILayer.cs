@@ -345,7 +345,7 @@ namespace CocosSharpMathGame
 
         internal override void Clear()
         {
-            
+            TouchCountSource = null;
             HangarLayer = null;
             
             this.PartCarousel = null;

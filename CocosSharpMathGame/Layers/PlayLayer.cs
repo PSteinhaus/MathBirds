@@ -119,6 +119,7 @@ namespace CocosSharpMathGame
             Projectiles = null;
             DrawNodeUsers = null;
             GUILayer = null;
+            TouchCountSource = null;
             this.ActiveChunks = null;
             this.FirstTouchListener = null;
             this.HighDrawNode = null;
@@ -787,7 +788,13 @@ namespace CocosSharpMathGame
                             cloudNode.AddCloud(new CircleCloud(aircraft.Position, 0, CCColor4B.White, true, aircraft.ContentSize.Width * 16, 6f));
                             ExplosionNodes.Add(cloudNode);
 
-                            DownedAircrafts.Add(aircraft);
+                            // if the aircraft is not completely made up of scrap parts add it to the salvageable wrecks
+                            foreach (var part in aircraft.TotalParts)
+                                if (!(part is BodyScrap) && !(part is DoubleWingScrap) && !(part is RotorScrap) && !(part is RudderScrap) && !(part is WeaponScrap))
+                                {
+                                    DownedAircrafts.Add(aircraft);
+                                    break;
+                                }
                             RemoveAircraft(aircraft);
                         }
                         // go through all projectiles and let them advance

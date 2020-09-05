@@ -7,7 +7,7 @@
 			<key>bodyBalloon.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{0,39},{49,67}}</string>
+				<string>{{50,39},{49,67}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -21,7 +21,7 @@
 			<key>bodyBalloonShiny.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{50,39},{49,67}}</string>
+				<string>{{0,39},{49,67}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -35,7 +35,7 @@
 			<key>bodyBat.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{40,118},{17,8}}</string>
+				<string>{{125,99},{17,8}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -49,7 +49,7 @@
 			<key>bodyBatShiny.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{58,118},{17,8}}</string>
+				<string>{{66,13},{17,8}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -133,7 +133,7 @@
 			<key>bodyPotato.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{66,0},{25,12}}</string>
+				<string>{{77,107},{25,12}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -147,7 +147,7 @@
 			<key>bodyPotatoShiny.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{77,107},{25,12}}</string>
+				<string>{{66,0},{25,12}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -156,6 +156,20 @@
 				<string>{{0,0},{25,12}}</string>
 				<key>sourceSize</key>
 				<string>{25,12}</string>
+			</dict>
+
+			<key>bodyScrap.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{40,118},{35,8}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false/>
+				<key>sourceColorRect</key>
+				<string>{{0,0},{35,8}}</string>
+				<key>sourceSize</key>
+				<string>{35,8}</string>
 			</dict>
 
 			<key>bodyTestShiny.png</key>
@@ -172,10 +186,24 @@
 				<string>{36,10}</string>
 			</dict>
 
+			<key>doubleWingScrap.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{147,26},{13,68}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false/>
+				<key>sourceColorRect</key>
+				<string>{{0,0},{13,68}}</string>
+				<key>sourceSize</key>
+				<string>{13,68}</string>
+			</dict>
+
 			<key>doubleWingsTestShiny.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{147,21},{12,44}}</string>
+				<string>{{161,45},{12,44}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -189,7 +217,7 @@
 			<key>rotorBalloon.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{169,0},{7,10}}</string>
+				<string>{{183,0},{7,10}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -217,7 +245,7 @@
 			<key>rotorBat.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{89,27},{8,8}}</string>
+				<string>{{174,73},{8,8}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -231,7 +259,7 @@
 			<key>rotorBatShiny.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{79,13},{8,8}}</string>
+				<string>{{158,116},{8,8}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -245,7 +273,7 @@
 			<key>rotorBigBomber.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{169,54},{5,11}}</string>
+				<string>{{183,22},{5,11}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -259,7 +287,7 @@
 			<key>rotorBigBomberShiny.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{169,42},{5,11}}</string>
+				<string>{{141,26},{5,11}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -273,7 +301,7 @@
 			<key>rotorFighter.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{141,26},{5,10}}</string>
+				<string>{{183,11},{5,10}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -287,7 +315,7 @@
 			<key>rotorFighterShiny.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{169,31},{5,10}}</string>
+				<string>{{183,54},{5,10}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -301,7 +329,7 @@
 			<key>rotorPotato.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{157,111},{11,16}}</string>
+				<string>{{171,107},{11,16}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -315,7 +343,7 @@
 			<key>rotorPotatoShiny.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{169,111},{11,16}}</string>
+				<string>{{171,90},{11,16}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -326,10 +354,24 @@
 				<string>{11,16}</string>
 			</dict>
 
+			<key>rotorScrap.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{174,43},{8,14}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false/>
+				<key>sourceColorRect</key>
+				<string>{{0,0},{8,14}}</string>
+				<key>sourceSize</key>
+				<string>{8,14}</string>
+			</dict>
+
 			<key>rotorTestShiny.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{160,17},{8,14}}</string>
+				<string>{{174,28},{8,14}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -343,7 +385,7 @@
 			<key>rudderBatShiny.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{36,121},{2,3}}</string>
+				<string>{{97,11},{2,3}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -357,7 +399,7 @@
 			<key>rudderBigBomber.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{160,47},{8,13}}</string>
+				<string>{{174,14},{8,13}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -371,7 +413,7 @@
 			<key>rudderBigBomberShiny.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{89,13},{8,13}}</string>
+				<string>{{174,0},{8,13}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -385,7 +427,7 @@
 			<key>rudderFighter.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{84,120},{6,6}}</string>
+				<string>{{94,120},{6,6}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -399,7 +441,7 @@
 			<key>rudderFighterShiny.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{91,120},{6,6}}</string>
+				<string>{{108,120},{6,6}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -413,7 +455,7 @@
 			<key>rudderJet.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{147,71},{9,9}}</string>
+				<string>{{89,22},{9,9}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -427,7 +469,7 @@
 			<key>rudderPotato.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{100,72},{2,3}}</string>
+				<string>{{141,42},{2,3}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -441,7 +483,7 @@
 			<key>rudderPotatoShiny.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{100,67},{2,4}}</string>
+				<string>{{97,15},{2,4}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -452,10 +494,24 @@
 				<string>{2,4}</string>
 			</dict>
 
+			<key>rudderScrap.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{138,108},{4,5}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false/>
+				<key>sourceColorRect</key>
+				<string>{{0,0},{4,5}}</string>
+				<key>sourceSize</key>
+				<string>{4,5}</string>
+			</dict>
+
 			<key>rudderTestShiny.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{109,120},{4,5}}</string>
+				<string>{{138,114},{4,5}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -483,7 +539,7 @@
 			<key>testDoubleWing.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{157,66},{12,44}}</string>
+				<string>{{161,0},{12,44}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -497,7 +553,7 @@
 			<key>testEngine.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{98,120},{5,3}}</string>
+				<string>{{141,38},{5,3}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -511,7 +567,7 @@
 			<key>testRotor.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{160,32},{8,14}}</string>
+				<string>{{174,58},{8,14}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -525,7 +581,7 @@
 			<key>testRudder.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{104,120},{4,5}}</string>
+				<string>{{138,120},{4,5}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -539,7 +595,7 @@
 			<key>testWeapon.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{53,33},{8,3}}</string>
+				<string>{{30,121},{8,3}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -553,7 +609,7 @@
 			<key>testWing.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{170,66},{4,10}}</string>
+				<string>{{183,65},{4,10}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -567,7 +623,7 @@
 			<key>testWings.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{169,11},{5,19}}</string>
+				<string>{{183,34},{5,19}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -581,7 +637,7 @@
 			<key>weaponBalloon.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{13,121},{11,5}}</string>
+				<string>{{66,33},{11,5}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -595,7 +651,7 @@
 			<key>weaponBalloonShiny.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{66,13},{12,8}}</string>
+				<string>{{84,13},{12,8}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -609,21 +665,21 @@
 			<key>weaponBat.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{76,120},{7,5}}</string>
+				<string>{{85,120},{8,7}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
 				<false/>
 				<key>sourceColorRect</key>
-				<string>{{0,0},{7,5}}</string>
+				<string>{{0,0},{8,7}}</string>
 				<key>sourceSize</key>
-				<string>{7,5}</string>
+				<string>{8,7}</string>
 			</dict>
 
 			<key>weaponBatShiny.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{147,86},{9,5}}</string>
+				<string>{{0,121},{9,5}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -637,21 +693,21 @@
 			<key>weaponBigBomber.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{71,33},{8,5}}</string>
+				<string>{{76,120},{8,7}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
 				<false/>
 				<key>sourceColorRect</key>
-				<string>{{0,0},{8,5}}</string>
+				<string>{{0,0},{8,7}}</string>
 				<key>sourceSize</key>
-				<string>{8,5}</string>
+				<string>{8,7}</string>
 			</dict>
 
 			<key>weaponBigBomberShiny.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{80,33},{8,5}}</string>
+				<string>{{89,32},{8,5}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -665,7 +721,7 @@
 			<key>weaponFighter.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{25,121},{10,5}}</string>
+				<string>{{78,33},{10,5}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -679,7 +735,7 @@
 			<key>weaponFighterShiny.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{0,121},{12,5}}</string>
+				<string>{{53,33},{12,5}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -693,7 +749,7 @@
 			<key>weaponPotato.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{147,81},{9,4}}</string>
+				<string>{{20,121},{9,4}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -707,7 +763,7 @@
 			<key>weaponPotatoShiny.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{147,66},{9,4}}</string>
+				<string>{{10,121},{9,4}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -718,10 +774,24 @@
 				<string>{9,4}</string>
 			</dict>
 
+			<key>weaponScrap.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{101,120},{6,5}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false/>
+				<key>sourceColorRect</key>
+				<string>{{0,0},{6,5}}</string>
+				<key>sourceSize</key>
+				<string>{6,5}</string>
+			</dict>
+
 			<key>weaponTestShiny.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{62,33},{8,3}}</string>
+				<string>{{147,95},{8,3}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -749,7 +819,7 @@
 			<key>wingBat.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{156,0},{12,16}}</string>
+				<string>{{125,108},{12,16}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -777,7 +847,7 @@
 			<key>wingBigBomber.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{125,46},{21,52}}</string>
+				<string>{{103,67},{21,52}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -791,7 +861,7 @@
 			<key>wingBigBomberShiny.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{103,67},{21,52}}</string>
+				<string>{{125,46},{21,52}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -805,7 +875,7 @@
 			<key>wingFighter.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{142,99},{14,25}}</string>
+				<string>{{145,0},{14,25}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -819,7 +889,7 @@
 			<key>wingFighterShiny.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{128,0},{14,25}}</string>
+				<string>{{143,99},{14,25}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -847,7 +917,7 @@
 			<key>wingPotato.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{143,0},{12,20}}</string>
+				<string>{{158,95},{12,20}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>
@@ -861,7 +931,7 @@
 			<key>wingPotatoShiny.png</key>
 			<dict>
 				<key>frame</key>
-				<string>{{125,99},{16,25}}</string>
+				<string>{{128,0},{16,25}}</string>
 				<key>offset</key>
 				<string>{0,0}</string>
 				<key>rotated</key>

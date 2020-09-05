@@ -73,7 +73,7 @@ namespace CocosSharpMathGame
         {
             get
             {
-                return TargetPart.Parent as Aircraft;
+                return TargetPart.Aircraft;
             }
         }
         internal float UpdateTargetDelay { get; set; } = 0.5f;
@@ -93,7 +93,7 @@ namespace CocosSharpMathGame
             if (TargetPart != null)
             {
                     CCPoint vectorMyPartTarget = TargetPart.PositionWorldspace - MyPart.PositionWorldspace;
-                    if (TargetPart.MyState == Part.State.DESTROYED || TargetAircraft.MyState == Aircraft.State.SHOT_DOWN
+                    if (TargetPart.MyState == Part.State.DESTROYED || (TargetAircraft != null && TargetAircraft.MyState == Aircraft.State.SHOT_DOWN)
                         || CooldownUntilNextTargetUpdate <= 0
                         || CCPoint.Distance(MyPart.PositionWorldspace, TargetPart.PositionWorldspace) > AttentionRange
                         || Constants.AbsAngleDifferenceDeg(MyPart.TotalRotation - MyPart.RotationFromNull, Constants.DxDyToCCDegrees(vectorMyPartTarget.X, vectorMyPartTarget.Y)) > AttentionAngle)
@@ -347,6 +347,19 @@ namespace CocosSharpMathGame
             testWeapon.TurningAnglePerSecond = 80f;
             testWeapon.CalcAttentionAngle();
             return testWeapon;
+        }
+
+        internal static WeaponAbility CreateScrapWeapon(Part myPart)
+        {
+            var weapon = new WeaponAbility(myPart);
+            weapon.ProjectileBlueprint = new ScrapProjectile();
+            weapon.CalcBaseValuesFromProjectile();
+            weapon.SpreadAngle = 1f;
+            weapon.ShootDelay = 0.25f;
+            weapon.MaxTurningAngle = 180f;
+            weapon.TurningAnglePerSecond = 25f;
+            weapon.CalcAttentionAngle();
+            return weapon;
         }
 
         internal static WeaponAbility CreateBalloonWeapon(Part weaponBalloon)

@@ -23,7 +23,7 @@ namespace CocosSharpMathGame
             MassPoints = CreateDiamondMassPoints(12f);
 
             // give it a maneuver ability!
-            ManeuverAbility = new ManeuverAbility((float)Math.Pow(10, 5) * 0.75f, (float)Math.Pow(10, 5) * 2.0f, (float)Math.Pow(10, 5) * 0.45f, (float)Math.Pow(10, 5) * 0.75f);
+            ManeuverAbility = new ManeuverAbility((float)Math.Pow(10, 5) * 1.25f, (float)Math.Pow(10, 5) * 2.0f, (float)Math.Pow(10, 5) * 0.45f, (float)Math.Pow(10, 5) * 0.75f);
             ManeuverAbility.CloudTailNode = null;
         }
     }

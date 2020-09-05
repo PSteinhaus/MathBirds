@@ -46,7 +46,7 @@ namespace CocosSharpMathGame
             CollisionType = Collisions.CreateDiamondCollisionPolygon(this);
 
             // give the rotor ManeuverAbility
-            ManeuverAbility = new ManeuverAbility((float)Math.Pow(10, 5) * 5.75f, (float)Math.Pow(10, 5) * 20.0f);
+            ManeuverAbility = new ManeuverAbility((float)Math.Pow(10, 5) * 8.75f, (float)Math.Pow(10, 5) * 20.0f);
             ManeuverAbility.CloudTailNode.CloudDelay *= 1.5f;
             ManeuverAbility.CloudTailNode.CloudLifeTime *= 0.75f;
             ManeuverAbility.CloudTailNode.ReferenceSize = 14f;

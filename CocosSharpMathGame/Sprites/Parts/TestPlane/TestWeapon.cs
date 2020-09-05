@@ -9,7 +9,7 @@ namespace CocosSharpMathGame
 {
     internal class TestWeapon : Part
     {
-        public TestWeapon() : base("testWeapon.png") // for now, as there is no gun sprite yet
+        public TestWeapon() : base("testWeapon.png")
         {
             SetHealthAndMaxHealth(8);
             // set your types

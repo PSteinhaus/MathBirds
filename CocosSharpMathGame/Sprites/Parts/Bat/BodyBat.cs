@@ -19,7 +19,8 @@ namespace CocosSharpMathGame
                 // add mount points for two single wings
                 var wingMount1 = new PartMount(this, new CCPoint((ContentSize.Width * 0.75f), (ContentSize.Height / 2) + 3), Type.SINGLE_WING);
                 var wingMount2 = new PartMount(this, new CCPoint((ContentSize.Width * 0.75f), (ContentSize.Height / 2) - 3), Type.SINGLE_WING);
-                var doubleWingMount = new PartMount(this, new CCPoint((ContentSize.Width * 0.72f), ContentSize.Height / 2), Type.WINGS);
+                var doubleWingMount = new PartMount(this, new CCPoint((ContentSize.Width * 0.62f), ContentSize.Height / 2), Type.WINGS);
+                doubleWingMount.Dz = 2;
                 doubleWingMount.PossiblyBlockingPartMounts.Add(wingMount1);
                 doubleWingMount.PossiblyBlockingPartMounts.Add(wingMount2);
                 wingMount1.PossiblyBlockingPartMounts.Add(doubleWingMount);
@@ -30,7 +31,7 @@ namespace CocosSharpMathGame
                 // add a mount for a rotor and one for a weapon
                 var rotorMount = new PartMount(this, new CCPoint(ContentSize.Width - 3, ContentSize.Height / 2), Type.ROTOR);
                 var gunMount = new PartMount(this, new CCPoint(ContentSize.Width - 3, ContentSize.Height / 2), Type.GUN);
-                gunMount.Dz = 1;
+                gunMount.Dz = -1;
 
                 PartMounts = new PartMount[] { wingMount1, wingMount2, doubleWingMount, rudderMount1, rudderMount2, rotorMount, gunMount };
 
