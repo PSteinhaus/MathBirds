@@ -1,4 +1,7 @@
 # CocosSharpMathGame
-The goal of this project is to create a game which teaches you different mathematical skills. IT DOES NOT AIM TO TEACH MATHEMATICS. Math is beautiful, but the subject told in schools, which also calls itself "Math", tends to be somewhat different. The focus of this game is to help you train the skills you need to survive math class. It is dedicated to those who do dislike homework, but still want to improve (in a less frustrating way).
+The goal of this project was to create a game which lets you practice different, mostly basic, mathematical skills, without forcing you to do so at any point in the game.
+The purpose of it was to find a way to help you train the skills you need to survive math class. It is dedicated to those who do dislike homework, but still want to improve (in a less frustrating way).
 
 Gameplay-wise the game is strongly inspired by the wonderful SteamBirds.
+
+The result, an app called MathBirds, is available on Android through the Play Store.
