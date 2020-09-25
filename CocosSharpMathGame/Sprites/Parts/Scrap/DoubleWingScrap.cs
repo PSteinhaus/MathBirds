@@ -21,6 +21,7 @@ namespace CocosSharpMathGame
 
             // give the wings a special ManeuverAbility (allowing to glide forward even after the rotor has been hit)
             ManeuverAbility = new ManeuverAbility((float)Math.Pow(10, 5) * 4.25f, (float)Math.Pow(10, 5) * 4.3f);
+            ManeuverAbility.CloudTailNode = null;
 
             // specify the mass points
             MassPoints = CreateDiamondMassPoints(60);

@@ -128,8 +128,8 @@ namespace CocosSharpMathGame
             fadeNode.AddAction(new CCSequence(new CCCallFiniteTimeFunc(duration / 2, FadeIn),
                                               new CCCallFunc(() =>
                                               {
-                                                  
-                                                    var director = layer1.Director;
+#if ANDROID
+                                                  var director = layer1.Director;
                                                     var scene = director.RunningScene;
                                                     var gv = scene.GameView;
 
@@ -164,22 +164,21 @@ namespace CocosSharpMathGame
                                                     director.ReplaceScene(scene2);
                                                     fadeNode.AddAction(new CCSequence(new CCCallFiniteTimeFunc(duration / 2, FadeOut),
                                                                         new CCRemoveSelf()));
-                                                  
-                                                    // this part is how it needs to be done in order to work on the old CocosSharp version
-                                                    // where GameView.Get fails (i.e. the DX-version)
-                                                    /*
-                                                    layer1.RemoveAllListeners();
-                                                    guiLayer1.RemoveAllListeners();
-                                                    var parent = layer1.Parent;
-                                                    layer1.RemoveFromParent();
-                                                    guiLayer1.RemoveFromParent();
-                                                    parent.AddChild(guiLayer2);
-                                                    parent.AddChild(layer2, int.MinValue);
-                                                    fadeNode.RemoveFromParent();
-                                                    guiLayer2.AddChild(fadeNode, int.MaxValue);
-                                                    fadeNode.AddAction(new CCSequence(new CCCallFiniteTimeFunc(duration / 2, FadeOut),
-                                                                        new CCRemoveSelf()));
-                                                    */
+#else
+                                                  // this part is how it needs to be done in order to work on the old CocosSharp version
+                                                  // where GameView.Get fails (i.e. the DX-version)
+                                                  layer1.RemoveAllListeners();
+                                                  guiLayer1.RemoveAllListeners();
+                                                  var parent = layer1.Parent;
+                                                  layer1.RemoveFromParent();
+                                                  guiLayer1.RemoveFromParent();
+                                                  parent.AddChild(guiLayer2);
+                                                  parent.AddChild(layer2, int.MinValue);
+                                                  fadeNode.RemoveFromParent();
+                                                  guiLayer2.AddChild(fadeNode, int.MaxValue);
+                                                  fadeNode.AddAction(new CCSequence(new CCCallFiniteTimeFunc(duration / 2, FadeOut),
+                                                                      new CCRemoveSelf()));
+#endif
                                               })));
         
                                               

@@ -1,5 +1,6 @@
-﻿using System;
+﻿#define ANDROID
 
+using System;
 using Android.App;
 using Android.Content;
 using Android.Content.PM;
