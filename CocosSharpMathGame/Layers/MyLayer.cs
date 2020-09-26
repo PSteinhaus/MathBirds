@@ -54,7 +54,7 @@ namespace CocosSharpMathGame
             {
                 if (!ActiveTouches.ContainsKey(touch))
                 {
-                    Console.WriteLine("TOUCH ADDED, ID: " + touch.Id);
+                    //Console.WriteLine("TOUCH ADDED, ID: " + touch.Id);
                     ActiveTouches.Add(touch, touch.Location);
                 }
             }
@@ -76,7 +76,7 @@ namespace CocosSharpMathGame
                 if (ActiveTouches.ContainsKey(touch))
                 {
                     ActiveTouches[touch] = touch.Location;
-                    Console.WriteLine("touch "+touch.Id+" location updated: " + touch.Location);
+                    //Console.WriteLine("touch "+touch.Id+" location updated: " + touch.Location);
                 }
             }
         }
@@ -86,8 +86,8 @@ namespace CocosSharpMathGame
             foreach (var touch in touches)
             {
                 ActiveTouches.Remove(touch);
-                Console.WriteLine("TOUCH REMOVED, ID: " + touch.Id);
-                Console.WriteLine("ActiveTouches.Count: " + ActiveTouches.Count);
+                //Console.WriteLine("TOUCH REMOVED, ID: " + touch.Id);
+                //Console.WriteLine("ActiveTouches.Count: " + ActiveTouches.Count);
             }
             if (touches.Count > 0)
             {
@@ -99,7 +99,7 @@ namespace CocosSharpMathGame
                 {
                     touchEvent.StopPropogation();
                 }
-                Console.WriteLine("TouchCount: " + TouchCount);
+                //Console.WriteLine("TouchCount: " + TouchCount);
             }
         }
 
@@ -126,47 +126,50 @@ namespace CocosSharpMathGame
                 fadeNode.Clear(); fadeNode.DrawRect(bigRect, new CCColor4B(0f, 0f, 0f, 1 - prog));
             }
             fadeNode.AddAction(new CCSequence(new CCCallFiniteTimeFunc(duration / 2, FadeIn),
+                                              Constants.oS != Constants.OS.WINDOWS ?
                                               new CCCallFunc(() =>
                                               {
-#if ANDROID
-                                                  var director = layer1.Director;
-                                                    var scene = director.RunningScene;
-                                                    var gv = scene.GameView;
+                                                      var director = layer1.Director;
+                                                      var scene = director.RunningScene;
+                                                      var gv = scene.GameView;
 
-                                                    fadeNode.RemoveFromParent();
-                                                    // the following are attempts at fixing the memory leak (which all mostly failed)
-                                                    // created by the fact that layers are not released for some reason
-                                                    layer1.RemoveAllListeners();
-                                                    guiLayer1.RemoveAllListeners();
-                                                    layer1.RemoveEventListeners();
-                                                    guiLayer1.RemoveEventListeners();
-                                                    layer1.RemoveFromParent();
-                                                    guiLayer1.RemoveFromParent();
-                                                    layer1.Clear();
-                                                    guiLayer1.Clear();
-                                                    layer1.Cleanup();
-                                                    guiLayer1.Cleanup();
-                                                    layer1.Dispose();
-                                                    guiLayer1.Dispose();
-                                                    scene.RemoveAllListeners();
-                                                    scene.RemoveAllChildren();
-                                                    scene.StopAllActions();
-                                                    scene.UnscheduleAll();
-                                                    scene.RemoveFromParent();
-                                                    scene.Cleanup();
-                                                    scene.Dispose();
+                                                      fadeNode.RemoveFromParent();
+                                                      // the following are attempts at fixing the memory leak (which all mostly failed)
+                                                      // created by the fact that layers are not released for some reason
+                                                      layer1.RemoveAllListeners();
+                                                      guiLayer1.RemoveAllListeners();
+                                                      layer1.RemoveEventListeners();
+                                                      guiLayer1.RemoveEventListeners();
+                                                      layer1.RemoveFromParent();
+                                                      guiLayer1.RemoveFromParent();
+                                                      layer1.Clear();
+                                                      guiLayer1.Clear();
+                                                      layer1.Cleanup();
+                                                      guiLayer1.Cleanup();
+                                                      layer1.Dispose();
+                                                      guiLayer1.Dispose();
+                                                      scene.RemoveAllListeners();
+                                                      scene.RemoveAllChildren();
+                                                      scene.StopAllActions();
+                                                      scene.UnscheduleAll();
+                                                      scene.RemoveFromParent();
+                                                      scene.Cleanup();
+                                                      scene.Dispose();
 
-                                                    var scene2 = new CCScene(gv);
-                                                    scene2.AddLayer(guiLayer2);
-                                                    scene2.AddLayer(layer2, int.MinValue);
-                                                    guiLayer2.AddChild(fadeNode, int.MaxValue);
-                                                    director.ResetSceneStack();
-                                                    director.ReplaceScene(scene2);
-                                                    fadeNode.AddAction(new CCSequence(new CCCallFiniteTimeFunc(duration / 2, FadeOut),
-                                                                        new CCRemoveSelf()));
-#else
+                                                      var scene2 = new CCScene(gv);
+                                                      scene2.AddLayer(guiLayer2);
+                                                      scene2.AddLayer(layer2, int.MinValue);
+                                                      guiLayer2.AddChild(fadeNode, int.MaxValue);
+                                                      director.ResetSceneStack();
+                                                      director.ReplaceScene(scene2);
+                                                      fadeNode.AddAction(new CCSequence(new CCCallFiniteTimeFunc(duration / 2, FadeOut),
+                                                                          new CCRemoveSelf()));
+                                              })
+                                              :
+                                              new CCCallFunc(() =>
+                                              {
                                                   // this part is how it needs to be done in order to work on the old CocosSharp version
-                                                  // where GameView.Get fails (i.e. the DX-version)
+                                                  //where GameView.Get fails (i.e. the DX-version)
                                                   layer1.RemoveAllListeners();
                                                   guiLayer1.RemoveAllListeners();
                                                   var parent = layer1.Parent;
@@ -178,10 +181,8 @@ namespace CocosSharpMathGame
                                                   guiLayer2.AddChild(fadeNode, int.MaxValue);
                                                   fadeNode.AddAction(new CCSequence(new CCCallFiniteTimeFunc(duration / 2, FadeOut),
                                                                       new CCRemoveSelf()));
-#endif
-                                              })));
-        
-                                              
+                                              })
+                                              ));                                   
         }
 
         private CCPoint ShakeAmount { get; set; }
@@ -340,8 +341,8 @@ namespace CocosSharpMathGame
         private protected void OnTouchesMovedMoveAndZoom(List<CCTouch> touches, CCEvent touchEvent)
         {
             if (!Pressed) return;
-            Console.WriteLine("touches.Count: " + touches.Count);
-            Console.WriteLine("TouchCount: " + TouchCount);
+            //Console.WriteLine("touches.Count: " + touches.Count);
+            //Console.WriteLine("TouchCount: " + TouchCount);
             switch (touches.Count)
             {
                 case 1:

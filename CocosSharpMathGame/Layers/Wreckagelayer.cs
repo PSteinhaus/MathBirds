@@ -25,7 +25,7 @@ namespace CocosSharpMathGame
             {
                 WreckCarousel.Pressable = false;
                 WreckCarousel.Pressed = false;
-                Console.WriteLine(value);
+                //Console.WriteLine(value);
                 switch (value)
                 {
                     case WreckageState.CAROUSEL:

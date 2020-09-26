@@ -794,6 +794,43 @@ namespace CocosSharpMathGame
         }
 
         private PartMount ClosestMount { get; set; } = null;
+        /// <summary>
+        /// Updates the ClosestMount and returns whether it changed.
+        /// This function is supposed to be called in MODIFY_AIRCRAFT-State when the touch-dragged part changes its position.
+        /// </summary>
+        /// <returns></returns>
+        internal bool UpdateClosestMount()
+        {
+            var closestMountBefore = ClosestMount;
+            ClosestMount = null;
+            float minDistance = float.PositiveInfinity;
+            foreach (var part in ModifiedAircraft.TotalParts)
+            {
+                foreach (var mountPoint in part.PartMounts)
+                {
+                    var mountedPart = mountPoint.MountedPart;
+                    if (mountedPart != null)
+                    {
+                    }
+                    else if (mountPoint.Available)
+                    {
+                        // find the closest possible mount point
+                        if (GUILayer.DragAndDropObject != null && mountPoint.CanMount((Part)GUILayer.DragAndDropObject) && CCPoint.IsNear(mountPoint.PositionModifyAircraft, GUICoordinatesToHangar(((Part)GUILayer.DragAndDropObject).PositionWorldspace), HangarGUILayer.MOUNT_DISTANCE))
+                        {
+                            float distance = CCPoint.Distance(mountPoint.PositionModifyAircraft, GUICoordinatesToHangar(((Part)GUILayer.DragAndDropObject).PositionWorldspace));
+                            if (distance < minDistance)
+                            {
+                                minDistance = distance;
+                                ClosestMount = mountPoint;
+                            }
+                        }
+                    }
+                }
+            }
+            if (ClosestMount != closestMountBefore && ClosestMount != null && Constants.oS != Constants.OS.WINDOWS)
+                Vibration.Vibrate(20);
+            return ClosestMount != closestMountBefore;
+        }
         internal void DrawInModifyAircraftState()
         {
             HighDrawNode.Clear();
@@ -827,32 +864,7 @@ namespace CocosSharpMathGame
                 drawNode.DrawLine(start, middle, LINE_WIDTH, color, CCLineCap.Round);
                 drawNode.DrawLine(middle, end, LINE_WIDTH, color, CCLineCap.Round);
             }
-            var closestMountBefore = ClosestMount;
-            ClosestMount = null;
-            float minDistance = float.PositiveInfinity;
-            foreach (var part in ModifiedAircraft.TotalParts)
-            {
-                foreach (var mountPoint in part.PartMounts)
-                {
-                    var mountedPart = mountPoint.MountedPart;
-                    if (mountedPart != null)
-                    {
-                    }
-                    else if (mountPoint.Available)
-                    {
-                        // find the closest possible mount point
-                        if (GUILayer.DragAndDropObject != null && mountPoint.CanMount((Part)GUILayer.DragAndDropObject) && CCPoint.IsNear(mountPoint.PositionModifyAircraft, GUICoordinatesToHangar(((Part)GUILayer.DragAndDropObject).PositionWorldspace), HangarGUILayer.MOUNT_DISTANCE))
-                        {
-                            float distance = CCPoint.Distance(mountPoint.PositionModifyAircraft, GUICoordinatesToHangar(((Part)GUILayer.DragAndDropObject).PositionWorldspace));
-                            if (distance < minDistance)
-                            {
-                                minDistance = distance;
-                                ClosestMount = mountPoint;
-                            }
-                        }
-                    }
-                }
-            }
+
             foreach (var part in ModifiedAircraft.TotalParts)
             {
                 foreach (var mountPoint in part.PartMounts)
@@ -879,8 +891,6 @@ namespace CocosSharpMathGame
                     }
                 }
             }
-            if (ClosestMount != closestMountBefore && ClosestMount != null && Constants.oS != Constants.OS.WINDOWS)
-                Vibration.Vibrate(20);
             if (!ModifiedAircraft.TotalParts.Any())
             {
                 // if the aircraft has no body...
@@ -982,6 +992,8 @@ namespace CocosSharpMathGame
             AddAircraft(newAircraft, CCPoint.Zero);
             newAircraft.Position = CCPoint.Zero;
             ModifiedAircraft = newAircraft;
+            if (!PopUp.TriggeredNewAircraft)
+                PopUp.ShowPopUp(GUILayer, PopUp.Enum.TRIGGERED_NEWAIRCRAFT);
             StartTransition(HangarState.MODIFY_AIRCRAFT);
         }
 
@@ -1267,6 +1279,7 @@ namespace CocosSharpMathGame
                                             part.Scale = GUILayer.HangarScaleToGUI() * Constants.STANDARD_SCALE;
                                             GUILayer.SetDragAndDropObjectWithRelativeTouchPos(part, touch);
                                             ModifiedAircraft.InWorkshopConfiguration = true;
+                                            UpdateClosestMount();
                                             DrawInModifyAircraftState();
                                             break;
                                         }

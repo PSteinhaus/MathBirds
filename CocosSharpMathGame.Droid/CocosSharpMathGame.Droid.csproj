@@ -65,6 +65,7 @@
     <AndroidKeyStore>false</AndroidKeyStore>
     <AndroidUseAapt2>true</AndroidUseAapt2>
     <AndroidCreatePackagePerAbi>false</AndroidCreatePackagePerAbi>
+    <AndroidEnableMultiDex>true</AndroidEnableMultiDex>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />

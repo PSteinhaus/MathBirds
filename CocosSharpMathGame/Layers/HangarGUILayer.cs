@@ -18,6 +18,7 @@ namespace CocosSharpMathGame
     {
         internal Carousel HangarOptionCarousel { get; set; }
         internal ScrollableCollectionNode TakeoffCollectionNode { get; set; }
+        internal CCLabel TakeoffCollectionLabel = new CCLabel("Place your aircrafts here", "EarlyGameBoy", 12, CCLabelFormat.SpriteFont);//new CCLabel("Place your aircrafts here", "alphbeta", 16, CCLabelFormat.SpriteFont);
         internal NonScalingCarousel PartCarousel { get; set; }
         internal CCNode TakeoffNode { get; set; } = new CCNode();
         private MathChallengeNode challengeNode;
@@ -166,6 +167,17 @@ namespace CocosSharpMathGame
             drawNode.DrawLine(CCPoint.Zero, new CCPoint (TakeoffNode.BoundingBoxTransformedToWorld.MaxX, 0), 8f, CCColor4B.White);
             TakeoffNode.ContentSize = new CCSize(TakeoffNode.ContentSize.Width, TakeoffNode.ContentSize.Height + 2 * 4f);
             TakeoffNode.PositionY += 8f;
+
+            TakeoffNode.AddChild(TakeoffCollectionLabel);
+            TakeoffCollectionLabel.VerticalAlignment = CCVerticalTextAlignment.Center;
+            TakeoffCollectionLabel.HorizontalAlignment = CCTextAlignment.Center;
+            TakeoffCollectionLabel.Color = CCColor3B.White;
+            TakeoffCollectionLabel.Scale = 2.5f;
+            if (PopUp.TriggeredPlayLayer)
+                TakeoffCollectionLabel.Visible = false;
+            TakeoffCollectionLabel.AnchorPoint = CCPoint.AnchorMiddle;
+            TakeoffCollectionLabel.Position = (CCPoint)TakeoffNode.ContentSize / 2;
+
             GOButton = new GOButton();
             AddChild(GOButton); // place the go button a bit higher than the rest (in ZOrder)
             GOButton.Visible = false;
@@ -203,7 +215,8 @@ namespace CocosSharpMathGame
                                 case HangarLayer.HangarState.MODIFY_AIRCRAFT:
                                     {
                                         // update the mount lines (to correctly visualize proximity to a fitting mount point)
-                                        HangarLayer.DrawInModifyAircraftState();
+                                        if (HangarLayer.UpdateClosestMount())
+                                            HangarLayer.DrawInModifyAircraftState();
                                     }
                                     break;
                             }
@@ -243,12 +256,18 @@ namespace CocosSharpMathGame
                                             HangarLayer.PlaceAircraft(selectedAircraft, HangarLayer.GUICoordinatesToHangar(selectedAircraft.Position));
                                         }
                                         if (TakeoffCollectionNode.Collection.Any())
+                                        {
                                             GOButton.AddAction(HangarLayer.AddGOButton);
+                                            TakeoffCollectionLabel.Visible = false;
+                                        }
+                                        else if (!PopUp.TriggeredPlayLayer)
+                                            TakeoffCollectionLabel.Visible = true;
                                     }
                                     break;
                                 case HangarLayer.HangarState.MODIFY_AIRCRAFT:
                                     {
                                         bool mounted = false;
+                                        HangarLayer.UpdateClosestMount();
                                         // the object is a part
                                         var part = (Part)DragAndDropObject;
                                         DragAndDropObject = null;

@@ -17,6 +17,8 @@ namespace CocosSharpMathGame
         internal static bool TriggeredPowerUp = false;
         internal static bool TriggeredWreckLayer = false;
         internal static bool TriggeredPlayLayer = false;
+        internal static bool TriggeredNewAircraft = false;
+        internal static bool TriggeredZoom = false;
 
         private string text;
         private protected CCLabel label;
@@ -169,6 +171,14 @@ namespace CocosSharpMathGame
                 case Enum.TRIGGERED_SLOTUNLOCK:
                     text = "Congratulations!\nß\nYou've just unlocked\na new plane slot.\nß\nNow you can lead\nup to " + HangarLayer.UnlockedPlaneSlots + " aircrafts\ninto battle!";
                     break;
+                case Enum.TRIGGERED_NEWAIRCRAFT:
+                    text = "First select\nthe body of\nyour new aircraft.\nß\nTo do so,\nscroll to the\ntop category and\nselect one of the\navailable bodies.";
+                    TriggeredNewAircraft = true;
+                    break;
+                case Enum.TRIGGERED_ZOOM:
+                    text = "You can also\nzoom in and out,\nusing two fingers.\nß\nTry it right now\nand gain some\nmore oversight over\nthe battlefield.";
+                    TriggeredZoom = true;
+                    break;
             }
             return ShowPopUp(layerToShowOn, text);
         }
@@ -177,7 +187,8 @@ namespace CocosSharpMathGame
         {
             STOP = 0, TRIGGERED_WELCOME = 1, TRIGGERED_ASSEMBLY = 2, TRIGGERED_SCRAPYARD = 3,
             TRIGGERED_POWERUP = 4, TRIGGERED_WRECKAGELAYER = 5, TRIGGERED_SLOTUNLOCK = 6,
-            TRIGGERED_PLAYLAYER = 7, TRIGGERED_WRECKAGELAYER2 = 8
+            TRIGGERED_PLAYLAYER = 7, TRIGGERED_WRECKAGELAYER2 = 8, TRIGGERED_NEWAIRCRAFT = 9,
+            TRIGGERED_ZOOM = 10
         }
         public static void WriteToStream(BinaryWriter writer)
         {
@@ -194,6 +205,10 @@ namespace CocosSharpMathGame
             writer.Write(TriggeredPowerUp);
             writer.Write((byte)Enum.TRIGGERED_WRECKAGELAYER);
             writer.Write(TriggeredWreckLayer);
+            writer.Write((byte)Enum.TRIGGERED_NEWAIRCRAFT);
+            writer.Write(TriggeredNewAircraft);
+            writer.Write((byte)Enum.TRIGGERED_ZOOM);
+            writer.Write(TriggeredZoom);
 
             writer.Write((byte)Enum.STOP);
         }
@@ -247,6 +262,20 @@ namespace CocosSharpMathGame
                             triggered = reader.ReadBoolean();
                             if (!keepCurrent)
                                 TriggeredWreckLayer = triggered;
+                        }
+                        break;
+                    case Enum.TRIGGERED_NEWAIRCRAFT:
+                        {
+                            triggered = reader.ReadBoolean();
+                            if (!keepCurrent)
+                                TriggeredNewAircraft = triggered;
+                        }
+                        break;
+                    case Enum.TRIGGERED_ZOOM:
+                        {
+                            triggered = reader.ReadBoolean();
+                            if (!keepCurrent)
+                                TriggeredZoom = triggered;
                         }
                         break;
                     case Enum.STOP:

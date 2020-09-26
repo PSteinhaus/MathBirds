@@ -34,7 +34,7 @@ namespace CocosSharpMathGame
 		public void OnBackPressed()
 		{
 			// return from the MODIFY_AIRCRAFT state (which would also be possible by double tapping)
-			if (CurrentHangarLayer != null && CurrentHangarLayer.Parent != null && CurrentHangarLayer.State == HangarLayer.HangarState.MODIFY_AIRCRAFT)
+			if (CurrentHangarLayer != null && CurrentHangarLayer.Parent != null && CurrentHangarLayer.State == HangarLayer.HangarState.MODIFY_AIRCRAFT && CurrentHangarLayer.GUILayer.DragAndDropObject == null)
 				CurrentHangarLayer.StartTransition(HangarLayer.HangarState.WORKSHOP);
 			// or return from the SCRAPYARD_CHALLENGE state (which would also be possible by tapping)
 			else if (CurrentHangarLayer != null && CurrentHangarLayer.Parent != null && CurrentHangarLayer.State == HangarLayer.HangarState.SCRAPYARD_CHALLENGE)

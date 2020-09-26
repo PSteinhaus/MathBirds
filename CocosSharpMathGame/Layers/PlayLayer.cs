@@ -232,7 +232,7 @@ namespace CocosSharpMathGame
                 foreach (var aircraft in PlayerAircrafts)
                     aircraft.ResetPowerUps();
             }
-            StartPlanningPhase();
+            StartPlanningPhase(true);
         }
 
         protected override void AddedToScene()
@@ -313,9 +313,11 @@ namespace CocosSharpMathGame
         internal List<Aircraft> ActiveAircrafts { get; private protected set; } = new List<Aircraft>();
         internal List<Squadron> ActiveSquadrons { get; private protected set; } = new List<Squadron>();
 
-        internal void StartPlanningPhase()
+        internal void StartPlanningPhase(bool suppressZoomPopup = false)
         {
             State = GameState.PLANNING;
+            if (!PopUp.TriggeredZoom && !suppressZoomPopup)
+                PopUp.ShowPopUp(GUILayer, PopUp.Enum.TRIGGERED_ZOOM);
             // find all active chunks
             // for that first find the player chunks and then grow around them
             // also calculate the new camera boundaries based on the plane positions
@@ -614,12 +616,7 @@ namespace CocosSharpMathGame
         {
             // add some squadrons randomly
             var rng = new Random();
-            /*
-            const int MIN_SQUADS_PER_CHUNK = 4;
-            const int MAX_SQUADS_PER_CHUNK = 5;
-            int squadCount = rng.Next(MIN_SQUADS_PER_CHUNK, MAX_SQUADS_PER_CHUNK + 1);
-            */
-            int squadCount = 5;
+            const int squadCount = 5;
             // choose random positions inside of this chunk
             CCPoint chunkMiddle = ChunkToWorldPos(chunkPoint);
             for (int i=0; i<squadCount; i++)
