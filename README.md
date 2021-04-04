@@ -7,4 +7,4 @@ The purpose of it was to find a way to help you train the skills you need to sur
 
 Gameplay-wise the game is strongly inspired by the wonderful SteamBirds.
 
-The result, an app called MathBirds, is available on Android through the Play Store.
+The result, an app called MathBirds, is available on Android through the Play Store. The APK is also available [right here](https://github.com/PSteinhaus/CocosSharpMathGame/releases/tag/v.1.043) on github.
