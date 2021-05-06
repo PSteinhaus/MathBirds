@@ -2,8 +2,9 @@
 
 ![](https://i.imgur.com/I8rNQ4k.png)
 
-The goal of this project was to create a game which lets you practice different, mostly basic, mathematical skills, without forcing you to do so at any point in the game.
-The purpose of it was to find a way to help you train the skills you need to survive math class. It is dedicated to those who do dislike homework, but still want to improve (in a less frustrating way).
+The goal of this project was to create a game which lets you practice different, all very basic, mathematical skills, without forcing you to do so at any point in the game.
+The purpose of it was to find a way to help you train the skills you need to survive math class (though this project in itself was way too small to achieve that on its own).
+It is dedicated to those who do dislike homework, but still want to improve (in a less frustrating way).
 
 Gameplay-wise the game is strongly inspired by the wonderful SteamBirds.
 
